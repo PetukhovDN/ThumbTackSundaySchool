@@ -48,7 +48,6 @@ CREATE TABLE note (
     note_head VARCHAR(100) NOT NULL,
     note_body VARCHAR(5000) NOT NULL,
     revision INT(11) DEFAULT 1,
-    note_comment VARCHAR(500),
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	author_id INT(11) NOT NULL,
     section_id INT(11) NOT NULL,
