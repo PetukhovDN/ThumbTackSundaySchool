@@ -13,11 +13,11 @@ public interface UserDao {
 
     String logOutUser(UUID token);
 
-    User getInfo(UUID token);
+    User getUserByToken(UUID token);
 
     String leaveNotesServer(UUID token, String password);
 
-    User editUserIndo(UUID token, User user);
+    User editUserInfo(UUID token, User user);
 
     String giveAdminRoot(UUID token);
 

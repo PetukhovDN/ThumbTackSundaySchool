@@ -1,19 +1,26 @@
 package net.thumbtack.school.notes.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Comment {
 
     private int id;
     private String commentText;
-    private Date creationTime;
     private User author;
     private Note note;
+    private LocalDateTime creationTime;
 
-    public Comment(String commentText, Note note) {
+    public Comment(String commentText) {
         this.commentText = commentText;
-        this.creationTime = new Date();
+    }
+
+    public Comment(int id, String commentText, User author, Note note, LocalDateTime creationTime) {
+        this.id = id;
+        this.commentText = commentText;
+        this.author = author;
         this.note = note;
+        this.creationTime = creationTime;
     }
 
     public int getId() {
@@ -32,11 +39,11 @@ public class Comment {
         this.commentText = commentText;
     }
 
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 
@@ -54,5 +61,24 @@ public class Comment {
 
     public void setNote(Note note) {
         this.note = note;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Comment)) {
+            return false;
+        }
+        Comment comment = (Comment) o;
+        return Objects.equals(getCommentText(), comment.getCommentText()) &&
+                Objects.equals(getAuthor(), comment.getAuthor()) &&
+                Objects.equals(getNote(), comment.getNote());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getCommentText(), getAuthor(), getNote());
     }
 }

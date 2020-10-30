@@ -1,6 +1,6 @@
 package net.thumbtack.school.notes.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Note {
@@ -8,17 +8,27 @@ public class Note {
     private int id;
     private String noteHead;
     private String noteBody;
-    private int revision;
-    private Date creationTime;
     private User author;
     private Section section;
+    private LocalDateTime creationTime;
 
-    public Note(String noteHead, String noteBody, Section section) {
+    public Note(String noteHead, String noteBody) {
         this.noteHead = noteHead;
         this.noteBody = noteBody;
-        this.revision = 1;
-        this.creationTime = new Date();
+    }
+
+    public Note(int id,
+                String noteHead,
+                String noteBody,
+                User author,
+                Section section,
+                LocalDateTime creationTime) {
+        this.id = id;
+        this.noteHead = noteHead;
+        this.noteBody = noteBody;
+        this.author = author;
         this.section = section;
+        this.creationTime = creationTime;
     }
 
     public int getId() {
@@ -45,19 +55,11 @@ public class Note {
         this.noteBody = noteBody;
     }
 
-    public int getRevision() {
-        return revision;
-    }
-
-    public void setRevision(int revision) {
-        this.revision = revision;
-    }
-
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 

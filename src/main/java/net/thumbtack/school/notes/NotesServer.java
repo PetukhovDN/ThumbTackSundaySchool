@@ -10,6 +10,8 @@ public class NotesServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotesServer.class);
 
     public static void main(String[] args) {
+        LOGGER.info("Starting notes server");
         SpringApplication.run(NotesServer.class, args);
+        LOGGER.info("Server has started");
     }
 }

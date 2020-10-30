@@ -28,7 +28,7 @@ public class UserDaoImpl extends DaoImplBase implements UserDao {
     }
 
     @Override
-    public User getInfo(UUID token) {
+    public User getUserByToken(UUID token) {
         return null;
     }
 
@@ -38,7 +38,7 @@ public class UserDaoImpl extends DaoImplBase implements UserDao {
     }
 
     @Override
-    public User editUserIndo(UUID token, User user) {
+    public User editUserInfo(UUID token, User user) {
         return null;
     }
 
