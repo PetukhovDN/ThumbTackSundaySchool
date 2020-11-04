@@ -6,18 +6,21 @@ import java.util.Objects;
 public class Comment {
 
     private int id;
-    private String commentText;
+    private String commentBody;
     private User author;
     private Note note;
     private LocalDateTime creationTime;
 
-    public Comment(String commentText) {
-        this.commentText = commentText;
+    public Comment() {
     }
 
-    public Comment(int id, String commentText, User author, Note note, LocalDateTime creationTime) {
+    public Comment(String commentBody) {
+        this.commentBody = commentBody;
+    }
+
+    public Comment(int id, String commentBody, User author, Note note, LocalDateTime creationTime) {
         this.id = id;
-        this.commentText = commentText;
+        this.commentBody = commentBody;
         this.author = author;
         this.note = note;
         this.creationTime = creationTime;
@@ -31,12 +34,12 @@ public class Comment {
         this.id = id;
     }
 
-    public String getCommentText() {
-        return commentText;
+    public String getCommentBody() {
+        return commentBody;
     }
 
-    public void setCommentText(String commentText) {
-        this.commentText = commentText;
+    public void setCommentBody(String commentBody) {
+        this.commentBody = commentBody;
     }
 
     public LocalDateTime getCreationTime() {
@@ -72,13 +75,13 @@ public class Comment {
             return false;
         }
         Comment comment = (Comment) o;
-        return Objects.equals(getCommentText(), comment.getCommentText()) &&
+        return Objects.equals(getCommentBody(), comment.getCommentBody()) &&
                 Objects.equals(getAuthor(), comment.getAuthor()) &&
                 Objects.equals(getNote(), comment.getNote());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getCommentText(), getAuthor(), getNote());
+        return Objects.hash(getCommentBody(), getAuthor(), getNote());
     }
 }

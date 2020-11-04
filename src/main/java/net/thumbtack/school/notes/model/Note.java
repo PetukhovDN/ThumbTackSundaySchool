@@ -12,6 +12,9 @@ public class Note {
     private Section section;
     private LocalDateTime creationTime;
 
+    public Note() {
+    }
+
     public Note(String noteHead, String noteBody) {
         this.noteHead = noteHead;
         this.noteBody = noteBody;

@@ -5,13 +5,17 @@ import java.util.Objects;
 
 public class Section {
 
-    private int id;
+    private long id;
     private String name;
     private User author;
     private LocalDateTime creationTime;
 
-    public Section(String name) {
+    public Section() {
+    }
+
+    public Section(long id, String name) {
         this.name = name;
+        this.id = id;
     }
 
     public Section(int id, String name, User author, LocalDateTime creationTime) {
@@ -21,7 +25,7 @@ public class Section {
         this.creationTime = creationTime;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 

@@ -4,16 +4,16 @@ USE `notes`;
 
 CREATE TABLE note_user (
     id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    firstName VARCHAR(50) NOT NULL,
-    lastName VARCHAR(50) NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
     patronymic VARCHAR(50),
 	login VARCHAR(50) NOT NULL,
     password VARCHAR(50) NOT NULL,
     creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_status ENUM('USER','ADMIN') DEFAULT 'USER',
     deleted_status BIT DEFAULT 0,
-    KEY firstName (firstName),
-    KEY lastName (lastName),
+    KEY first_name (first_name),
+    KEY last_name (last_name),
 	KEY creation_time (creation_time),
     KEY user_status (user_status),
     KEY deleted_status (deleted_status),
@@ -22,7 +22,7 @@ CREATE TABLE note_user (
 
 CREATE TABLE session (
 	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    token VARCHAR(36),
+    token VARCHAR(36) NOT NULL,
     note_user_id INT(11) NOT NULL,
     session_start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY token (token),
@@ -103,4 +103,4 @@ CREATE TABLE note_rating (
     FOREIGN KEY (author_id) REFERENCES note_user (id) ON UPDATE CASCADE ON DELETE CASCADE)
     ENGINE=INNODB DEFAULT CHARSET=utf8;
 
-INSERT INTO note_user (id, firstname, lastname, login, password, user_status) VALUES (null, 'admin', 'admin', 'admin', 'password', 'ADMIN');
+INSERT INTO note_user (id, first_name, last_name, login, password, user_status) VALUES (null, 'admin', 'admin', 'admin', 'password', 'ADMIN');

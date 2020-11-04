@@ -1,33 +1,33 @@
 package net.thumbtack.school.notes.dao;
 
-import net.thumbtack.school.notes.enums.RequestParam;
 import net.thumbtack.school.notes.model.User;
+import net.thumbtack.school.notes.model.params.UserRequestParam;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface UserDao {
-    UUID registerUser(User user);
+    String registerUser(User user);
 
-    UUID logInUser(String login, String password);
+    User getUserInfo(String userToken);
 
-    String logOutUser(UUID token);
+    void leaveNotesServer(String userToken, String password);
 
-    User getUserByToken(UUID token);
+    User editUserInfo(String userToken,
+                      String newFirstName,
+                      String newLastName,
+                      String newPatronymic,
+                      String password,
+                      String nePassword);
 
-    String leaveNotesServer(UUID token, String password);
+    void giveAdminRoot(String userToken, int userId);
 
-    User editUserInfo(UUID token, User user);
+    List<User> getUsersWithParams(String userToken, UserRequestParam param);
 
-    String giveAdminRoot(UUID token);
+    void followUser(String userToken, String login);
 
-    List<User> getUsersWithParams(UUID token, RequestParam... params);
+    void ignoreUser(String userToken, String login);
 
-    String followUser(UUID token, String login);
+    void stopFollowUser(String userToken, String login);
 
-    String stopFollowUser(UUID token);
-
-    String ignoreUser(UUID token, String login);
-
-    String stopIgnoreUser(UUID token, String login);
+    void stopIgnoreUser(String userToken, String login);
 }

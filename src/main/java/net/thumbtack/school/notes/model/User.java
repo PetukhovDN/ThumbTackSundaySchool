@@ -4,6 +4,7 @@ import net.thumbtack.school.notes.enums.UserStatus;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 public class User {
 
@@ -13,9 +14,15 @@ public class User {
     private String patronymic;
     private String login;
     private String password;
+    private UUID token;
     private LocalDateTime creationTime;
     private UserStatus userStatus;
     private boolean isDeleted;
+    private boolean isOnline;
+    private int rating;
+
+    public User() {
+    }
 
     public User(String firstName,
                 String lastName,
@@ -35,18 +42,24 @@ public class User {
                 String patronymic,
                 String login,
                 String password,
+                UUID token,
                 LocalDateTime creationTime,
                 UserStatus userStatus,
-                boolean isDeleted) {
+                boolean isDeleted,
+                boolean isOnline,
+                int rating) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.patronymic = patronymic;
         this.login = login;
         this.password = password;
+        this.token = token;
         this.creationTime = creationTime;
         this.userStatus = userStatus;
         this.isDeleted = isDeleted;
+        this.isOnline = isOnline;
+        this.rating = rating;
     }
 
     public int getId() {
@@ -97,6 +110,14 @@ public class User {
         this.password = password;
     }
 
+    public UUID getToken() {
+        return token;
+    }
+
+    public void setToken(UUID token) {
+        this.token = token;
+    }
+
     public LocalDateTime getCreationTime() {
         return creationTime;
     }
@@ -119,6 +140,22 @@ public class User {
 
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
+    }
+
+    public boolean isOnline() {
+        return isOnline;
+    }
+
+    public void setOnline(boolean online) {
+        isOnline = online;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 
     @Override
