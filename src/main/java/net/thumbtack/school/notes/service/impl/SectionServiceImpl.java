@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SectionServiceImpl implements SectionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDaoImpl.class);
-    private SectionDaoImpl sectionDao;
+    private final SectionDaoImpl sectionDao;
 
     @Autowired
     public SectionServiceImpl(SectionDaoImpl sectionDao) {

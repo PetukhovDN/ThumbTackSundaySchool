@@ -1,6 +1,5 @@
 package net.thumbtack.school.notes.controller;
 
-import net.thumbtack.school.notes.dao.impl.UserDaoImpl;
 import net.thumbtack.school.notes.service.impl.NoteServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NoteController {
     private static final Logger LOGGER = LoggerFactory.getLogger(NoteController.class);
 
-    private NoteServiceImpl noteService;
+    private final NoteServiceImpl noteService;
 
     @Autowired
     public NoteController(NoteServiceImpl noteService) {

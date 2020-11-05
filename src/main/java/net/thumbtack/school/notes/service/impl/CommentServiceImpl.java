@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CommentServiceImpl implements CommentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDaoImpl.class);
-    private CommentDaoImpl commentDao;
+    private final CommentDaoImpl commentDao;
 
     @Autowired
     public CommentServiceImpl(CommentDaoImpl commentDao) {

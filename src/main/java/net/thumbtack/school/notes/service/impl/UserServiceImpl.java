@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements UserService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDaoImpl.class);
-    private UserDaoImpl userDao;
+    private final UserDaoImpl userDao;
 
     @Autowired
     public UserServiceImpl(UserDaoImpl userDao) {

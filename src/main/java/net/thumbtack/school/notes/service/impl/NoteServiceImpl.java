@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class NoteServiceImpl implements NoteService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDaoImpl.class);
-    private NoteDaoImpl noteDao;
+    private final NoteDaoImpl noteDao;
 
     @Autowired
     public NoteServiceImpl(NoteDaoImpl noteDao) {

@@ -4,26 +4,20 @@ import net.thumbtack.school.notes.validator.UserLogin;
 import net.thumbtack.school.notes.validator.UserName;
 import net.thumbtack.school.notes.validator.UserPassword;
 
-import javax.validation.constraints.NotNull;
-
 public class RegisterRequest {
 
-    @NotNull
     @UserName
     private String firstName;
 
-    @NotNull
     @UserName
     private String lastName;
 
     @UserName
     private String patronymic;
 
-    @NotNull
     @UserLogin
     private String login;
 
-    @NotNull
     @UserPassword
     private String password;
 

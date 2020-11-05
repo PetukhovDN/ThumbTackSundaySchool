@@ -7,7 +7,7 @@ import org.springframework.core.env.Environment;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class UserLoginValidator  implements ConstraintValidator<UserLogin, String> {
+public class UserLoginValidator implements ConstraintValidator<UserLogin, String> {
     @Autowired
     private Environment env;
 
@@ -16,6 +16,6 @@ public class UserLoginValidator  implements ConstraintValidator<UserLogin, Strin
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
-        return true;
+        return s != null && s.length() <= max_name_length;
     }
 }
