@@ -6,7 +6,7 @@ import net.thumbtack.school.notes.model.params.UserRequestParam;
 import java.util.List;
 
 public interface UserDao {
-    String registerUser(User user);
+    User registerUser(User user);
 
     User getUserInfo(String userToken);
 

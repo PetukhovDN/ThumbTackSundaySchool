@@ -21,11 +21,9 @@ CREATE TABLE note_user (
     ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE session (
-	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    token VARCHAR(36) NOT NULL,
+    token VARCHAR(36) NOT NULL PRIMARY KEY,
     note_user_id INT(11) NOT NULL,
     session_start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY token (token),
     KEY session_start_time (session_start_time),
     FOREIGN KEY (note_user_id) REFERENCES note_user (id) ON UPDATE CASCADE ON DELETE CASCADE)
     ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -53,7 +51,7 @@ CREATE TABLE section (
     author_id INT(11) NOT NULL,
     KEY section_name (section_name),
     KEY creation_time (creation_time),
-    FOREIGN KEY (author_id) REFERENCES note_user (id) ON UPDATE CASCADE ON DELETE CASCADE)
+    FOREIGN KEY (author_id) REFERENCES note_user (id))
 	ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE note (
@@ -66,7 +64,7 @@ CREATE TABLE note (
     KEY author_id (author_id),
     KEY section_id (section_id),
     KEY creation_time (creation_time),
-    FOREIGN KEY (author_id) REFERENCES note_user (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES note_user (id),
     FOREIGN KEY (section_id) REFERENCES section (id) ON UPDATE CASCADE ON DELETE CASCADE)
 	ENGINE=INNODB DEFAULT CHARSET=utf8;
 
@@ -86,7 +84,7 @@ CREATE TABLE note_comment (
     author_id INT(11) NOT NULL,
     note_id INT(11) NOT NULL,
 	KEY creation_time (creation_time),
-    FOREIGN KEY (author_id) REFERENCES note_user (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES note_user (id),
     FOREIGN KEY (note_id) REFERENCES note (id) ON UPDATE CASCADE ON DELETE CASCADE)
     ENGINE=INNODB DEFAULT CHARSET=utf8;
 
@@ -100,7 +98,7 @@ CREATE TABLE note_rating (
     KEY rating (rating),
     KEY rating_time (rating_time),
     FOREIGN KEY (note_id) REFERENCES note (id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (author_id) REFERENCES note_user (id) ON UPDATE CASCADE ON DELETE CASCADE)
+    FOREIGN KEY (author_id) REFERENCES note_user (id))
     ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 INSERT INTO note_user (id, first_name, last_name, login, password, user_status) VALUES (null, 'admin', 'admin', 'admin', 'password', 'ADMIN');

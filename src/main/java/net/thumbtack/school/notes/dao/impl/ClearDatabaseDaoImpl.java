@@ -10,21 +10,24 @@ import org.springframework.stereotype.Component;
 public class ClearDatabaseDaoImpl extends DaoImplBase implements ClearDatabaseDao {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClearDatabaseDaoImpl.class);
 
+    private final SqlSession sqlSession;
+
+    public ClearDatabaseDaoImpl(SqlSession sqlSession) {
+        this.sqlSession = sqlSession;
+    }
+
     @Override
     public void clear() {
         LOGGER.debug("Clear database");
-        try (SqlSession sqlSession = getSession()) {
-            try {
-                getUserMapper(sqlSession).deleteAll();
-                getNoteMapper(sqlSession).deleteAll();
-                getSectionMapper(sqlSession).deleteAll();
-                getCommentMapper(sqlSession).deleteAll();
-            } catch (RuntimeException ex) {
-                LOGGER.info("Can't clear database");
-                sqlSession.rollback();
-                throw ex;
-            }
-            sqlSession.commit();
+        try {
+            getUserMapper(sqlSession).deleteAll();
+            getNoteMapper(sqlSession).deleteAll();
+            getSectionMapper(sqlSession).deleteAll();
+            getCommentMapper(sqlSession).deleteAll();
+        } catch (RuntimeException ex) {
+            LOGGER.info("Can't clear database");
+            throw ex;
         }
+        sqlSession.commit();
     }
 }

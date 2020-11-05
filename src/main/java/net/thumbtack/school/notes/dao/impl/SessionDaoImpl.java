@@ -14,29 +14,31 @@ import java.util.UUID;
 public class SessionDaoImpl extends DaoImplBase implements SessionDao {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionDaoImpl.class);
 
+    private final SqlSession sqlSession;
+
+    public SessionDaoImpl(SqlSession sqlSession) {
+        this.sqlSession = sqlSession;
+    }
+
     @Override
     public String logInUser(String login, String password) {
         LOGGER.info("DAO User with login {} login to server", login);
         String userToken;
-        try (SqlSession sqlSession = getSession()) {
-            try {
-                User user = getUserMapper(sqlSession).getUserByLogin(login, password);
-                userToken = user.getToken().toString();
-                int userId = user.getId();
-                SessionMapper currentSession = getSessionMapper(sqlSession);
-                if (currentSession.checkIsLogged(userToken) != null) {
-                    currentSession.logoutFromDatabase(userToken);
-                    userToken = UUID.randomUUID().toString();
-                    currentSession.loginToDatabase(userToken, userId);
-                } else {
-                    getSessionMapper(sqlSession).loginToDatabase(userToken, userId);
-                }
-            } catch (RuntimeException ex) {
-                LOGGER.error("User with login {} can't login to server, ", login, ex);
-                sqlSession.rollback();
-                throw ex;
+        try {
+            User user = getUserMapper(sqlSession).getUserByLogin(login, password);
+            userToken = user.getToken().toString();
+            int userId = user.getId();
+            SessionMapper currentSession = getSessionMapper(sqlSession);
+            if (currentSession.checkIsLogged(userToken) != null) {
+                currentSession.logoutFromDatabase(userToken);
+                userToken = UUID.randomUUID().toString();
+                currentSession.loginToDatabase(userToken, userId);
+            } else {
+                getSessionMapper(sqlSession).loginToDatabase(userToken, userId);
             }
-            sqlSession.commit();
+        } catch (RuntimeException ex) {
+            LOGGER.error("User with login {} can't login to server, ", login, ex);
+            throw ex;
         }
         return userToken;
     }

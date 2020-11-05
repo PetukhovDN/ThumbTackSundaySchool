@@ -15,25 +15,26 @@ import java.util.UUID;
 public class UserDaoImpl extends DaoImplBase implements UserDao {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDaoImpl.class);
 
+    private final SqlSession sqlSession;
+
+    public UserDaoImpl(SqlSession sqlSession) {
+        this.sqlSession = sqlSession;
+    }
+
     @Override
-    public String registerUser(User user) {
+    public User registerUser(User user) {
         LOGGER.info("DAO insert User {} to Database", user);
-        String userToken;
-        try (SqlSession sqlSession = getSession()) {
+        UUID userToken = UUID.randomUUID();
             try {
-                userToken = UUID.randomUUID().toString();
-                user.setToken(UUID.fromString(userToken));
+                user.setToken(userToken);
                 getUserMapper(sqlSession).registerUser(user);
                 user = getUserMapper(sqlSession).getUserByLogin(user.getLogin(), user.getPassword());
-                getSessionMapper(sqlSession).loginToDatabase(userToken, user.getId());
+                getSessionMapper(sqlSession).loginToDatabase(userToken.toString(), user.getId());
             } catch (RuntimeException ex) {
                 LOGGER.error("Can't insert User {} to Database, {}", user, ex);
-                sqlSession.rollback();
                 throw ex;
             }
-            sqlSession.commit();
-        }
-        return userToken;
+        return user;
     }
 
     @Override
