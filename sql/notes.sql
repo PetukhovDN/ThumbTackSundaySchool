@@ -57,7 +57,6 @@ CREATE TABLE section (
 CREATE TABLE note (
 	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     note_head VARCHAR(100) NOT NULL,
-    note_body VARCHAR(5000) NOT NULL,
     creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	author_id INT(11) NOT NULL,
     section_id INT(11) NOT NULL,
@@ -72,6 +71,7 @@ CREATE TABLE note_revision (
 	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     revision INT(11) NOT NULL,
     note_id INT(11) NOT NULL,
+    note_body VARCHAR(5000) NOT NULL,
     KEY revision (revision),
     UNIQUE KEY note_revision (revision, note_id),
     FOREIGN KEY (note_id) REFERENCES note (id) ON UPDATE CASCADE ON DELETE CASCADE)

@@ -26,12 +26,11 @@ public class SessionDaoImpl extends DaoImplBase implements SessionDao {
         String userToken;
         try {
             User user = getUserMapper(sqlSession).getUserByLogin(login, password);
-            userToken = user.getToken().toString();
             int userId = user.getId();
             SessionMapper currentSession = getSessionMapper(sqlSession);
-            if (currentSession.checkIsLogged(userToken) != null) {
-                currentSession.logoutFromDatabase(userToken);
-                userToken = UUID.randomUUID().toString();
+            userToken = UUID.randomUUID().toString();
+            if (!currentSession.getUserSession(userId).isEmpty()) {
+                currentSession.logoutFromDatabase(userId);
                 currentSession.loginToDatabase(userToken, userId);
             } else {
                 getSessionMapper(sqlSession).loginToDatabase(userToken, userId);

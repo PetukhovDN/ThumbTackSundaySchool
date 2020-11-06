@@ -9,8 +9,8 @@ public interface SessionMapper {
     @Options(keyProperty = "userToken")
     Integer loginToDatabase(String userToken, int userId);
 
-    void logoutFromDatabase(String userToken);
+    void logoutFromDatabase(int userId);
 
-    String checkIsLogged(String userToken);
+    String getUserSession(int userId);
 
 }

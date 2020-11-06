@@ -3,8 +3,8 @@ package net.thumbtack.school.notes.model;
 import net.thumbtack.school.notes.enums.UserStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 public class User {
 
@@ -14,12 +14,16 @@ public class User {
     private String patronymic;
     private String login;
     private String password;
-    private UUID token;
     private LocalDateTime creationTime;
     private UserStatus userStatus;
     private boolean isDeleted;
     private boolean isOnline;
     private int rating;
+
+    private List<User> following;
+    private List<User> followers;
+    private List<User> ignoring;
+    private List<User> ignoredBy;
 
     public User() {
     }
@@ -30,7 +34,6 @@ public class User {
                 String patronymic,
                 String login,
                 String password,
-                UUID token,
                 LocalDateTime creationTime,
                 UserStatus userStatus,
                 boolean isDeleted,
@@ -42,7 +45,6 @@ public class User {
         this.patronymic = patronymic;
         this.login = login;
         this.password = password;
-        this.token = token;
         this.creationTime = creationTime;
         this.userStatus = userStatus;
         this.isDeleted = isDeleted;
@@ -98,14 +100,6 @@ public class User {
         this.password = password;
     }
 
-    public UUID getToken() {
-        return token;
-    }
-
-    public void setToken(UUID token) {
-        this.token = token;
-    }
-
     public LocalDateTime getCreationTime() {
         return creationTime;
     }
@@ -144,6 +138,38 @@ public class User {
 
     public void setRating(int rating) {
         this.rating = rating;
+    }
+
+    public List<User> getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(List<User> following) {
+        this.following = following;
+    }
+
+    public List<User> getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(List<User> followers) {
+        this.followers = followers;
+    }
+
+    public List<User> getIgnoring() {
+        return ignoring;
+    }
+
+    public void setIgnoring(List<User> ignoring) {
+        this.ignoring = ignoring;
+    }
+
+    public List<User> getIgnoredBy() {
+        return ignoredBy;
+    }
+
+    public void setIgnoredBy(List<User> ignoredBy) {
+        this.ignoredBy = ignoredBy;
     }
 
     @Override

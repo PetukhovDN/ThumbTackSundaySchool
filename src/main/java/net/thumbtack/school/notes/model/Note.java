@@ -1,13 +1,14 @@
 package net.thumbtack.school.notes.model;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Objects;
 
 public class Note {
 
     private int id;
     private String noteHead;
-    private String noteBody;
+    private Map<Integer, String> noteBodyWithRevision;
     private User author;
     private Section section;
     private LocalDateTime creationTime;
@@ -15,20 +16,20 @@ public class Note {
     public Note() {
     }
 
-    public Note(String noteHead, String noteBody) {
+    public Note(String noteHead, Map<Integer, String> noteBodyWithRevision) {
         this.noteHead = noteHead;
-        this.noteBody = noteBody;
+        this.noteBodyWithRevision = noteBodyWithRevision;
     }
 
     public Note(int id,
                 String noteHead,
-                String noteBody,
+                Map<Integer, String> noteBodyWithRevision,
                 User author,
                 Section section,
                 LocalDateTime creationTime) {
         this.id = id;
         this.noteHead = noteHead;
-        this.noteBody = noteBody;
+        this.noteBodyWithRevision = noteBodyWithRevision;
         this.author = author;
         this.section = section;
         this.creationTime = creationTime;
@@ -50,12 +51,12 @@ public class Note {
         this.noteHead = noteHead;
     }
 
-    public String getNoteBody() {
-        return noteBody;
+    public Map<Integer, String> getNoteBody() {
+        return noteBodyWithRevision;
     }
 
-    public void setNoteBody(String noteBody) {
-        this.noteBody = noteBody;
+    public void setNoteBody(Map<Integer, String> noteBodyWithRevision) {
+        this.noteBodyWithRevision = noteBodyWithRevision;
     }
 
     public LocalDateTime getCreationTime() {

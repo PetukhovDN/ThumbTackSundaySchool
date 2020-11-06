@@ -26,7 +26,6 @@ public class UserDaoImpl extends DaoImplBase implements UserDao {
         LOGGER.info("DAO insert User {} to Database", user);
         UUID userToken = UUID.randomUUID();
         try {
-            user.setToken(userToken);
             getUserMapper(sqlSession).registerUser(user);
             user = getUserMapper(sqlSession).getUserByLogin(user.getLogin(), user.getPassword());
             getSessionMapper(sqlSession).loginToDatabase(userToken.toString(), user.getId());
