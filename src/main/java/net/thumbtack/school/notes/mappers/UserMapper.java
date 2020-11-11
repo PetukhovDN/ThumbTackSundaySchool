@@ -3,6 +3,7 @@ package net.thumbtack.school.notes.mappers;
 import net.thumbtack.school.notes.model.User;
 import org.apache.ibatis.annotations.*;
 
+@Mapper
 public interface UserMapper {
     @Insert("INSERT INTO notes.note_user (first_name, last_name, patronymic, login, password)" +
             " VALUES " +

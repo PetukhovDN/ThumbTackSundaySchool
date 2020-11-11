@@ -3,6 +3,7 @@ package net.thumbtack.school.notes.dto.request.user;
 import net.thumbtack.school.notes.validator.UserLogin;
 import net.thumbtack.school.notes.validator.UserName;
 import net.thumbtack.school.notes.validator.UserPassword;
+import net.thumbtack.school.notes.validator.UserPatronymic;
 
 public class RegisterRequest {
 
@@ -12,7 +13,7 @@ public class RegisterRequest {
     @UserName
     private String lastName;
 
-    @UserName
+    @UserPatronymic
     private String patronymic;
 
     @UserLogin
@@ -20,6 +21,9 @@ public class RegisterRequest {
 
     @UserPassword
     private String password;
+
+    public RegisterRequest() {
+    }
 
     public RegisterRequest(String firstName,
                            String lastName,

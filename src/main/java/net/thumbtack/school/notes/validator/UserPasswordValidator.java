@@ -5,6 +5,11 @@ import org.springframework.beans.factory.annotation.Value;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+
+/**
+ * User password validation during registration.
+ * Cannot be null, empty or shorter min_password_length.
+ */
 public class UserPasswordValidator implements ConstraintValidator<UserPassword, String> {
 
     @Value("${min_password_length}")
@@ -12,6 +17,8 @@ public class UserPasswordValidator implements ConstraintValidator<UserPassword, 
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
-        return s != null && s.length() >= min_password_length;
+        return s != null
+                && !s.isBlank()
+                && s.length() >= min_password_length;
     }
 }

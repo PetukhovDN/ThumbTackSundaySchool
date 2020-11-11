@@ -1,34 +1,41 @@
 package net.thumbtack.school.notes.dao.impl;
 
 import net.thumbtack.school.notes.dao.UserDao;
+import net.thumbtack.school.notes.mappers.SessionMapper;
+import net.thumbtack.school.notes.mappers.UserMapper;
 import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.model.params.UserRequestParam;
-import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.UUID;
 
 @Component
-public class UserDaoImpl extends DaoImplBase implements UserDao {
+public class UserDaoImpl implements UserDao {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDaoImpl.class);
 
-    private final SqlSession sqlSession;
+    private final UserMapper userMapper;
+    private final SessionMapper sessionMapper;
 
-    public UserDaoImpl(SqlSession sqlSession) {
-        this.sqlSession = sqlSession;
+    @Autowired
+    public UserDaoImpl(UserMapper userMapper,
+                       SessionMapper sessionMapper) {
+        this.userMapper = userMapper;
+        this.sessionMapper = sessionMapper;
     }
 
     @Override
     public User registerUser(User user) {
         LOGGER.info("DAO insert User {} to Database", user);
-        UUID userToken = UUID.randomUUID();
         try {
-            getUserMapper(sqlSession).registerUser(user);
-            user = getUserMapper(sqlSession).getUserByLogin(user.getLogin(), user.getPassword());
-            getSessionMapper(sqlSession).loginToDatabase(userToken.toString(), user.getId());
+            userMapper.registerUser(user);
+            UUID userToken = UUID.randomUUID();
+            user = userMapper.getUserByLogin(user.getLogin(), user.getPassword());
+            sessionMapper.loginToDatabase(userToken.toString(), user.getId());
+            user.setOnline(true);
         } catch (RuntimeException ex) {
             LOGGER.error("Can't insert User {} to Database, {}", user, ex);
             throw ex;
