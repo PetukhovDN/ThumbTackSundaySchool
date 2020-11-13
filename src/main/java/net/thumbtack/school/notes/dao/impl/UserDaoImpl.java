@@ -1,35 +1,27 @@
 package net.thumbtack.school.notes.dao.impl;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.UserDao;
 import net.thumbtack.school.notes.mappers.SessionMapper;
 import net.thumbtack.school.notes.mappers.UserMapper;
 import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.model.params.UserRequestParam;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
+@RequiredArgsConstructor
 @Component
 public class UserDaoImpl implements UserDao {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserDaoImpl.class);
-
     private final UserMapper userMapper;
     private final SessionMapper sessionMapper;
 
-    @Autowired
-    public UserDaoImpl(UserMapper userMapper,
-                       SessionMapper sessionMapper) {
-        this.userMapper = userMapper;
-        this.sessionMapper = sessionMapper;
-    }
-
     @Override
     public User registerUser(User user) {
-        LOGGER.info("DAO insert User {} to Database", user);
+        log.info("DAO insert User {} to Database", user);
         try {
             userMapper.registerUser(user);
             UUID userToken = UUID.randomUUID();
@@ -37,7 +29,7 @@ public class UserDaoImpl implements UserDao {
             sessionMapper.loginToDatabase(userToken.toString(), user.getId());
             user.setOnline(true);
         } catch (RuntimeException ex) {
-            LOGGER.error("Can't insert User {} to Database, {}", user, ex);
+            log.error("Can't insert User {} to Database, {}", user, ex);
             throw ex;
         }
         return user;
@@ -87,6 +79,4 @@ public class UserDaoImpl implements UserDao {
     public void stopIgnoreUser(String userToken, String login) {
 
     }
-
-
 }

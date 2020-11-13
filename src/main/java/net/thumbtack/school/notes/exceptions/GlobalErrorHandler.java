@@ -1,5 +1,7 @@
 package net.thumbtack.school.notes.exceptions;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.thumbtack.school.notes.dto.responce.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -56,14 +58,8 @@ public class GlobalErrorHandler {
     }
 
     public static class MyError {
+        @Getter
+        @Setter
         private List<ErrorResponse> errors = new ArrayList<>();
-
-        public List<ErrorResponse> getErrors() {
-            return errors;
-        }
-
-        public void setErrors(List<ErrorResponse> errors) {
-            this.errors = errors;
-        }
     }
 }

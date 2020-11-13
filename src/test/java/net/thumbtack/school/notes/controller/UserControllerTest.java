@@ -33,12 +33,12 @@ class UserControllerTest {
 
     @Test
     public void testRegisterUserInFail() throws Exception {
-        RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setFirstName("Test"); //true
-        registerRequest.setLastName("$@*(QWE"); //false
-        registerRequest.setPatronymic(""); //true
-        registerRequest.setLogin(null); //false
-        registerRequest.setPassword("short"); //false
+        RegisterRequest registerRequest = new RegisterRequest(
+                "Test",  //true
+                "$@*(QWE", //false
+                "", //true
+                "user123 *&^",  //false
+                "short"); //false
         MvcResult result = mvc.perform(post("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(registerRequest)))
@@ -50,12 +50,12 @@ class UserControllerTest {
 
     @Test
     public void testRegisterUserRight() throws Exception {
-        RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setFirstName("Test"); //true
-        registerRequest.setLastName("Testov"); //false
-        registerRequest.setPatronymic("Testovitch"); //true
-        registerRequest.setLogin("login"); //false
-        registerRequest.setPassword("good_password"); //false
+        RegisterRequest registerRequest = new RegisterRequest(
+                "Test",
+                "Testov",
+                "Testovitch",
+                "login",
+                "good_password");
         MvcResult result = mvc.perform(post("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(registerRequest)))

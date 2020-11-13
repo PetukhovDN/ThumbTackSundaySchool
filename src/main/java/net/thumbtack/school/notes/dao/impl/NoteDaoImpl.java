@@ -1,23 +1,17 @@
 package net.thumbtack.school.notes.dao.impl;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.NoteDao;
 import net.thumbtack.school.notes.mappers.NoteMapper;
 import net.thumbtack.school.notes.model.Note;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
+@RequiredArgsConstructor
 @Component
 public class NoteDaoImpl implements NoteDao {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NoteDaoImpl.class);
-
     private final NoteMapper noteMapper;
-
-    @Autowired
-    public NoteDaoImpl(NoteMapper noteMapper) {
-        this.noteMapper = noteMapper;
-    }
 
     @Override
     public Note createNote(String token, Note note, int sectionId) {

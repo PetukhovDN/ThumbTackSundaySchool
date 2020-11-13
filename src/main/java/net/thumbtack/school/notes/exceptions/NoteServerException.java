@@ -1,20 +1,12 @@
 package net.thumbtack.school.notes.exceptions;
 
-public class NoteServerException extends Exception {
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+public @RequiredArgsConstructor
+class NoteServerException extends Exception {
+    @Getter
     private final ExceptionErrorInfo exceptionErrorInfo;
+    @Getter
     private final String field;
-
-    public NoteServerException(ExceptionErrorInfo exceptionErrorInfo, String field) {
-        this.exceptionErrorInfo = exceptionErrorInfo;
-        this.field = field;
-    }
-
-    public ExceptionErrorInfo getExceptionErrorInfo() {
-        return exceptionErrorInfo;
-    }
-
-    public String getField() {
-        return field;
-    }
 }

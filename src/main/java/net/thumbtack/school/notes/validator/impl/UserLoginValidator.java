@@ -1,5 +1,6 @@
-package net.thumbtack.school.notes.validator;
+package net.thumbtack.school.notes.validator.impl;
 
+import net.thumbtack.school.notes.validator.UserLogin;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.validation.ConstraintValidator;

@@ -1,25 +1,19 @@
 package net.thumbtack.school.notes.dao.impl;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.SectionDao;
 import net.thumbtack.school.notes.mappers.SectionMapper;
 import net.thumbtack.school.notes.model.Section;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
+@RequiredArgsConstructor
 @Component
 public class SectionDaoImpl implements SectionDao {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SectionDaoImpl.class);
-
     private final SectionMapper sectionMapper;
-
-    @Autowired
-    public SectionDaoImpl(SectionMapper sectionMapper) {
-        this.sectionMapper = sectionMapper;
-    }
 
     @Override
     public Section createSection(String token, Section section) {

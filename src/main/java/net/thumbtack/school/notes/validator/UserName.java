@@ -1,5 +1,7 @@
 package net.thumbtack.school.notes.validator;
 
+import net.thumbtack.school.notes.validator.impl.UserNameValidator;
+
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.*;
