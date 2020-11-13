@@ -21,6 +21,9 @@ public class UserServiceImpl implements UserService {
     }
 
     public RegisterResponse registerUser(RegisterRequest userRequest) {
+    	// REVU User user = new User(userRequest.getFirstName(),userRequest.getLastName()...
+    	// а если Вам такое не нравится, то 
+    	// https://mapstruct.org/
         User user = new User();
         user.setFirstName(userRequest.getFirstName());
         user.setLastName(userRequest.getLastName());

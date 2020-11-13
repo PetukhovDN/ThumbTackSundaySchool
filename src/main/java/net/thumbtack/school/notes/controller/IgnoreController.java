@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/api/ignore")
+// REVU ИМХО слишком много контроллеров
+// хватит UserController и NoteController
 public class IgnoreController {
     private static final Logger LOGGER = LoggerFactory.getLogger(IgnoreController.class);
 
