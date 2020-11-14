@@ -25,7 +25,7 @@ public class AcceptanceTest {
         rightRegisterRequest.setFirstName("Test");
         rightRegisterRequest.setLastName("Testov");
         rightRegisterRequest.setPatronymic("Testovitch");
-        rightRegisterRequest.setLogin("login");
+        rightRegisterRequest.setLogin("test");
         rightRegisterRequest.setPassword("good_password");
     }
 

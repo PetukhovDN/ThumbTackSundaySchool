@@ -19,10 +19,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public RegisterResponse registerUser(RegisterRequest userRequest) {
         log.info("Trying to register user");
-        User user = UserMapper.INSTANCE.requestToUser(userRequest);
-        RegisterResponse registerResponse = UserMapper.INSTANCE.userToResponse(userDao.registerUser(user));
+        User user = UserMapper.INSTANCE.requestRegisterUser(userRequest);
+        User registeredUser = userDao.registerUser(user);
         log.info("The user was registered");
-        return registerResponse;
+        log.info("Trying to get registration response");
+        RegisterResponse registrationResponse = UserMapper.INSTANCE.responseRegisterUser(registeredUser);
+        log.info("Response was got");
+        return registrationResponse;
     }
 
 }

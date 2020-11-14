@@ -25,7 +25,9 @@ public class UserDaoImpl implements UserDao {
         try {
             userMapper.registerUser(user);
             UUID userToken = UUID.randomUUID();
+            log.info("Trying to get User {} from Database", user);
             user = userMapper.getUserByLogin(user.getLogin(), user.getPassword());
+            log.info("Trying tp login User {} to Database", user);
             sessionMapper.loginToDatabase(userToken.toString(), user.getId());
             user.setOnline(true);
         } catch (RuntimeException ex) {
