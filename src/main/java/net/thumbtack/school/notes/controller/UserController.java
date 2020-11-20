@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.responce.user.RegisterResponse;
+import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.service.impl.UserServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,10 +19,12 @@ import javax.validation.Valid;
 public class UserController {
     private final UserServiceImpl userService;
 
-    @PostMapping(value = "accounts", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "accounts",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public RegisterResponse registerUser(@RequestBody @Valid RegisterRequest userRequest) {
-        return userService.registerUser(userRequest);
+    public RegisterResponse registerUser(@RequestBody @Valid RegisterRequest registerRequest) throws NoteServerException {
+        return userService.registerUser(registerRequest);
     }
 }
 

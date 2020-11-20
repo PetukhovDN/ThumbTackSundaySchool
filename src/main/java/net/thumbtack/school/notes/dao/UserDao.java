@@ -1,12 +1,13 @@
 package net.thumbtack.school.notes.dao;
 
+import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.model.params.UserRequestParam;
 
 import java.util.List;
 
 public interface UserDao {
-    User registerUser(User user);
+    User registerUser(User user) throws NoteServerException;
 
     User getUserInfo(String userToken);
 

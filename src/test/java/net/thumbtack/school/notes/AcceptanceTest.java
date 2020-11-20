@@ -51,4 +51,15 @@ public class AcceptanceTest {
 
         assertEquals(rightRegisterRequest.getFirstName(), actualUser.getFirstName());
     }
+
+    @Test
+    public void testGetFromNotExistingPage() {
+        HttpClientErrorException exc = assertThrows(HttpClientErrorException.class, () -> {
+            template.getForEntity(postUserUrl + "wrong/page", String.class);
+        });
+        assertAll(
+                () -> assertEquals(404, exc.getStatusCode().value()),
+                () -> assertTrue(exc.getResponseBodyAsString().contains("Not Found"))
+        );
+    }
 }

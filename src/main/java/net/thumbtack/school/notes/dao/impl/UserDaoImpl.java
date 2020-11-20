@@ -3,10 +3,13 @@ package net.thumbtack.school.notes.dao.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.UserDao;
+import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
+import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.mappers.SessionMapper;
 import net.thumbtack.school.notes.mappers.UserMapper;
 import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.model.params.UserRequestParam;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,16 +23,18 @@ public class UserDaoImpl implements UserDao {
     private final SessionMapper sessionMapper;
 
     @Override
-    public User registerUser(User user) {
+    public User registerUser(User user) throws NoteServerException {
         log.info("DAO insert User {} to Database", user);
         try {
             userMapper.registerUser(user);
             UUID userToken = UUID.randomUUID();
             log.info("Trying to get User {} from Database", user);
             user = userMapper.getUserByLogin(user.getLogin(), user.getPassword());
-            log.info("Trying tp login User {} to Database", user);
+            log.info("Trying to login User {} to Database", user);
             sessionMapper.loginToDatabase(userToken.toString(), user.getId());
             user.setOnline(true);
+        } catch (DuplicateKeyException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.LOGIN_ALREADY_EXISTS, user.getLogin());
         } catch (RuntimeException ex) {
             log.error("Can't insert User {} to Database, {}", user, ex);
             throw ex;

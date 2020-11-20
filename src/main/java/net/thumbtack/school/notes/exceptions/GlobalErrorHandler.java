@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class GlobalErrorHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public MyError handleValidation(MethodArgumentNotValidException exc) {
+    public MyError exceptionHandler(MethodArgumentNotValidException exc) {
         final MyError errors = new MyError();
         exc.getBindingResult().getFieldErrors().forEach(fieldError -> {
             ErrorResponse error = new ErrorResponse();
@@ -57,9 +58,9 @@ public class GlobalErrorHandler {
         return errors;
     }
 
+    @Getter
+    @Setter
     public static class MyError {
-        @Getter
-        @Setter
         private List<ErrorResponse> errors = new ArrayList<>();
     }
 }
