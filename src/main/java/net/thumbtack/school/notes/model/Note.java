@@ -17,4 +17,5 @@ public class Note {
     private User author;
     private Section section;
     private LocalDateTime creationTime;
+    // REVU а еще List<Revision>
 }

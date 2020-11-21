@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface UserMapper {
+	// REVU не надо указывать имя БД, пока она одна
+	// INSERT INTO note_user
     @Insert("INSERT INTO notes.note_user (first_name, last_name, patronymic, login, password)" +
             " VALUES " +
             "( #{user.firstName}, #{user.lastName}, #{user.patronymic}, #{user.login}, #{user.password} )")
