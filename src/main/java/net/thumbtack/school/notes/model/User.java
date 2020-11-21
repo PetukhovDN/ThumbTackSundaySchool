@@ -28,5 +28,6 @@ public class User {
     private List<User> followers;
     private List<User> ignoring;
     private List<User> ignoredBy;
-    // REVU а может, еще и List<Note> и List<Section>
+    private List<Note> userNotes;
+    private List<Section> userSections;
 }
