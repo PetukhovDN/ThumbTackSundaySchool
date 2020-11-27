@@ -1,7 +1,11 @@
 package net.thumbtack.school.notes.dao;
 
-public interface SessionDao {
-    String logInUser(String login, String password);
+import net.thumbtack.school.notes.exceptions.NoteServerException;
+import net.thumbtack.school.notes.model.Session;
 
-    void logOutUser(String userToken);
+public interface SessionDao {
+    String logInUser(String login, String password, Session session) throws NoteServerException;
+
+    void logOutUser(Session session);
+
 }

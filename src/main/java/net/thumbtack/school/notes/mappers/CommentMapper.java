@@ -7,6 +7,6 @@ import org.apache.ibatis.annotations.Mapper;
 public interface CommentMapper {
 
 
-    @Delete("DELETE FROM notes.note_comment")
+    @Delete("DELETE FROM note_comment")
     void deleteAll();
 }

@@ -1,18 +1,24 @@
 package net.thumbtack.school.notes.mappers;
 
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
+import net.thumbtack.school.notes.model.Session;
+import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface SessionMapper {
 
-    @Insert("INSERT INTO notes.session (token, note_user_id) VALUES ( #{userToken}, #{userId} )")
-    @Options(keyProperty = "userToken")
-    Integer loginToDatabase(String userToken, int userId);
+    @Insert("INSERT INTO session (session_id, note_user_id) VALUES ( #{sessionId}, #{userId} )")
+    @Options(keyProperty = "session.sessionId")
+    Integer loginToDatabase(String sessionId, int userId);
 
-    void logoutFromDatabase(int userId);
+    @Delete("DELETE FROM session WHERE session_id = #{sessionId}")
+    void logoutFromDatabase(String sessionId);
 
-    String getUserSession(int userId);
+    @Select("SELECT session_id FROM session WHERE session_id = #{sessionId}")
+    String getUserSession(String sessionId);
 
+    @Select("SELECT last_access_time FROM session WHERE session_id = #{sessionId}")
+    Session checkSessionExpired(String sessionId);
+
+    @Delete("DELETE FROM session")
+    void deleteAll();
 }

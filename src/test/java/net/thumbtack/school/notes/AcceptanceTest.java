@@ -1,5 +1,6 @@
 package net.thumbtack.school.notes;
 
+import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,14 @@ public class AcceptanceTest {
     }
 
     @Test
+    public void testPostWithRightParameters() {
+        User actualUser = template.postForObject(postUserUrl + "accounts", rightRegisterRequest, User.class);
+        assert actualUser != null;
+
+        assertEquals(rightRegisterRequest.getFirstName(), actualUser.getFirstName());
+    }
+
+    @Test
     public void testPostWithWrongParameters() {
         rightRegisterRequest.setLogin(null);
         rightRegisterRequest.setPassword("short");
@@ -45,11 +54,31 @@ public class AcceptanceTest {
     }
 
     @Test
-    public void testPostWithRightParameters() {
-        User actualUser = template.postForObject(postUserUrl + "accounts", rightRegisterRequest, User.class);
-        assert actualUser != null;
+    public void testLoginWithRightParameters() {
+        template.postForObject(postUserUrl + "accounts", rightRegisterRequest, User.class);
 
-        assertEquals(rightRegisterRequest.getFirstName(), actualUser.getFirstName());
+        LoginRequest loginRequest = new LoginRequest(
+                rightRegisterRequest.getLogin(),
+                rightRegisterRequest.getPassword());
+        template.postForObject(postUserUrl + "sessions", loginRequest, String.class);
+
+        //
+    }
+
+    @Test
+    public void testLoginWithWrongParameters() {
+        LoginRequest loginRequest = new LoginRequest(
+                "wrong login",
+                "wrongpass"
+        );
+
+        HttpClientErrorException exc = assertThrows(HttpClientErrorException.class, () -> {
+            User actualUser = template.postForObject(postUserUrl + "sessions", loginRequest, User.class);
+        });
+        assertAll(
+                () -> assertEquals(400, exc.getStatusCode().value()),
+                () -> assertTrue(exc.getResponseBodyAsString().contains("Invalid user password"))
+        );
     }
 
     @Test

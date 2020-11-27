@@ -7,6 +7,6 @@ import org.apache.ibatis.annotations.Mapper;
 public interface NoteMapper {
 
 
-    @Delete("DELETE FROM notes.note")
+    @Delete("DELETE FROM note")
     void deleteAll();
 }

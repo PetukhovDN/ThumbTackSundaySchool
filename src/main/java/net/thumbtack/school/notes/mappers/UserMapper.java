@@ -12,11 +12,13 @@ public interface UserMapper {
     Integer registerUser(@Param("user") User user);
 
     @Select("SELECT id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
-            "creation_time as creationTime, user_status as userStatus, deleted_status as isDeleted " +
+            "user_creation_time as creationTime, user_status as userStatus, deleted_status as isDeleted " +
             "FROM note_user WHERE login = #{login} AND password = #{password}")
     User getUserByLogin(String login, String password);
 
+    @Select("SELECT id FROM note_user WHERE login = #{login}")
+    String checkLoginExists(String login);
 
-    @Delete("DELETE FROM notes.note_user")
+    @Delete("DELETE FROM note_user")
     void deleteAll();
 }

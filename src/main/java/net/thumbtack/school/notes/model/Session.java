@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Session {
+    private String sessionId;
     private User user;
-    private UUID userToken;
+    private long creationTime;
+    private long lastAccessTime;
+    private long expiryTime;
 }

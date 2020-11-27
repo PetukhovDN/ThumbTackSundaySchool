@@ -1,7 +1,3 @@
-DROP DATABASE IF EXISTS notes;
-create DATABASE `notes`;
-USE `notes`;
-
 create TABLE note_user (
     id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
@@ -102,5 +98,3 @@ create TABLE note_rating (
     FOREIGN KEY (note_id) REFERENCES note (id) ON update CASCADE ON delete CASCADE,
     FOREIGN KEY (author_id) REFERENCES note_user (id))
     ENGINE=INNODB DEFAULT CHARSET=utf8;
-
-insert into note_user (id, first_name, last_name, login, password, user_status) values (null, 'admin', 'admin', 'admin', 'password', 'ADMIN');

@@ -7,6 +7,6 @@ import org.apache.ibatis.annotations.Mapper;
 public interface SectionMapper {
 
 
-    @Delete("DELETE FROM notes.section")
+    @Delete("DELETE FROM section")
     void deleteAll();
 }
