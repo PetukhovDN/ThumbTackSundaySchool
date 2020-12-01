@@ -23,13 +23,19 @@ import java.util.Base64;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserDaoImpl userDao;
+    // REVU private final SessionDao sessionDao;
     private final SessionDaoImpl sessionDao;
 
+    // REVU private
     Base64.Encoder enc = Base64.getEncoder();
 
     @Override
     public RegisterResponse registerUser(RegisterRequest userRequest, HttpSession userSession) throws NoteServerException {
 
+    	// REVU несколько действий, нужна трансакция
+    	// см @Transactional
+    	// обсуждение здесь
+    	// https://stackoverflow.com/questions/41009873/how-to-use-transactional-annotation-in-mybatis-spring
         log.info("Trying to register user");
         User user = UserMapStruct.INSTANCE.requestRegisterUser(userRequest);
         User registeredUser = userDao.registerUser(user);

@@ -28,8 +28,14 @@ public class SessionDaoImpl implements SessionDao {
 
     @Override
     public String logInUser(String login, String password, Session session) throws NoteServerException {
+    	// REVU логика в DAO
+    	// DAO лишь переносчик информации в/из БД
+    	// логика должна быть в сервисе
         log.info("DAO User with login {} login to server", login);
         try {
+        	// REVU не надо проверять, есть ли логин
+        	// проверка вернула, что нет, а через миллисекунду уже есть
+        	// просто пробуйте добавить юзера с этим логином и ловите DuplicateKeyException
             if (checkLoginExists(login)) {
                 User user = userMapper.getUserByLogin(login, password);
                 sessionMapper.loginToDatabase(session.getSessionId(), user.getId());
