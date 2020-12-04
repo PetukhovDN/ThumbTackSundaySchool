@@ -8,12 +8,10 @@ public interface SessionMapper {
 
     @Insert("INSERT INTO session (session_id, note_user_id) VALUES ( #{sessionId}, #{userId} )")
     @Options(keyProperty = "session.sessionId")
-    // REVU крайне неудачное название. Я уж подумал, что Вы логинитесь к самой БД
-    // зачем тут употреблять слово Database ? 
-    Integer loginToDatabase(String sessionId, int userId);
+    Integer startUserSession(String sessionId, int userId);
 
     @Delete("DELETE FROM session WHERE session_id = #{sessionId}")
-    void logoutFromDatabase(String sessionId);
+    void stopUserSession(String sessionId);
 
     @Select("SELECT session_id FROM session WHERE session_id = #{sessionId}")
     String getUserSession(String sessionId);

@@ -2,6 +2,8 @@ package net.thumbtack.school.notes.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.thumbtack.school.notes.dao.SessionDao;
+import net.thumbtack.school.notes.dao.UserDao;
 import net.thumbtack.school.notes.dao.impl.SessionDaoImpl;
 import net.thumbtack.school.notes.dao.impl.UserDaoImpl;
 import net.thumbtack.school.notes.dto.mappers.SessionMapStruct;
@@ -22,12 +24,10 @@ import java.util.Base64;
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
-    private final UserDaoImpl userDao;
-    // REVU private final SessionDao sessionDao;
-    private final SessionDaoImpl sessionDao;
+    private final UserDao userDao;
+    private final SessionDao sessionDao;
 
-    // REVU private
-    Base64.Encoder enc = Base64.getEncoder();
+    private Base64.Encoder enc = Base64.getEncoder();
 
     @Override
     public RegisterResponse registerUser(RegisterRequest userRequest, HttpSession userSession) throws NoteServerException {
