@@ -25,7 +25,7 @@ public class SessionDaoImpl implements SessionDao {
         try {
             User user = userMapper.getUserByLogin(login, password);
             sessionMapper.startUserSession(session.getSessionId(), user.getId());
-        } catch (NullPointerException ex){
+        } catch (NullPointerException ex) {
             log.error("User with login {} doesn't exists", login, ex);
             throw new NoteServerException(ExceptionErrorInfo.LOGIN_DOESNT_EXISTS, login);
         } catch (DuplicateKeyException ex) {

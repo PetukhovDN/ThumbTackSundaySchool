@@ -1,7 +1,5 @@
 package net.thumbtack.school.notes.dao;
 
-import net.thumbtack.school.notes.dao.impl.ServerDaoImpl;
-import net.thumbtack.school.notes.dao.impl.UserDaoImpl;
 import net.thumbtack.school.notes.dto.mappers.UserMapStruct;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.exceptions.NoteServerException;

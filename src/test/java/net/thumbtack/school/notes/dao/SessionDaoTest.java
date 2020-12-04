@@ -1,8 +1,5 @@
 package net.thumbtack.school.notes.dao;
 
-import net.thumbtack.school.notes.dao.impl.ServerDaoImpl;
-import net.thumbtack.school.notes.dao.impl.SessionDaoImpl;
-import net.thumbtack.school.notes.dao.impl.UserDaoImpl;
 import net.thumbtack.school.notes.dto.mappers.UserMapStruct;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
@@ -15,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -51,14 +47,14 @@ public class SessionDaoTest {
     @Test
     public void testLoginUser_rightParameters() throws NoteServerException {
         userDao.registerUser(rightParametersUser);
-        String sessionId = sessionDao.logInUser(rightParametersUser.getLogin(), rightParametersUser.getPassword(),testSession);
+        String sessionId = sessionDao.logInUser(rightParametersUser.getLogin(), rightParametersUser.getPassword(), testSession);
         assertEquals(testSession.getSessionId(), sessionId);
     }
 
     @Test
     public void testLoginUser_loginDoesntExists() {
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
-            sessionDao.logInUser(rightParametersUser.getLogin(), rightParametersUser.getPassword(),testSession);
+            sessionDao.logInUser(rightParametersUser.getLogin(), rightParametersUser.getPassword(), testSession);
         });
         assertAll(
                 () -> assertNotNull(exception.getExceptionErrorInfo()),

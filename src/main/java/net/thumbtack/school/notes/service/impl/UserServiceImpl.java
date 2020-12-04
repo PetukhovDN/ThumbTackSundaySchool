@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.SessionDao;
 import net.thumbtack.school.notes.dao.UserDao;
-import net.thumbtack.school.notes.dao.impl.SessionDaoImpl;
-import net.thumbtack.school.notes.dao.impl.UserDaoImpl;
 import net.thumbtack.school.notes.dto.mappers.SessionMapStruct;
 import net.thumbtack.school.notes.dto.mappers.UserMapStruct;
 import net.thumbtack.school.notes.dto.request.user.LoginRequest;
@@ -16,6 +14,7 @@ import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.service.UserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
 import java.util.Base64;
@@ -30,12 +29,9 @@ public class UserServiceImpl implements UserService {
     private Base64.Encoder enc = Base64.getEncoder();
 
     @Override
+    @Transactional
     public RegisterResponse registerUser(RegisterRequest userRequest, HttpSession userSession) throws NoteServerException {
 
-    	// REVU несколько действий, нужна трансакция
-    	// см @Transactional
-    	// обсуждение здесь
-    	// https://stackoverflow.com/questions/41009873/how-to-use-transactional-annotation-in-mybatis-spring
         log.info("Trying to register user");
         User user = UserMapStruct.INSTANCE.requestRegisterUser(userRequest);
         User registeredUser = userDao.registerUser(user);
@@ -56,6 +52,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public String loginUser(LoginRequest loginRequest, HttpSession userSession) throws NoteServerException {
         log.info("Trying to convert httpsession");
         log.info("SessionId: " + userSession.getId());
@@ -69,6 +66,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void logoutUser(HttpSession userSession) throws NoteServerException {
         log.info("Trying to convert httpsession");
         log.info("SessionId: " + userSession.getId());
