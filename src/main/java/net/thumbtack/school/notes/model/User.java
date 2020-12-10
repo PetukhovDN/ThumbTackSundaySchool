@@ -1,33 +1,36 @@
 package net.thumbtack.school.notes.model;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import net.thumbtack.school.notes.enums.UserStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    private int id;
-    private String firstName;
-    private String lastName;
-    private String patronymic;
-    private String login;
-    private String password;
-    private LocalDateTime creationTime;
-    private UserStatus userStatus;
-    private boolean isDeleted;
-    private boolean isOnline;
-    private int rating;
+    int id;
+    String firstName;
+    String lastName;
+    String patronymic;
+    String login;
+    String password;
+    LocalDateTime creationTime;
+    UserStatus userStatus;
+    boolean isDeleted;
+    boolean isOnline;
+    int rating;
 
-    private List<User> following;
-    private List<User> followers;
-    private List<User> ignoring;
-    private List<User> ignoredBy;
-    private List<Note> userNotes;
-    private List<Section> userSections;
+    List<User> following;
+    List<User> followers;
+    List<User> ignoring;
+    List<User> ignoredBy;
+    List<Note> userNotes;
+    List<Section> userSections;
 }

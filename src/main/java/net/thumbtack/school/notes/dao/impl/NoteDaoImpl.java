@@ -1,6 +1,8 @@
 package net.thumbtack.school.notes.dao.impl;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.NoteDao;
 import net.thumbtack.school.notes.mappers.NoteMapper;
@@ -9,9 +11,10 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @Component
 public class NoteDaoImpl implements NoteDao {
-    private final NoteMapper noteMapper;
+    NoteMapper noteMapper;
 
     @Override
     public Note createNote(String token, Note note, int sectionId) {

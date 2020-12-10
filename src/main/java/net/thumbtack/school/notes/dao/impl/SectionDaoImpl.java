@@ -1,6 +1,8 @@
 package net.thumbtack.school.notes.dao.impl;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.SectionDao;
 import net.thumbtack.school.notes.mappers.SectionMapper;
@@ -11,9 +13,10 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @Component
 public class SectionDaoImpl implements SectionDao {
-    private final SectionMapper sectionMapper;
+    SectionMapper sectionMapper;
 
     @Override
     public Section createSection(String token, Section section) {

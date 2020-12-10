@@ -13,8 +13,8 @@ public interface SessionMapper {
     @Delete("DELETE FROM session WHERE session_id = #{sessionId}")
     void stopUserSession(String sessionId);
 
-    @Select("SELECT session_id FROM session WHERE session_id = #{sessionId}")
-    String getUserSession(String sessionId);
+    @Select("SELECT note_user_id FROM session WHERE session_id = #{sessionId}")
+    Integer getUserIdBySessionId(String sessionId);
 
     @Select("SELECT last_access_time FROM session WHERE session_id = #{sessionId}")
     Session checkSessionExpired(String sessionId);

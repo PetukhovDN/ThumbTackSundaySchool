@@ -32,7 +32,7 @@ class UserDaoTest {
                 "Testov",
                 "Testovitch",
                 "login",
-                "good_password");
+                "test_password");
         rightParametersUser = UserMapStruct.INSTANCE.requestRegisterUser(rightRegisterRequest);
     }
 
@@ -56,5 +56,58 @@ class UserDaoTest {
         );
     }
 
+    @Test
+    public void getUserInfo_rightParameters() throws NoteServerException {
+        User registeredUser = userDao.registerUser(rightParametersUser);
+        User userInfo = userDao.getUserInfo(registeredUser.getId());
 
+        assertEquals(registeredUser.getFirstName(), userInfo.getFirstName());
+    }
+
+    @Test
+    public void getUserInfo_userDoesNotExists() {
+        NoteServerException exception = assertThrows(NoteServerException.class, () -> {
+            userDao.getUserInfo(1);
+
+        });
+        assertAll(
+                () -> assertNotNull(exception.getExceptionErrorInfo()),
+                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
+                        .contains("No such user on the server"))
+        );
+    }
+
+    @Test
+    public void leaveServer_loggedInUser() throws NoteServerException {
+        User registeredUser = userDao.registerUser(rightParametersUser);
+        userDao.leaveNotesServer(registeredUser.getId(), registeredUser.getPassword());
+
+    }
+
+    @Test
+    public void leaveServer_userDoesNotExists() {
+        NoteServerException exception = assertThrows(NoteServerException.class, () -> {
+            userDao.leaveNotesServer(1, "test_password");
+
+        });
+        assertAll(
+                () -> assertNotNull(exception.getExceptionErrorInfo()),
+                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
+                        .contains("No such user on the server"))
+        );
+    }
+
+    @Test
+    public void leaveServer_wrongPassword() {
+        NoteServerException exception = assertThrows(NoteServerException.class, () -> {
+            User registeredUser = userDao.registerUser(rightParametersUser);
+            userDao.leaveNotesServer(registeredUser.getId(), "wrong_password");
+
+        });
+        assertAll(
+                () -> assertNotNull(exception.getExceptionErrorInfo()),
+                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
+                        .contains("Wrong password"))
+        );
+    }
 }

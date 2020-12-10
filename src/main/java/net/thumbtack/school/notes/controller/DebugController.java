@@ -1,6 +1,8 @@
 package net.thumbtack.school.notes.controller;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.service.impl.DebugService;
 import org.springframework.http.HttpStatus;
@@ -12,10 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RestController
 @RequestMapping(value = "/api/debug")
 public class DebugController {
-    private final DebugService debugService;
+    DebugService debugService;
 
     @PostMapping(value = "clear", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)

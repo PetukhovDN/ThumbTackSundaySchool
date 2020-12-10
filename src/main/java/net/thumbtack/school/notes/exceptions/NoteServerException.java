@@ -1,12 +1,15 @@
 package net.thumbtack.school.notes.exceptions;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
-public @RequiredArgsConstructor
-class NoteServerException extends Exception {
+@RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+public class NoteServerException extends Exception {
     @Getter
-    private final ExceptionErrorInfo exceptionErrorInfo;
+    ExceptionErrorInfo exceptionErrorInfo;
     @Getter
-    private final String field;
+    String field;
 }

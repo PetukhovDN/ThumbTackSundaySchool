@@ -6,9 +6,11 @@ import net.thumbtack.school.notes.dao.SessionDao;
 import net.thumbtack.school.notes.dao.UserDao;
 import net.thumbtack.school.notes.dto.mappers.SessionMapStruct;
 import net.thumbtack.school.notes.dto.mappers.UserMapStruct;
+import net.thumbtack.school.notes.dto.request.user.LeaveServerRequest;
 import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
-import net.thumbtack.school.notes.dto.responce.user.RegisterResponse;
+import net.thumbtack.school.notes.dto.responce.user.UserInfoResponse;
+import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
@@ -30,7 +32,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public RegisterResponse registerUser(RegisterRequest userRequest, HttpSession userSession) throws NoteServerException {
+    public UserInfoResponse registerUser(RegisterRequest userRequest, HttpSession userSession) throws NoteServerException {
 
         log.info("Trying to register user");
         User user = UserMapStruct.INSTANCE.requestRegisterUser(userRequest);
@@ -46,8 +48,8 @@ public class UserServiceImpl implements UserService {
         log.info("The user logged in");
 
         log.info("Trying to get registration response");
-        RegisterResponse registrationResponse = UserMapStruct.INSTANCE.responseRegisterUser(registeredUser);
-        log.info("Response was got: {}", registrationResponse.toString());
+        UserInfoResponse registrationResponse = UserMapStruct.INSTANCE.responseRegisterUser(registeredUser);
+        log.info("Response was received: {}", registrationResponse.toString());
         return registrationResponse;
     }
 
@@ -77,5 +79,52 @@ public class UserServiceImpl implements UserService {
         sessionDao.logOutUser(currentSession);
         log.info("The user logged out");
     }
+
+    @Override
+    @Transactional
+    public UserInfoResponse getUserInfo(HttpSession userSession) throws NoteServerException {
+        if (userSession == null) {
+            throw new NoteServerException(ExceptionErrorInfo.USER_IS_NOT_LOGGED_IN, "Please log in");
+        }
+        log.info("Trying to convert httpsession");
+        log.info("SessionId: " + userSession.getId());
+        Session currentSession = SessionMapStruct.INSTANCE.httpSessionToNotesSession(userSession);
+        log.info("Session was converted");
+
+        log.info("Trying to get user id");
+        int userId = sessionDao.getUserIdBySessionId(currentSession.getSessionId());
+        log.info("The user id was received");
+
+        log.info("Trying to get user info");
+        User user = userDao.getUserInfo(userId);
+        log.info("The user info was received");
+
+        log.info("Trying to get user info response");
+        UserInfoResponse userInfo = UserMapStruct.INSTANCE.responseRegisterUser(user);
+        log.info("Response was received: {}", userInfo.toString());
+        return userInfo;
+    }
+
+    @Override
+    @Transactional
+    public void leaveServer(LeaveServerRequest leaveRequest, HttpSession userSession) throws NoteServerException {
+        log.info("Trying to convert httpsession");
+        log.info("SessionId: " + userSession.getId());
+        Session currentSession = SessionMapStruct.INSTANCE.httpSessionToNotesSession(userSession);
+        log.info("Session was converted");
+
+        log.info("Trying to get user id");
+        int userId = sessionDao.getUserIdBySessionId(currentSession.getSessionId());
+        log.info("The user id was received");
+
+        log.info("Trying to logout user");
+        sessionDao.logOutUser(currentSession);
+        log.info("The user logged out");
+
+        log.info("Trying to delete user account");
+        userDao.leaveNotesServer(userId, leaveRequest.getPassword());
+        log.info("The user account was deleted");
+    }
+
 
 }

@@ -8,4 +8,5 @@ public interface SessionDao {
 
     void logOutUser(Session session);
 
+    int getUserIdBySessionId(String sessionId) throws NoteServerException;
 }

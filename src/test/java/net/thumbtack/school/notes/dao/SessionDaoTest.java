@@ -63,4 +63,25 @@ public class SessionDaoTest {
         );
 
     }
+
+    @Test
+    public void testGetUserIdBySessionId_rightParameters() throws NoteServerException {
+        int registeredUserId = userDao.registerUser(rightParametersUser).getId();
+        String sessionId = sessionDao.logInUser(rightParametersUser.getLogin(), rightParametersUser.getPassword(), testSession);
+        int userId = sessionDao.getUserIdBySessionId(sessionId);
+
+        assertEquals(registeredUserId, userId);
+    }
+
+    @Test
+    public void testGetUserIdBySessionId_wrongParameters() {
+        NoteServerException exception = assertThrows(NoteServerException.class, () -> {
+            sessionDao.getUserIdBySessionId("wrong_session_id");
+        });
+        assertAll(
+                () -> assertNotNull(exception.getExceptionErrorInfo()),
+                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
+                        .contains("No such session on the server"))
+        );
+    }
 }

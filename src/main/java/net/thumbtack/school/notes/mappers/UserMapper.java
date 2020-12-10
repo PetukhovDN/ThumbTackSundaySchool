@@ -16,8 +16,13 @@ public interface UserMapper {
             "FROM note_user WHERE login = #{login} AND password = #{password}")
     User getUserByLogin(String login, String password);
 
-    @Select("SELECT id FROM note_user WHERE login = #{login}")
-    String checkLoginExists(String login);
+    @Select("SELECT id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
+            "user_creation_time as creationTime, user_status as userStatus, deleted_status as isDeleted " +
+            "FROM note_user WHERE id = #{id}")
+    User getUserById(int id);
+
+    @Delete("DELETE FROM note_user WHERE id = #{userId}")
+    void deleteUser(int userId);
 
     @Delete("DELETE FROM note_user")
     void deleteAll();

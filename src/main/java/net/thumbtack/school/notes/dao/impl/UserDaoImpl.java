@@ -1,6 +1,8 @@
 package net.thumbtack.school.notes.dao.impl;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.UserDao;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
@@ -15,9 +17,10 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @Component
 public class UserDaoImpl implements UserDao {
-    private final UserMapper userMapper;
+    UserMapper userMapper;
 
     @Override
     public User registerUser(User user) throws NoteServerException {
@@ -37,13 +40,39 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public User getUserInfo(String userToken) {
-        return null;
+    public User getUserInfo(int userId) throws NoteServerException {
+        log.info("DAO get user info from Database");
+        try {
+            log.info("Trying to get user info from Database");
+            User userById = userMapper.getUserById(userId);
+            if (userById == null) {
+                log.error("No user with userId = {} in database", userId);
+                throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, String.valueOf(userId));
+            }
+            return userById;
+        } catch (RuntimeException ex) {
+            log.error("Can't get user info from Database, ", ex);
+            throw ex;
+        }
     }
 
     @Override
-    public void leaveNotesServer(String userToken, String password) {
-
+    public void leaveNotesServer(int userId, String password) throws NoteServerException {
+        log.info("DAO delete user account from database");
+        try {
+            log.info("Trying to delete user account from Database");
+            String userPassword = userMapper.getUserById(userId).getPassword();
+            if (!password.equals(userPassword)) {
+                log.error("Wrong password {}", password);
+                throw new NoteServerException(ExceptionErrorInfo.WRONG_PASSWORD, password);
+            }
+            userMapper.deleteUser(userId);
+        } catch (NullPointerException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, String.valueOf(userId));
+        } catch (RuntimeException ex) {
+            log.error("Can't get user info from Database, ", ex);
+            throw ex;
+        }
     }
 
     @Override
