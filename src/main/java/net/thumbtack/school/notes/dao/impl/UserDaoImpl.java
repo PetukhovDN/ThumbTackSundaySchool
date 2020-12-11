@@ -30,6 +30,8 @@ public class UserDaoImpl implements UserDao {
             log.info("Trying to get User {} from Database", user);
             user = userMapper.getUserByLogin(user.getLogin(), user.getPassword());
         } catch (DuplicateKeyException ex) {
+        	// REVU Login {} already exists - это понятно
+        	// а User {} already exists - наводит на философские размышления :-)
             log.error("User {} already exists", user, ex);
             throw new NoteServerException(ExceptionErrorInfo.LOGIN_ALREADY_EXISTS, user.getLogin());
         } catch (RuntimeException ex) {

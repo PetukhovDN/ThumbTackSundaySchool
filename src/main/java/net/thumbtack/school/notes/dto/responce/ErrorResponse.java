@@ -1,3 +1,4 @@
+// REVU response, а не responce
 package net.thumbtack.school.notes.dto.responce;
 
 import lombok.AccessLevel;

@@ -34,6 +34,11 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserInfoResponse registerUser(RegisterRequest userRequest, HttpSession userSession) throws NoteServerException {
 
+    	// REVU слишком много вывода в лог тоже не очень хорошо
+    	// тем более на уровне info. Это же пойдет в production
+    	// думаю, на весь метод хватило бы одного в начале
+    	// если он прологгируется, значит, мы тут были
+    	// а если в итоге регистрация не прошла, то надо смотреть логгинг исключений
         log.info("Trying to register user");
         User user = UserMapStruct.INSTANCE.requestRegisterUser(userRequest);
         User registeredUser = userDao.registerUser(user);
