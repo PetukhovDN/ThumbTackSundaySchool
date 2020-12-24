@@ -1,7 +1,7 @@
 package net.thumbtack.school.notes.dto.mappers;
 
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
-import net.thumbtack.school.notes.dto.responce.user.UserInfoResponse;
+import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
 import net.thumbtack.school.notes.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

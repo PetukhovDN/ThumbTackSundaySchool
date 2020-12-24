@@ -1,5 +1,4 @@
-// REVU response, а не responce
-package net.thumbtack.school.notes.dto.responce;
+package net.thumbtack.school.notes.dto.response.user;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -11,8 +10,9 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ErrorResponse {
-    String errorCode;
-    String field;
-    String message;
+public class UserInfoResponse {
+    String firstName;
+    String lastName;
+    String patronymic;
+    String login;
 }

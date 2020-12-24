@@ -4,22 +4,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.SessionDao;
 import net.thumbtack.school.notes.dao.UserDao;
-import net.thumbtack.school.notes.dto.mappers.SessionMapStruct;
 import net.thumbtack.school.notes.dto.mappers.UserMapStruct;
 import net.thumbtack.school.notes.dto.request.user.LeaveServerRequest;
 import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
-import net.thumbtack.school.notes.dto.responce.user.UserInfoResponse;
+import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
-import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.service.UserService;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpSession;
 import java.util.Base64;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,103 +31,57 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserInfoResponse registerUser(RegisterRequest userRequest, HttpSession userSession) throws NoteServerException {
+    public ImmutablePair<UserInfoResponse, String> registerUser(RegisterRequest userRequest) throws NoteServerException {
 
-    	// REVU слишком много вывода в лог тоже не очень хорошо
-    	// тем более на уровне info. Это же пойдет в production
-    	// думаю, на весь метод хватило бы одного в начале
-    	// если он прологгируется, значит, мы тут были
-    	// а если в итоге регистрация не прошла, то надо смотреть логгинг исключений
         log.info("Trying to register user");
         User user = UserMapStruct.INSTANCE.requestRegisterUser(userRequest);
         User registeredUser = userDao.registerUser(user);
-        log.info("The user was registered");
-
-        log.info("Trying to convert httpsession");
-        Session currentSession = SessionMapStruct.INSTANCE.httpSessionToNotesSession(userSession);
-        log.info("Session was converted");
-
-        log.info("Trying to login user");
-        sessionDao.logInUser(registeredUser.getLogin(), registeredUser.getPassword(), currentSession);
-        log.info("The user logged in");
-
-        log.info("Trying to get registration response");
-        UserInfoResponse registrationResponse = UserMapStruct.INSTANCE.responseRegisterUser(registeredUser);
-        log.info("Response was received: {}", registrationResponse.toString());
-        return registrationResponse;
+        String sessionToken = UUID.randomUUID().toString();
+        sessionDao.logInUser(registeredUser.getLogin(), registeredUser.getPassword(), sessionToken);
+        UserInfoResponse userInfoResponse = UserMapStruct.INSTANCE.responseRegisterUser(registeredUser);
+        return new ImmutablePair<>(userInfoResponse, sessionToken);
     }
 
     @Override
     @Transactional
-    public String loginUser(LoginRequest loginRequest, HttpSession userSession) throws NoteServerException {
-        log.info("Trying to convert httpsession");
-        log.info("SessionId: " + userSession.getId());
-        Session currentSession = SessionMapStruct.INSTANCE.httpSessionToNotesSession(userSession);
-        log.info("Session was converted");
+    public String loginUser(LoginRequest loginRequest) throws NoteServerException {
 
         log.info("Trying to login user");
-        String resultOfLogin = sessionDao.logInUser(loginRequest.getLogin(), loginRequest.getPassword(), currentSession);
-        log.info("The user logged in");
-        return resultOfLogin;
+        String sessionToken = UUID.randomUUID().toString();
+        return sessionDao.logInUser(loginRequest.getLogin(), loginRequest.getPassword(), sessionToken);
     }
 
     @Override
     @Transactional
-    public void logoutUser(HttpSession userSession) throws NoteServerException {
-        log.info("Trying to convert httpsession");
-        log.info("SessionId: " + userSession.getId());
-        Session currentSession = SessionMapStruct.INSTANCE.httpSessionToNotesSession(userSession);
-        log.info("Session was converted");
+    public void logoutUser(String sessionToken) throws NoteServerException {
 
         log.info("Trying to logout user");
-        sessionDao.logOutUser(currentSession);
-        log.info("The user logged out");
+        sessionDao.logOutUser(sessionToken);
     }
 
     @Override
     @Transactional
-    public UserInfoResponse getUserInfo(HttpSession userSession) throws NoteServerException {
-        if (userSession == null) {
-            throw new NoteServerException(ExceptionErrorInfo.USER_IS_NOT_LOGGED_IN, "Please log in");
-        }
-        log.info("Trying to convert httpsession");
-        log.info("SessionId: " + userSession.getId());
-        Session currentSession = SessionMapStruct.INSTANCE.httpSessionToNotesSession(userSession);
-        log.info("Session was converted");
-
-        log.info("Trying to get user id");
-        int userId = sessionDao.getUserIdBySessionId(currentSession.getSessionId());
-        log.info("The user id was received");
+    public UserInfoResponse getUserInfo(String sessionToken) throws NoteServerException {
 
         log.info("Trying to get user info");
+        if (sessionToken == null) {
+            log.error("User is not logged ib");
+            throw new NoteServerException(ExceptionErrorInfo.USER_IS_NOT_LOGGED_IN, "Please log in");
+        }
+        int userId = sessionDao.getUserIdBySessionId(sessionToken);
         User user = userDao.getUserInfo(userId);
-        log.info("The user info was received");
-
-        log.info("Trying to get user info response");
-        UserInfoResponse userInfo = UserMapStruct.INSTANCE.responseRegisterUser(user);
-        log.info("Response was received: {}", userInfo.toString());
-        return userInfo;
+        return UserMapStruct.INSTANCE.responseRegisterUser(user);
     }
 
     @Override
     @Transactional
-    public void leaveServer(LeaveServerRequest leaveRequest, HttpSession userSession) throws NoteServerException {
-        log.info("Trying to convert httpsession");
-        log.info("SessionId: " + userSession.getId());
-        Session currentSession = SessionMapStruct.INSTANCE.httpSessionToNotesSession(userSession);
-        log.info("Session was converted");
-
-        log.info("Trying to get user id");
-        int userId = sessionDao.getUserIdBySessionId(currentSession.getSessionId());
-        log.info("The user id was received");
-
-        log.info("Trying to logout user");
-        sessionDao.logOutUser(currentSession);
-        log.info("The user logged out");
+    public void leaveServer(LeaveServerRequest leaveRequest, String sessionToken) throws NoteServerException {
 
         log.info("Trying to delete user account");
+
+        int userId = sessionDao.getUserIdBySessionId(sessionToken);
+        sessionDao.logOutUser(sessionToken);
         userDao.leaveNotesServer(userId, leaveRequest.getPassword());
-        log.info("The user account was deleted");
     }
 
 

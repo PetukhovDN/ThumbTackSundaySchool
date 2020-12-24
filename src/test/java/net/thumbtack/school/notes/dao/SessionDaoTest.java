@@ -3,7 +3,6 @@ package net.thumbtack.school.notes.dao;
 import net.thumbtack.school.notes.dto.mappers.UserMapStruct;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
-import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,13 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
 public class SessionDaoTest {
     private User rightParametersUser;
-    private Session testSession;
+    private String sessionToken;
     private RegisterRequest rightRegisterRequest;
 
     @Autowired
@@ -40,21 +41,23 @@ public class SessionDaoTest {
                 "good_password");
         rightParametersUser = UserMapStruct.INSTANCE.requestRegisterUser(rightRegisterRequest);
 
-        testSession = new Session();
-        testSession.setSessionId("test_session_id");
+        sessionToken = UUID.randomUUID().toString();
     }
 
     @Test
     public void testLoginUser_rightParameters() throws NoteServerException {
         userDao.registerUser(rightParametersUser);
-        String sessionId = sessionDao.logInUser(rightParametersUser.getLogin(), rightParametersUser.getPassword(), testSession);
-        assertEquals(testSession.getSessionId(), sessionId);
+        String sessionId = sessionDao.logInUser(rightParametersUser.getLogin(), rightParametersUser.getPassword(), sessionToken);
+        assertEquals(sessionToken, sessionId);
     }
 
     @Test
     public void testLoginUser_loginDoesntExists() {
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
-            sessionDao.logInUser(rightParametersUser.getLogin(), rightParametersUser.getPassword(), testSession);
+            sessionDao.logInUser(
+                    rightParametersUser.getLogin(),
+                    rightParametersUser.getPassword(),
+                    sessionToken);
         });
         assertAll(
                 () -> assertNotNull(exception.getExceptionErrorInfo()),
@@ -67,7 +70,10 @@ public class SessionDaoTest {
     @Test
     public void testGetUserIdBySessionId_rightParameters() throws NoteServerException {
         int registeredUserId = userDao.registerUser(rightParametersUser).getId();
-        String sessionId = sessionDao.logInUser(rightParametersUser.getLogin(), rightParametersUser.getPassword(), testSession);
+        String sessionId = sessionDao.logInUser(
+                rightParametersUser.getLogin(),
+                rightParametersUser.getPassword(),
+                sessionToken);
         int userId = sessionDao.getUserIdBySessionId(sessionId);
 
         assertEquals(registeredUserId, userId);

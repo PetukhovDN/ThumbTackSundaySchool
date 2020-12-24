@@ -2,7 +2,7 @@ package net.thumbtack.school.notes.exceptions;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.thumbtack.school.notes.dto.responce.ErrorResponse;
+import net.thumbtack.school.notes.dto.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;

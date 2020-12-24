@@ -27,25 +27,20 @@ public class UserDaoImpl implements UserDao {
         log.info("DAO insert User {} to Database", user);
         try {
             userMapper.registerUser(user);
-            log.info("Trying to get User {} from Database", user);
-            user = userMapper.getUserByLogin(user.getLogin(), user.getPassword());
+            return userMapper.getUserByLogin(user.getLogin(), user.getPassword());
         } catch (DuplicateKeyException ex) {
-        	// REVU Login {} already exists - это понятно
-        	// а User {} already exists - наводит на философские размышления :-)
-            log.error("User {} already exists", user, ex);
+            log.error("Login {} already exists", user.getLogin(), ex);
             throw new NoteServerException(ExceptionErrorInfo.LOGIN_ALREADY_EXISTS, user.getLogin());
         } catch (RuntimeException ex) {
             log.error("Can't insert User {} to Database, {}", user, ex);
             throw ex;
         }
-        return user;
     }
 
     @Override
     public User getUserInfo(int userId) throws NoteServerException {
         log.info("DAO get user info from Database");
         try {
-            log.info("Trying to get user info from Database");
             User userById = userMapper.getUserById(userId);
             if (userById == null) {
                 log.error("No user with userId = {} in database", userId);
@@ -62,7 +57,6 @@ public class UserDaoImpl implements UserDao {
     public void leaveNotesServer(int userId, String password) throws NoteServerException {
         log.info("DAO delete user account from database");
         try {
-            log.info("Trying to delete user account from Database");
             String userPassword = userMapper.getUserById(userId).getPassword();
             if (!password.equals(userPassword)) {
                 log.error("Wrong password {}", password);
@@ -70,6 +64,7 @@ public class UserDaoImpl implements UserDao {
             }
             userMapper.deleteUser(userId);
         } catch (NullPointerException ex) {
+            log.error("No such user on the server");
             throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, String.valueOf(userId));
         } catch (RuntimeException ex) {
             log.error("Can't get user info from Database, ", ex);

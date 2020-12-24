@@ -9,7 +9,6 @@ import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.mappers.SessionMapper;
 import net.thumbtack.school.notes.mappers.UserMapper;
-import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
@@ -23,11 +22,11 @@ public class SessionDaoImpl implements SessionDao {
     SessionMapper sessionMapper;
 
     @Override
-    public String logInUser(String login, String password, Session session) throws NoteServerException {
-        log.info("DAO User with login {} login to server", login);
+    public String logInUser(String login, String password, String sessionToken) throws NoteServerException {
+        log.info("DAO User with login {} logging in to the server", login);
         try {
             User user = userMapper.getUserByLogin(login, password);
-            sessionMapper.startUserSession(session.getSessionId(), user.getId());
+            sessionMapper.startUserSession(sessionToken, user.getId());
         } catch (NullPointerException ex) {
             log.error("User with login {} doesn't exists", login, ex);
             throw new NoteServerException(ExceptionErrorInfo.LOGIN_DOES_NOT_EXISTS, login);
@@ -38,14 +37,14 @@ public class SessionDaoImpl implements SessionDao {
             log.error("User with login {} can't login to server, ", login, ex);
             throw ex;
         }
-        return session.getSessionId();
+        return sessionToken;
     }
 
     @Override
-    public void logOutUser(Session session) {
+    public void logOutUser(String sessionToken) {
         log.info("DAO User logout from server");
         try {
-            sessionMapper.stopUserSession(session.getSessionId());
+            sessionMapper.stopUserSession(sessionToken);
         } catch (RuntimeException ex) {
             log.error("User can't logout from server, ", ex);
             throw ex;
