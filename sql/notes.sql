@@ -23,7 +23,7 @@ create TABLE note_user (
 create TABLE session (
     id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     session_id VARCHAR(36) NOT NULL,
-    note_user_id INT(11) NOT NULL,
+    note_user_id INT(11) NOT NULL UNIQUE KEY,
     session_start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_access_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expiry_time int(11),
