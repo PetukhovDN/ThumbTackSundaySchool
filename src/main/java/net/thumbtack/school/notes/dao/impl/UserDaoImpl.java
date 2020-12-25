@@ -9,7 +9,7 @@ import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.mappers.UserMapper;
 import net.thumbtack.school.notes.model.User;
-import net.thumbtack.school.notes.model.params.UserRequestParam;
+import net.thumbtack.school.notes.params.UserRequestParam;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 

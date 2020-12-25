@@ -32,6 +32,7 @@ class UserControllerTest {
 
     private RegisterRequest registerRequest;
     private String sessionToken;
+    private final String JAVASESSIONID = "JAVASESSIONID";
 
     @Autowired
     private MockMvc mvc;
@@ -58,7 +59,7 @@ class UserControllerTest {
         MvcResult result = mvc.perform(post("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(registerRequest))
-                .header("session-token", sessionToken))
+                .header(JAVASESSIONID, sessionToken))
                 .andReturn();
         assertEquals(200, result.getResponse().getStatus());
     }
@@ -74,7 +75,7 @@ class UserControllerTest {
         MvcResult result = mvc.perform(post("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(registerRequest))
-                .header("session-token", sessionToken))
+                .header(JAVASESSIONID, sessionToken))
                 .andReturn();
         assertEquals(result.getResponse().getStatus(), 400);
         GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(), GlobalErrorHandler.MyError.class);
@@ -87,11 +88,11 @@ class UserControllerTest {
         mvc.perform(post("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(registerRequest))
-                .header("session-token", sessionToken))
+                .header(JAVASESSIONID, sessionToken))
                 .andReturn();
 
         MvcResult resultOfLogout = mvc.perform(delete("/api/sessions")
-                .header("session-token", sessionToken))
+                .header(JAVASESSIONID, sessionToken))
                 .andReturn();
 
         LoginRequest loginRequest = new LoginRequest(
@@ -100,7 +101,7 @@ class UserControllerTest {
         MvcResult resultOfLogin = mvc.perform(post("/api/sessions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(loginRequest))
-                .header("session-token", sessionToken))
+                .header(JAVASESSIONID, sessionToken))
                 .andReturn();
 
         assertEquals(200, resultOfLogin.getResponse().getStatus());
@@ -109,7 +110,7 @@ class UserControllerTest {
     @Test
     public void testGetUserInfo_right() throws Exception {
         MvcResult result = mvc.perform(get("/api/account")
-                .header("session-token", sessionToken))
+                .header(JAVASESSIONID, sessionToken))
                 .andReturn();
         assertEquals(200, result.getResponse().getStatus());
     }
@@ -121,13 +122,13 @@ class UserControllerTest {
                 .content(mapper.writeValueAsString(registerRequest)))
                 .andReturn()
                 .getResponse()
-                .addHeader("session-token", sessionToken);
+                .addHeader(JAVASESSIONID, sessionToken);
 
         LeaveServerRequest leaveRequest = new LeaveServerRequest(registerRequest.getPassword());
         MvcResult result = mvc.perform(delete("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(leaveRequest))
-                .header("session-token", sessionToken))
+                .header(JAVASESSIONID, sessionToken))
                 .andReturn();
 
         assertEquals(200, result.getResponse().getStatus());
@@ -139,7 +140,7 @@ class UserControllerTest {
         MvcResult result = mvc.perform(delete("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(leaveRequest))
-                .header("session-token", sessionToken))
+                .header(JAVASESSIONID, sessionToken))
                 .andReturn();
         assertEquals(result.getResponse().getStatus(), 400);
         GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(), GlobalErrorHandler.MyError.class);

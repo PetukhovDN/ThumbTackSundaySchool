@@ -1,7 +1,6 @@
 package net.thumbtack.school.notes.controller;
 
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dto.request.user.LeaveServerRequest;
@@ -11,6 +10,7 @@ import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.service.impl.UserServiceImpl;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +20,20 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @Slf4j
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @RestController
 @RequestMapping(value = "/api")
 public class UserController {
-    UserServiceImpl userService;
+    final UserServiceImpl userService;
+    final String JAVASESSIONID = "JAVASESSIONID";
+
+    @Value("${user_idle_timeout}")
+    int user_idle_timeout;
+
+    public UserController(UserServiceImpl userService) {
+        this.userService = userService;
+    }
+
 
     @PostMapping(value = "accounts",
             produces = MediaType.APPLICATION_JSON_VALUE,
@@ -36,11 +44,8 @@ public class UserController {
         ImmutablePair<UserInfoResponse, String> resultPair = userService.registerUser(registerRequest);
         UserInfoResponse userInfoResponse = resultPair.left;
         String sessionToken = resultPair.right;
-        Cookie session = new Cookie("session-token", sessionToken);
-
-        //@Value("${user_idle_timeout}")
-        //int user_idle_timeout;
-        //session.setMaxAge(user_idle_timeout);
+        Cookie session = new Cookie(JAVASESSIONID, sessionToken);
+        session.setMaxAge(user_idle_timeout);
         response.addCookie(session);
         return userInfoResponse;
     }
@@ -51,21 +56,22 @@ public class UserController {
     public void loginUser(@RequestBody @Valid LoginRequest loginRequest,
                           HttpServletResponse response) throws NoteServerException {
         String sessionToken = userService.loginUser(loginRequest);
-        Cookie session = new Cookie("session-token", sessionToken);
+        Cookie session = new Cookie(JAVASESSIONID, sessionToken);
         response.addCookie(session);
     }
 
     @DeleteMapping(value = "sessions",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public void logoutUser(@RequestHeader(name = "session-token") String sessionToken) throws NoteServerException {
+    public void logoutUser(@RequestHeader(name = JAVASESSIONID) String sessionToken) throws NoteServerException {
+
         userService.logoutUser(sessionToken);
     }
 
     @GetMapping(value = "account",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public UserInfoResponse getUserInfo(@RequestHeader(name = "session-token") String sessionToken) throws NoteServerException {
+    public UserInfoResponse getUserInfo(@RequestHeader(name = JAVASESSIONID) String sessionToken) throws NoteServerException {
         return userService.getUserInfo(sessionToken);
     }
 
@@ -73,7 +79,7 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public void leaveServer(@RequestBody @Valid LeaveServerRequest leaveRequest,
-                            @RequestHeader(name = "session-token") String sessionToken) throws NoteServerException {
+                            @RequestHeader(name = JAVASESSIONID) String sessionToken) throws NoteServerException {
         userService.leaveServer(leaveRequest, sessionToken);
     }
 }

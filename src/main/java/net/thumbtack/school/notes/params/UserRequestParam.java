@@ -1,5 +1,4 @@
-// REVU это параметры поиска, к модели не относится
-package net.thumbtack.school.notes.model.params;
+package net.thumbtack.school.notes.params;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

@@ -15,7 +15,8 @@ public enum ExceptionErrorInfo {
     USER_DOES_NOT_EXISTS("No such user on the server"),
     USER_IS_NOT_LOGGED_IN("You are not logged in"),
     SESSION_DOES_NOT_EXISTS("No such session on the server"),
-    WRONG_PASSWORD("Wrong password");
+    WRONG_PASSWORD("Wrong password"),
+    SESSION_EXPIRED("Session expired, please log in");
 
     @Getter
     String errorString;

@@ -9,6 +9,7 @@ import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.mappers.SessionMapper;
 import net.thumbtack.school.notes.mappers.UserMapper;
+import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
@@ -22,11 +23,11 @@ public class SessionDaoImpl implements SessionDao {
     SessionMapper sessionMapper;
 
     @Override
-    public String logInUser(String login, String password, String sessionToken) throws NoteServerException {
+    public String logInUser(String login, String password, Session session) throws NoteServerException {
         log.info("DAO User with login {} logging in to the server", login);
         try {
             User user = userMapper.getUserByLogin(login, password);
-            sessionMapper.startUserSession(sessionToken, user.getId());
+            sessionMapper.startUserSession(session, user.getId());
         } catch (NullPointerException ex) {
             log.error("User with login {} doesn't exists", login, ex);
             throw new NoteServerException(ExceptionErrorInfo.LOGIN_DOES_NOT_EXISTS, login);
@@ -37,11 +38,11 @@ public class SessionDaoImpl implements SessionDao {
             log.error("User with login {} can't login to server, ", login, ex);
             throw ex;
         }
-        return sessionToken;
+        return session.getSessionId();
     }
 
     @Override
-    public void logOutUser(String sessionToken) {
+    public void stopUserSession(String sessionToken) {
         log.info("DAO User logout from server");
         try {
             sessionMapper.stopUserSession(sessionToken);
@@ -52,13 +53,15 @@ public class SessionDaoImpl implements SessionDao {
     }
 
     @Override
-    public int getUserIdBySessionId(String sessionId) throws NoteServerException {
-        log.info("DAO User get ID from database");
+    public Session getSessionById(String sessionId) throws NoteServerException {
+        log.info("DAO Get user session from database");
         try {
-            return sessionMapper.getUserIdBySessionId(sessionId);
-        } catch (NullPointerException ex) {
-            log.error("No session with id {} running on server", sessionId, ex);
-            throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, ex.getMessage());
+            Session session = sessionMapper.getSessionBySessionId(sessionId);
+            if (session == null) {
+                log.error("No session with id {} running on server", sessionId);
+                throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, "No such session on the server");
+            }
+            return session;
         } catch (RuntimeException ex) {
             log.error("User can't logout from server, ", ex);
             throw ex;

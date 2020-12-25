@@ -2,7 +2,7 @@ package net.thumbtack.school.notes.dao;
 
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.User;
-import net.thumbtack.school.notes.model.params.UserRequestParam;
+import net.thumbtack.school.notes.params.UserRequestParam;
 
 import java.util.List;
 

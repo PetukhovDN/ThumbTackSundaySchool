@@ -11,13 +11,16 @@ import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
+import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.service.UserService;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Base64;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Slf4j
@@ -27,7 +30,8 @@ public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     private final SessionDao sessionDao;
 
-    private Base64.Encoder enc = Base64.getEncoder();
+    @Value("${user_idle_timeout}")
+    private int user_idle_timeout;
 
     @Override
     @Transactional
@@ -37,7 +41,10 @@ public class UserServiceImpl implements UserService {
         User user = UserMapStruct.INSTANCE.requestRegisterUser(userRequest);
         User registeredUser = userDao.registerUser(user);
         String sessionToken = UUID.randomUUID().toString();
-        sessionDao.logInUser(registeredUser.getLogin(), registeredUser.getPassword(), sessionToken);
+        Session userSession = new Session();
+        userSession.setSessionId(sessionToken);
+        userSession.setExpiryTime(user_idle_timeout);
+        sessionDao.logInUser(registeredUser.getLogin(), registeredUser.getPassword(), userSession);
         UserInfoResponse userInfoResponse = UserMapStruct.INSTANCE.responseRegisterUser(registeredUser);
         return new ImmutablePair<>(userInfoResponse, sessionToken);
     }
@@ -48,7 +55,10 @@ public class UserServiceImpl implements UserService {
 
         log.info("Trying to login user");
         String sessionToken = UUID.randomUUID().toString();
-        return sessionDao.logInUser(loginRequest.getLogin(), loginRequest.getPassword(), sessionToken);
+        Session userSession = new Session();
+        userSession.setSessionId(sessionToken);
+        userSession.setExpiryTime(user_idle_timeout);
+        return sessionDao.logInUser(loginRequest.getLogin(), loginRequest.getPassword(), userSession);
     }
 
     @Override
@@ -56,7 +66,7 @@ public class UserServiceImpl implements UserService {
     public void logoutUser(String sessionToken) throws NoteServerException {
 
         log.info("Trying to logout user");
-        sessionDao.logOutUser(sessionToken);
+        sessionDao.stopUserSession(sessionToken);
     }
 
     @Override
@@ -65,11 +75,11 @@ public class UserServiceImpl implements UserService {
 
         log.info("Trying to get user info");
         if (sessionToken == null) {
-            log.error("User is not logged ib");
+            log.error("User is not logged in");
             throw new NoteServerException(ExceptionErrorInfo.USER_IS_NOT_LOGGED_IN, "Please log in");
         }
-        int userId = sessionDao.getUserIdBySessionId(sessionToken);
-        User user = userDao.getUserInfo(userId);
+        Session userSession = checkSessionExpired(sessionToken);
+        User user = userDao.getUserInfo(userSession.getUserId());
         return UserMapStruct.INSTANCE.responseRegisterUser(user);
     }
 
@@ -79,10 +89,25 @@ public class UserServiceImpl implements UserService {
 
         log.info("Trying to delete user account");
 
-        int userId = sessionDao.getUserIdBySessionId(sessionToken);
-        sessionDao.logOutUser(sessionToken);
+        int userId = sessionDao.getSessionById(sessionToken).getUserId();
+        sessionDao.stopUserSession(sessionToken);
         userDao.leaveNotesServer(userId, leaveRequest.getPassword());
     }
 
 
+    public Session checkSessionExpired(String sessionToken) throws NoteServerException {
+        Session userSession = sessionDao.getSessionById(sessionToken);
+        long sessionStartTimeInSec = userSession
+                .getLastAccessTime()
+                .atZone(ZoneId.of("Asia/Omsk"))
+                .toInstant()
+                .toEpochMilli() / 1000;
+        long currentTimeInSec = LocalDateTime.now().atZone(ZoneId.of("Asia/Omsk")).toInstant().toEpochMilli() / 1000;
+        if (sessionStartTimeInSec + user_idle_timeout > currentTimeInSec) {
+            log.error("Session expired");
+            sessionDao.stopUserSession(sessionToken);
+            throw new NoteServerException(ExceptionErrorInfo.SESSION_EXPIRED, "Please log in");
+        }
+        return userSession;
+    }
 }

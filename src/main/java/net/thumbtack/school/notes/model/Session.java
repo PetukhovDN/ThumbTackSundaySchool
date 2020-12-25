@@ -6,14 +6,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Session {
+    int id;
     String sessionId;
-    User user;
-    long creationTime;
-    long lastAccessTime;
+    int userId;
+    LocalDateTime creationTime;
+    LocalDateTime lastAccessTime;
     long expiryTime;
 }

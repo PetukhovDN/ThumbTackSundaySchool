@@ -30,6 +30,9 @@ public class AcceptanceTest {
         rightRegisterRequest.setPassword("good_password");
     }
 
+    //TODO:
+    //проверить cookie
+
     @Test
     public void testPostWithRightParameters() {
         User actualUser = template.postForObject(postUserUrl + "accounts", rightRegisterRequest, User.class);
@@ -54,20 +57,19 @@ public class AcceptanceTest {
     }
 
     @Test
-    public void testLoginWithRightParameters() {
+    public void testLogin_alreadyLoggedIn() {
         template.postForObject(postUserUrl + "accounts", rightRegisterRequest, User.class);
-        // REVU а cookie проверить ?
-        // https://codeflex.co/java-rest-client-post-with-cookie/
-        // http://codeflex.co/java-rest-client-get-cookie/ 
-        // https://stackoverflow.com/questions/24642508/spring-inserting-cookies-in-a-rest-call-response/54507027
-        // https://dzone.com/articles/how-to-use-cookies-in-spring-boot
-
         LoginRequest loginRequest = new LoginRequest(
                 rightRegisterRequest.getLogin(),
                 rightRegisterRequest.getPassword());
-        template.postForObject(postUserUrl + "sessions", loginRequest, String.class);
 
-        //
+        HttpClientErrorException exc = assertThrows(HttpClientErrorException.class, () -> {
+            template.postForObject(postUserUrl + "sessions", loginRequest, String.class);
+        });
+        assertAll(
+                () -> assertEquals(400, exc.getStatusCode().value()),
+                () -> assertTrue(exc.getResponseBodyAsString().contains("You are already logged in"))
+        );
     }
 
     @Test
