@@ -1,7 +1,6 @@
 package net.thumbtack.school.notes.controller;
 
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dto.request.user.LeaveServerRequest;
 import net.thumbtack.school.notes.dto.request.user.LoginRequest;
@@ -9,31 +8,19 @@ import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.service.impl.UserServiceImpl;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api")
 public class UserController {
-    final UserServiceImpl userService;
-    final String JAVASESSIONID = "JAVASESSIONID";
-
-    @Value("${user_idle_timeout}")
-    int user_idle_timeout;
-
-    public UserController(UserServiceImpl userService) {
-        this.userService = userService;
-    }
-
+    private final UserServiceImpl userService;
 
     @PostMapping(value = "accounts",
             produces = MediaType.APPLICATION_JSON_VALUE,
@@ -41,13 +28,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public UserInfoResponse registerUser(@RequestBody @Valid RegisterRequest registerRequest,
                                          HttpServletResponse response) throws NoteServerException {
-        ImmutablePair<UserInfoResponse, String> resultPair = userService.registerUser(registerRequest);
-        UserInfoResponse userInfoResponse = resultPair.left;
-        String sessionToken = resultPair.right;
-        Cookie session = new Cookie(JAVASESSIONID, sessionToken);
-        session.setMaxAge(user_idle_timeout);
-        response.addCookie(session);
-        return userInfoResponse;
+        return userService.registerUser(registerRequest, response);
     }
 
     @PostMapping(value = "sessions",
@@ -55,23 +36,20 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public void loginUser(@RequestBody @Valid LoginRequest loginRequest,
                           HttpServletResponse response) throws NoteServerException {
-        String sessionToken = userService.loginUser(loginRequest);
-        Cookie session = new Cookie(JAVASESSIONID, sessionToken);
-        response.addCookie(session);
+        userService.loginUser(loginRequest, response);
+
     }
 
-    @DeleteMapping(value = "sessions",
-            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "sessions")
     @ResponseStatus(HttpStatus.OK)
-    public void logoutUser(@RequestHeader(name = JAVASESSIONID) String sessionToken) throws NoteServerException {
-
+    public void logoutUser(@CookieValue(name = "JAVASESSIONID", required = false) String sessionToken) throws NoteServerException {
         userService.logoutUser(sessionToken);
     }
 
     @GetMapping(value = "account",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public UserInfoResponse getUserInfo(@RequestHeader(name = JAVASESSIONID) String sessionToken) throws NoteServerException {
+    public UserInfoResponse getUserInfo(@CookieValue(name = "JAVASESSIONID", required = false) String sessionToken) throws NoteServerException {
         return userService.getUserInfo(sessionToken);
     }
 
@@ -79,7 +57,7 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public void leaveServer(@RequestBody @Valid LeaveServerRequest leaveRequest,
-                            @RequestHeader(name = JAVASESSIONID) String sessionToken) throws NoteServerException {
+                            @CookieValue(name = "JAVASESSIONID", required = false) String sessionToken) throws NoteServerException {
         userService.leaveServer(leaveRequest, sessionToken);
     }
 }

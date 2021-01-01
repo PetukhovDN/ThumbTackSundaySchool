@@ -16,10 +16,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import javax.servlet.http.Cookie;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,8 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 class UserControllerTest {
 
     private RegisterRequest registerRequest;
-    private String sessionToken;
-    private final String JAVASESSIONID = "JAVASESSIONID";
+    private final Cookie testCookie = new Cookie("JAVASESSIONID", UUID.randomUUID().toString());
 
     @Autowired
     private MockMvc mvc;
@@ -51,15 +52,13 @@ class UserControllerTest {
                 "Testovitch",
                 "login",
                 "good_password");
-        sessionToken = UUID.randomUUID().toString();
     }
 
-    @Ignore
+    @Test
     public void testRegisterUser_right() throws Exception {
         MvcResult result = mvc.perform(post("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(registerRequest))
-                .header(JAVASESSIONID, sessionToken))
+                .content(mapper.writeValueAsString(registerRequest)))
                 .andReturn();
         assertEquals(200, result.getResponse().getStatus());
     }
@@ -74,34 +73,22 @@ class UserControllerTest {
                 "short"); //false
         MvcResult result = mvc.perform(post("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(registerRequest))
-                .header(JAVASESSIONID, sessionToken))
+                .content(mapper.writeValueAsString(registerRequest)))
                 .andReturn();
-        assertEquals(result.getResponse().getStatus(), 400);
+        assertEquals( 400, result.getResponse().getStatus());
         GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(), GlobalErrorHandler.MyError.class);
         assertEquals(3, error.getErrors().size());
     }
 
 
-    @Ignore
+    @Test
     public void testLogoutAndLoginRegisteredUser_right() throws Exception {
-        mvc.perform(post("/api/accounts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(registerRequest))
-                .header(JAVASESSIONID, sessionToken))
-                .andReturn();
-
-        MvcResult resultOfLogout = mvc.perform(delete("/api/sessions")
-                .header(JAVASESSIONID, sessionToken))
-                .andReturn();
-
         LoginRequest loginRequest = new LoginRequest(
                 registerRequest.getLogin(),
                 registerRequest.getPassword());
         MvcResult resultOfLogin = mvc.perform(post("/api/sessions")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(loginRequest))
-                .header(JAVASESSIONID, sessionToken))
+                .content(mapper.writeValueAsString(loginRequest)))
                 .andReturn();
 
         assertEquals(200, resultOfLogin.getResponse().getStatus());
@@ -110,25 +97,23 @@ class UserControllerTest {
     @Test
     public void testGetUserInfo_right() throws Exception {
         MvcResult result = mvc.perform(get("/api/account")
-                .header(JAVASESSIONID, sessionToken))
+                .cookie(testCookie))
                 .andReturn();
         assertEquals(200, result.getResponse().getStatus());
     }
 
-    @Ignore
+    @Test
     public void testUserLeaveServer_right() throws Exception {
         mvc.perform(post("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(registerRequest)))
-                .andReturn()
-                .getResponse()
-                .addHeader(JAVASESSIONID, sessionToken);
+                .andReturn();
 
         LeaveServerRequest leaveRequest = new LeaveServerRequest(registerRequest.getPassword());
         MvcResult result = mvc.perform(delete("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(leaveRequest))
-                .header(JAVASESSIONID, sessionToken))
+                .cookie(testCookie))
                 .andReturn();
 
         assertEquals(200, result.getResponse().getStatus());
@@ -140,7 +125,7 @@ class UserControllerTest {
         MvcResult result = mvc.perform(delete("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(leaveRequest))
-                .header(JAVASESSIONID, sessionToken))
+                .cookie(testCookie))
                 .andReturn();
         assertEquals(result.getResponse().getStatus(), 400);
         GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(), GlobalErrorHandler.MyError.class);

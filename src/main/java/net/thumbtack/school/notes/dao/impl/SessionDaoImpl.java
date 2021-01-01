@@ -11,7 +11,6 @@ import net.thumbtack.school.notes.mappers.SessionMapper;
 import net.thumbtack.school.notes.mappers.UserMapper;
 import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -27,13 +26,13 @@ public class SessionDaoImpl implements SessionDao {
         log.info("DAO User with login {} logging in to the server", login);
         try {
             User user = userMapper.getUserByLogin(login, password);
+            if (sessionMapper.getSessionByUserId(user.getId()) != null) {
+                sessionMapper.stopUserSession(user.getId());
+            }
             sessionMapper.startUserSession(session, user.getId());
         } catch (NullPointerException ex) {
             log.error("User with login {} doesn't exists", login, ex);
             throw new NoteServerException(ExceptionErrorInfo.LOGIN_DOES_NOT_EXISTS, login);
-        } catch (DuplicateKeyException ex) {
-            log.error("User with login {} already logged in", login, ex);
-            throw new NoteServerException(ExceptionErrorInfo.USER_ALREADY_LOGGED_IN, login);
         } catch (RuntimeException ex) {
             log.error("User with login {} can't login to server, ", login, ex);
             throw ex;
@@ -45,7 +44,8 @@ public class SessionDaoImpl implements SessionDao {
     public void stopUserSession(String sessionToken) {
         log.info("DAO User logout from server");
         try {
-            sessionMapper.stopUserSession(sessionToken);
+            Session session = sessionMapper.getSessionBySessionId(sessionToken);
+            sessionMapper.stopUserSession(session.getUserId());
         } catch (RuntimeException ex) {
             log.error("User can't logout from server, ", ex);
             throw ex;
