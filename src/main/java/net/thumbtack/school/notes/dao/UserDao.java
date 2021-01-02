@@ -11,14 +11,9 @@ public interface UserDao {
 
     User getUserInfo(int userId) throws NoteServerException;
 
-    void leaveNotesServer(int userId, String password) throws NoteServerException;
+    void leaveNotesServer(int userId) throws NoteServerException;
 
-    User editUserInfo(String userToken,
-                      String newFirstName,
-                      String newLastName,
-                      String newPatronymic,
-                      String password,
-                      String nePassword);
+    User editUserInfo(User userToUpdate);
 
     void giveAdminRoot(String userToken, int userId);
 

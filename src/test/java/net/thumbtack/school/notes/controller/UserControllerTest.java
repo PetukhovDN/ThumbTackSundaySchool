@@ -1,12 +1,13 @@
 package net.thumbtack.school.notes.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import net.thumbtack.school.notes.dto.request.user.LeaveServerRequest;
 import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.exceptions.GlobalErrorHandler;
 import net.thumbtack.school.notes.service.impl.UserServiceImpl;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,9 +15,7 @@ import org.mybatis.spring.boot.test.autoconfigure.AutoConfigureMybatis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -30,19 +29,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ExtendWith(SpringExtension.class)
 @AutoConfigureMybatis
 @WebMvcTest(controllers = UserController.class)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 class UserControllerTest {
-
-    private RegisterRequest registerRequest;
-    private final Cookie testCookie = new Cookie("JAVASESSIONID", UUID.randomUUID().toString());
-
-    @Autowired
-    private MockMvc mvc;
+    Cookie testCookie;
+    RegisterRequest registerRequest;
 
     @Autowired
-    private ObjectMapper mapper;
+    MockMvc mvc;
+
+    @Autowired
+    ObjectMapper mapper;
 
     @MockBean
-    private UserServiceImpl userService;
+    UserServiceImpl userService;
 
     @BeforeEach
     void setUp() {
@@ -52,6 +51,7 @@ class UserControllerTest {
                 "Testovitch",
                 "login",
                 "good_password");
+        testCookie = new Cookie("JAVASESSIONID", UUID.randomUUID().toString());
     }
 
     @Test
@@ -75,7 +75,7 @@ class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(registerRequest)))
                 .andReturn();
-        assertEquals( 400, result.getResponse().getStatus());
+        assertEquals(400, result.getResponse().getStatus());
         GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(), GlobalErrorHandler.MyError.class);
         assertEquals(3, error.getErrors().size());
     }

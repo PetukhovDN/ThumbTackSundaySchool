@@ -1,6 +1,8 @@
 package net.thumbtack.school.notes.dto.mappers;
 
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
+import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
+import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
 import net.thumbtack.school.notes.model.User;
 import org.mapstruct.Mapper;
@@ -13,4 +15,8 @@ public interface UserMapStruct {
     User requestRegisterUser(RegisterRequest request);
 
     UserInfoResponse responseRegisterUser(User user);
+
+    User requestUpdateUser(UpdateUserInfoRequest updateUserInfoRequest);
+
+    UpdateUserInfoResponse responseUpdateUserInfo(User user);
 }

@@ -4,9 +4,14 @@ import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.Session;
 
 public interface SessionDao {
-    String logInUser(String login, String password, Session session) throws NoteServerException;
+    Session logInUser(String login, String password, Session session) throws NoteServerException;
 
-    void stopUserSession(String sessionToken);
+    void stopUserSession(String sessionToken) throws NoteServerException;
 
-    Session getSessionById(String sessionId) throws NoteServerException;
+    Session getSessionBySessionId(String sessionId) throws NoteServerException;
+
+    Session getSessionByUserId(int userId) throws NoteServerException;
+
+    void updateSession(Session session) throws NoteServerException;
+
 }

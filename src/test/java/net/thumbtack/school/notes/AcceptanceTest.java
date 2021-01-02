@@ -1,7 +1,11 @@
 package net.thumbtack.school.notes;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
+import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
+import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,10 +26,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class AcceptanceTest {
-    private RestTemplate template = new RestTemplate();
-    private RegisterRequest rightRegisterRequest = new RegisterRequest();
-    private String userUrl = "http://localhost:8888/api/";
+    RestTemplate template = new RestTemplate();
+    RegisterRequest rightRegisterRequest = new RegisterRequest();
+    String userUrl = "http://localhost:8888/api/";
 
     @BeforeEach
     void setUp() {
@@ -149,6 +154,58 @@ public class AcceptanceTest {
         assertAll(
                 () -> assertEquals(400, exc.getStatusCode().value()),
                 () -> assertTrue(exc.getResponseBodyAsString().contains("No such session on the server"))
+        );
+    }
+
+    @Test
+    public void updateUserInfo_rightParameters() {
+        HttpEntity<UserInfoResponse> registerResponse = template.postForEntity(userUrl + "accounts", rightRegisterRequest, UserInfoResponse.class);
+
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Cookie", registerResponse.getHeaders().getFirst("Set-Cookie"));
+        UpdateUserInfoRequest request = new UpdateUserInfoRequest(
+                "NewFirstName",
+                "NewLastName",
+                "",
+                rightRegisterRequest.getPassword(),
+                "new_good_password");
+        HttpEntity<UpdateUserInfoRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<UpdateUserInfoResponse> response = template.exchange(
+                userUrl + "accounts", HttpMethod.PUT, entity,
+                UpdateUserInfoResponse.class);
+
+        assertAll(
+                () -> assertEquals(200, response.getStatusCodeValue()),
+                () -> assertNotNull(response.getBody().getFirstName()),
+                () -> assertNotNull(registerResponse.getBody().getFirstName()),
+                () -> assertEquals("NewFirstName", response.getBody().getFirstName()),
+                () -> assertEquals("NewLastName", response.getBody().getLastName()),
+                () -> assertEquals(rightRegisterRequest.getLogin(), response.getBody().getLogin())
+        );
+    }
+
+    @Test
+    public void updateUserInfo_wrongPassword() {
+        HttpEntity<UserInfoResponse> registerResponse = template.postForEntity(userUrl + "accounts", rightRegisterRequest, UserInfoResponse.class);
+
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Cookie", registerResponse.getHeaders().getFirst("Set-Cookie"));
+        UpdateUserInfoRequest request = new UpdateUserInfoRequest(
+                "NewFirstName",
+                "NewLastName",
+                "",
+                "wrong_old_password",
+                "new_good_password");
+        HttpEntity<UpdateUserInfoRequest> entity = new HttpEntity<>(request, headers);
+
+        HttpClientErrorException exc = assertThrows(HttpClientErrorException.class, () -> {
+            template.exchange(userUrl + "accounts", HttpMethod.PUT, entity, UpdateUserInfoResponse.class);
+        });
+
+        assertAll(
+                () -> assertEquals(400, exc.getStatusCode().value()),
+                () -> assertTrue(exc.getResponseBodyAsString().contains("Wrong password"))
         );
     }
 

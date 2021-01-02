@@ -54,18 +54,15 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void leaveNotesServer(int userId, String password) throws NoteServerException {
+    public void leaveNotesServer(int userId) throws NoteServerException {
         log.info("DAO delete user account from database");
         try {
-            String userPassword = userMapper.getUserById(userId).getPassword();
-            if (!password.equals(userPassword)) {
-                log.error("Wrong password {}", password);
-                throw new NoteServerException(ExceptionErrorInfo.WRONG_PASSWORD, password);
+            User userById = userMapper.getUserById(userId);
+            if (userById == null) {
+                log.error("No user with userId = {} in database", userId);
+                throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, String.valueOf(userId));
             }
             userMapper.deleteUser(userId);
-        } catch (NullPointerException ex) {
-            log.error("No such user on the server");
-            throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, String.valueOf(userId));
         } catch (RuntimeException ex) {
             log.error("Can't get user info from Database, ", ex);
             throw ex;
@@ -73,8 +70,15 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public User editUserInfo(String userToken, String newFirstName, String newLastName, String newPatronymic, String password, String nePassword) {
-        return null;
+    public User editUserInfo(User user) {
+        log.info("DAO update user account");
+        try {
+            userMapper.editUserInfo(user);
+            return userMapper.getUserById(user.getId());
+        } catch (RuntimeException ex) {
+            log.error("Can't get user info from Database, ", ex);
+            throw ex;
+        }
     }
 
     @Override

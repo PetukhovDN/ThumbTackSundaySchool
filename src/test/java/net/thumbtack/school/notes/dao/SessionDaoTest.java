@@ -1,5 +1,7 @@
 package net.thumbtack.school.notes.dao;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import net.thumbtack.school.notes.dto.mappers.UserMapStruct;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
@@ -11,25 +13,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class SessionDaoTest {
-    private User rightParametersUser;
-    private Session userSession;
-    private RegisterRequest rightRegisterRequest;
+    User rightParametersUser;
+    Session testUserSession;
+    RegisterRequest rightRegisterRequest;
 
     @Autowired
-    private ServerDao serverDao;
+    ServerDao serverDao;
 
     @Autowired
-    private UserDao userDao;
+    UserDao userDao;
 
     @Autowired
-    private SessionDao sessionDao;
+    SessionDao sessionDao;
 
     @BeforeEach
     public void setUp() {
@@ -42,15 +46,18 @@ public class SessionDaoTest {
                 "good_password");
         rightParametersUser = UserMapStruct.INSTANCE.requestRegisterUser(rightRegisterRequest);
 
-        userSession = new Session();
-        userSession.setSessionId(UUID.randomUUID().toString());
+        testUserSession = new Session();
+        testUserSession.setSessionId(UUID.randomUUID().toString());
     }
 
     @Test
     public void testLoginUser_rightParameters() throws NoteServerException {
         userDao.registerUser(rightParametersUser);
-        String sessionId = sessionDao.logInUser(rightParametersUser.getLogin(), rightParametersUser.getPassword(), userSession);
-        assertEquals(userSession.getSessionId(), sessionId);
+        String sessionId = sessionDao.logInUser(
+                rightParametersUser.getLogin(),
+                rightParametersUser.getPassword(), testUserSession)
+                .getSessionId();
+        assertEquals(testUserSession.getSessionId(), sessionId);
     }
 
     @Test
@@ -59,7 +66,7 @@ public class SessionDaoTest {
             sessionDao.logInUser(
                     rightParametersUser.getLogin(),
                     rightParametersUser.getPassword(),
-                    userSession);
+                    testUserSession);
         });
         assertAll(
                 () -> assertNotNull(exception.getExceptionErrorInfo()),
@@ -75,21 +82,40 @@ public class SessionDaoTest {
         String sessionId = sessionDao.logInUser(
                 rightParametersUser.getLogin(),
                 rightParametersUser.getPassword(),
-                userSession);
-        int userId = sessionDao.getSessionById(sessionId).getUserId();
+                testUserSession)
+                .getSessionId();
+        int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
 
         assertEquals(registeredUserId, userId);
     }
 
     @Test
-    public void testGetUserIdBySessionId_wrongParameters() {
+    public void testGetUserIdBySessionId_wrongSessionId() {
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
-            sessionDao.getSessionById("wrong_session_id");
+            sessionDao.getSessionBySessionId("wrong_session_id");
         });
         assertAll(
                 () -> assertNotNull(exception.getExceptionErrorInfo()),
                 () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
                         .contains("No such session on the server"))
+        );
+    }
+
+    @Test
+    public void testUpdateSession_rightSessionId() throws NoteServerException {
+        User user = userDao.registerUser(rightParametersUser);
+        sessionDao.logInUser(user.getLogin(), user.getPassword(), testUserSession);
+        Session session = sessionDao.getSessionByUserId(user.getId());
+        LocalDateTime creationTime = session.getCreationTime();
+        LocalDateTime lastAccessTime = LocalDateTime.now().plusNanos(1);
+        session.setLastAccessTime(lastAccessTime);
+
+        sessionDao.updateSession(session);
+        Session resultSession = sessionDao.getSessionByUserId(user.getId());
+        assertAll(
+                () -> assertEquals(creationTime, resultSession.getCreationTime()),
+                () -> assertNotEquals(session.getLastAccessTime(), resultSession.getLastAccessTime()),
+                () -> assertEquals(session.getSessionId(), resultSession.getSessionId())
         );
     }
 }

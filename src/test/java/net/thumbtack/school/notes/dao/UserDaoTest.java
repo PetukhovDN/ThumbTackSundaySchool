@@ -1,5 +1,7 @@
 package net.thumbtack.school.notes.dao;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import net.thumbtack.school.notes.dto.mappers.UserMapStruct;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
@@ -14,15 +16,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
+@FieldDefaults(level = AccessLevel.PRIVATE)
 class UserDaoTest {
-    private User rightParametersUser;
-    private RegisterRequest rightRegisterRequest;
+    User rightParametersUser;
+    RegisterRequest rightRegisterRequest;
 
     @Autowired
-    private ServerDao serverDao;
+    ServerDao serverDao;
 
     @Autowired
-    private UserDao userDao;
+    UserDao userDao;
 
     @BeforeEach
     public void setUp() {
@@ -57,7 +60,7 @@ class UserDaoTest {
     }
 
     @Test
-    public void getUserInfo_rightParameters() throws NoteServerException {
+    public void testGetUserInfo_rightParameters() throws NoteServerException {
         User registeredUser = userDao.registerUser(rightParametersUser);
         User userInfo = userDao.getUserInfo(registeredUser.getId());
 
@@ -65,7 +68,7 @@ class UserDaoTest {
     }
 
     @Test
-    public void getUserInfo_userDoesNotExists() {
+    public void testGetUserInfo_userDoesNotExists() {
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
             userDao.getUserInfo(1);
 
@@ -78,16 +81,16 @@ class UserDaoTest {
     }
 
     @Test
-    public void leaveServer_loggedInUser() throws NoteServerException {
+    public void testLeaveServer_loggedInUser() throws NoteServerException {
         User registeredUser = userDao.registerUser(rightParametersUser);
-        userDao.leaveNotesServer(registeredUser.getId(), registeredUser.getPassword());
+        userDao.leaveNotesServer(registeredUser.getId());
 
     }
 
     @Test
-    public void leaveServer_userDoesNotExists() {
+    public void testLeaveServer_userDoesNotExists() {
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
-            userDao.leaveNotesServer(1, "test_password");
+            userDao.leaveNotesServer(100);
 
         });
         assertAll(
@@ -98,16 +101,18 @@ class UserDaoTest {
     }
 
     @Test
-    public void leaveServer_wrongPassword() {
-        NoteServerException exception = assertThrows(NoteServerException.class, () -> {
-            User registeredUser = userDao.registerUser(rightParametersUser);
-            userDao.leaveNotesServer(registeredUser.getId(), "wrong_password");
+    public void testUpdateUserInfo_success() throws NoteServerException {
+        User registeredUser = userDao.registerUser(rightParametersUser);
+        registeredUser.setFirstName("NewFirstName");
+        registeredUser.setLastName("NewLastName");
+        userDao.editUserInfo(registeredUser);
 
-        });
+        User updatedUser = userDao.getUserInfo(registeredUser.getId());
+
         assertAll(
-                () -> assertNotNull(exception.getExceptionErrorInfo()),
-                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
-                        .contains("Wrong password"))
+                () -> assertEquals(registeredUser.getFirstName(), updatedUser.getFirstName()),
+                () -> assertEquals(registeredUser.getLastName(), updatedUser.getLastName()),
+                () -> assertEquals(registeredUser.getLogin(), updatedUser.getLogin())
         );
     }
 }

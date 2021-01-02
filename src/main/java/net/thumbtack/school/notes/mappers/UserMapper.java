@@ -21,6 +21,10 @@ public interface UserMapper {
             "FROM note_user WHERE id = #{id}")
     User getUserById(int id);
 
+    @Update("UPDATE note_user SET first_name = #{user.firstName}, last_name = #{user.lastName}, " +
+            "patronymic = #{user.patronymic}, password = #{user.password}  WHERE id = #{user.id} ")
+    void editUserInfo(@Param("user") User user);
+
     @Delete("DELETE FROM note_user WHERE id = #{userId}")
     void deleteUser(int userId);
 
