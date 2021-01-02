@@ -82,8 +82,14 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void giveAdminRoot(String userToken, int userId) {
-
+    public void changeUserStatus(User user) {
+        log.info("DAO give user admin root");
+        try {
+            userMapper.changeUserStatus(user);
+        } catch (RuntimeException ex) {
+            log.error("Can't give admin root to user with id {}, ", user.getId(), ex);
+            throw ex;
+        }
     }
 
     @Override

@@ -4,9 +4,8 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
-import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
+import net.thumbtack.school.notes.enums.UserStatus;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
-import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.service.impl.DebugService;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,6 +43,12 @@ public class UserServiceTest {
         testSessionId = UUID.randomUUID().toString();
     }
 
+    public void makeAdminForTests() throws NoteServerException {
+        User admin = userService.registerUser(rightRegisterRequest, testSessionId);
+        admin.setUserStatus(UserStatus.ADMIN);
+        debugService.makeAdmin(admin);
+    }
+
     @Test
     public void testUpdateUserInfo_rightParameters() throws NoteServerException {
         userService.registerUser(rightRegisterRequest, testSessionId);
@@ -56,13 +60,58 @@ public class UserServiceTest {
                 "new_good_password");
         userService.updateUserInfo(request, testSessionId);
 
-        UserInfoResponse userInfo = userService.getUserInfo(testSessionId);
+        User resultUser = userService.getUserInfo(testSessionId);
 
         assertAll(
-                () -> assertEquals(request.getFirstName(), userInfo.getFirstName()),
-                () -> assertEquals(request.getLastName(), userInfo.getLastName()),
-                () -> assertEquals(rightRegisterRequest.getLogin(), userInfo.getLogin())
+                () -> assertEquals(request.getFirstName(), resultUser.getFirstName()),
+                () -> assertEquals(request.getLastName(), resultUser.getLastName()),
+                () -> assertEquals(rightRegisterRequest.getLogin(), resultUser.getLogin())
         );
-
     }
+
+    @Test
+    public void testGiveUserAdminRoot_withRoot() throws NoteServerException {
+        makeAdminForTests();
+        RegisterRequest newRequest = new RegisterRequest(
+                "Test2",
+                "Testov2",
+                "Testovitch2",
+                "login2",
+                "test_password2");
+        String testSessionIdSecond = UUID.randomUUID().toString();
+        User user = userService.registerUser(newRequest, testSessionIdSecond);
+        userService.makeAdmin(user.getId(), testSessionId);
+
+        User resultUser = userService.getUserInfo(testSessionIdSecond);
+
+        assertAll(
+                () -> assertEquals(UserStatus.ADMIN, resultUser.getUserStatus()),
+                () -> assertEquals(newRequest.getLogin(), resultUser.getLogin())
+        );
+    }
+
+    @Test
+    public void testGiveUserAdminRoot_withoutRoot() throws NoteServerException {
+        userService.registerUser(rightRegisterRequest, testSessionId);
+        RegisterRequest newRequest = new RegisterRequest(
+                "Test2",
+                "Testov2",
+                "Testovitch2",
+                "login2",
+                "test_password2");
+        String testSessionIdSecond = UUID.randomUUID().toString();
+        User user = userService.registerUser(newRequest, testSessionIdSecond);
+
+        NoteServerException exception = assertThrows(NoteServerException.class, () -> {
+            userService.makeAdmin(user.getId(), testSessionId);
+        });
+
+        assertAll(
+                () -> assertNotNull(exception.getExceptionErrorInfo()),
+                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
+                        .contains("Not enough rights for this action"))
+        );
+    }
+
+
 }

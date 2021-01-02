@@ -93,7 +93,7 @@ public class SessionDaoImpl implements SessionDao {
         log.info("DAO update user session");
         try {
             sessionMapper.updateSessionLastAccessTime(session);
-        }catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             log.error("Can't update user session, ", ex);
             throw ex;
         }

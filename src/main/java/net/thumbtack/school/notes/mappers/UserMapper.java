@@ -25,6 +25,9 @@ public interface UserMapper {
             "patronymic = #{user.patronymic}, password = #{user.password}  WHERE id = #{user.id} ")
     void editUserInfo(@Param("user") User user);
 
+    @Update("UPDATE note_user SET user_status = #{user.userStatus} WHERE id = #{user.id}")
+    void changeUserStatus(@Param("user") User user);
+
     @Delete("DELETE FROM note_user WHERE id = #{userId}")
     void deleteUser(int userId);
 

@@ -15,7 +15,7 @@ public interface UserDao {
 
     User editUserInfo(User userToUpdate);
 
-    void giveAdminRoot(String userToken, int userId);
+    void changeUserStatus(User user);
 
     List<User> getUsersWithParams(String userToken, UserRequestParam param);
 

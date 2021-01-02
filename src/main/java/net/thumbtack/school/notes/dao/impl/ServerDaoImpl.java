@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.ServerDao;
 import net.thumbtack.school.notes.mappers.*;
+import net.thumbtack.school.notes.model.User;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -34,5 +35,17 @@ public class ServerDaoImpl implements ServerDao {
             throw ex;
         }
         log.info("Database was cleared");
+    }
+
+    @Override
+    public void makeAdmin(User user) {
+        log.info("Trying to make admin");
+        try {
+            userMapper.changeUserStatus(user);
+        } catch (RuntimeException ex) {
+            log.error("Can't give user admin root");
+            throw ex;
+        }
+        log.info("User with id {} became admin", user.getId());
     }
 }

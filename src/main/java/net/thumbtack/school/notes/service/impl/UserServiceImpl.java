@@ -11,7 +11,7 @@ import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
 import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
-import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
+import net.thumbtack.school.notes.enums.UserStatus;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.Session;
@@ -42,8 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserInfoResponse registerUser(RegisterRequest userRequest, String sessionId) throws NoteServerException {
-
+    public User registerUser(RegisterRequest userRequest, String sessionId) throws NoteServerException {
         log.info("Trying to register user");
         User user = UserMapStruct.INSTANCE.requestRegisterUser(userRequest);
         User registeredUser = userDao.registerUser(user);
@@ -51,13 +50,12 @@ public class UserServiceImpl implements UserService {
         userSession.setSessionId(sessionId);
         userSession.setExpiryTime(user_idle_timeout);
         sessionDao.logInUser(registeredUser.getLogin(), registeredUser.getPassword(), userSession);
-        return UserMapStruct.INSTANCE.responseRegisterUser(registeredUser);
+        return registeredUser;
     }
 
     @Override
     @Transactional
     public String loginUser(LoginRequest loginRequest, String sessionId) throws NoteServerException {
-
         log.info("Trying to login user");
         Session userSession = new Session();
         userSession.setSessionId(sessionId);
@@ -70,33 +68,28 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void logoutUser(String sessionId) throws NoteServerException {
-
         log.info("Trying to logout user");
+        checkSessionIdNotNull(sessionId);
         sessionDao.stopUserSession(sessionId);
     }
 
     @Override
     @Transactional
-    public UserInfoResponse getUserInfo(String sessionId) throws NoteServerException {
-
+    public User getUserInfo(String sessionId) throws NoteServerException {
         log.info("Trying to get user info");
-        if (sessionId == null) {
-            log.error("User is not logged in");
-            throw new NoteServerException(ExceptionErrorInfo.USER_IS_NOT_LOGGED_IN, "Please log in");
-        }
-
+        checkSessionIdNotNull(sessionId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         checkSessionExpired(userSession);
         User user = userDao.getUserInfo(userSession.getUserId());
         updateSession(userSession);
-        return UserMapStruct.INSTANCE.responseRegisterUser(user);
+        return user;
     }
 
     @Override
     @Transactional
     public void leaveServer(LeaveServerRequest leaveRequest, String sessionId) throws NoteServerException {
         log.info("Trying to delete user account");
-
+        checkSessionIdNotNull(sessionId);
         int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
         String password = leaveRequest.getPassword();
         checkIsPasswordCorrect(userId, password);
@@ -108,18 +101,32 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UpdateUserInfoResponse updateUserInfo(UpdateUserInfoRequest updateRequest, String sessionId) throws NoteServerException {
         log.info("Trying to update user account");
-
+        checkSessionIdNotNull(sessionId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         checkSessionExpired(userSession);
-
         String oldPassword = updateRequest.getOldPassword();
         checkIsPasswordCorrect(userSession.getUserId(), oldPassword);
-
         User userToUpdate = UserMapStruct.INSTANCE.requestUpdateUser(updateRequest);
         userToUpdate.setId(userSession.getUserId());
         User resultUser = userDao.editUserInfo(userToUpdate);
         updateSession(userSession);
         return UserMapStruct.INSTANCE.responseUpdateUserInfo(resultUser);
+    }
+
+    @Override
+    @Transactional
+    public void makeAdmin(int userId, String sessionId) throws NoteServerException {
+        log.info("Trying to make user admin");
+        checkSessionIdNotNull(sessionId);
+        Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        checkSessionExpired(userSession);
+        User currentUser = userDao.getUserInfo(userSession.getUserId());
+        if (!currentUser.getUserStatus().equals(UserStatus.ADMIN)) {
+            throw new NoteServerException(ExceptionErrorInfo.NOT_ENOUGH_RIGHTS, currentUser.getUserStatus().toString());
+        }
+        User resultUser = userDao.getUserInfo(userId);
+        resultUser.setUserStatus(UserStatus.ADMIN);
+        userDao.changeUserStatus(resultUser);
     }
 
 
@@ -131,7 +138,14 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public Session checkSessionExpired(Session userSession) throws NoteServerException {
+    public void checkSessionIdNotNull(String sessionId) throws NoteServerException {
+        if (sessionId == null) {
+            log.error("User is not logged in");
+            throw new NoteServerException(ExceptionErrorInfo.USER_IS_NOT_LOGGED_IN, "Please log in");
+        }
+    }
+
+    public void checkSessionExpired(Session userSession) throws NoteServerException {
         log.info("Checking if session expired");
         long sessionStartTimeInSec = userSession
                 .getLastAccessTime()
@@ -144,7 +158,6 @@ public class UserServiceImpl implements UserService {
             sessionDao.stopUserSession(userSession.getSessionId());
             throw new NoteServerException(ExceptionErrorInfo.SESSION_EXPIRED, "Please log in");
         }
-        return userSession;
     }
 
     public void updateSession(Session userSession) throws NoteServerException {
