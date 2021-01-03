@@ -25,7 +25,7 @@ public class SessionDaoImpl implements SessionDao {
     public Session logInUser(String login, String password, Session session) throws NoteServerException {
         log.info("DAO User with login {} logging in to the server", login);
         try {
-            User user = userMapper.getUserByLogin(login, password);
+            User user = userMapper.getUserByLoginAndPassword(login, password);
             if (sessionMapper.getSessionByUserId(user.getId()) != null) {
                 sessionMapper.stopUserSession(user.getId());
             }

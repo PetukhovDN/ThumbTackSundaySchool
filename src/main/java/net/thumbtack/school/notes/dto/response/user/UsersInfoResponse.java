@@ -1,4 +1,4 @@
-package net.thumbtack.school.notes.model;
+package net.thumbtack.school.notes.dto.response.user;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -8,29 +8,20 @@ import lombok.experimental.FieldDefaults;
 import net.thumbtack.school.notes.enums.UserStatus;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class UsersInfoResponse {
     int id;
     String firstName;
     String lastName;
     String patronymic;
     String login;
-    String password;
     LocalDateTime creationTime;
-    boolean isDeleted;
     boolean isOnline;
+    boolean isDeleted;
     UserStatus userStatus;
-    List<Integer> ratings;
-
-    List<User> following;
-    List<User> followers;
-    List<User> ignoring;
-    List<User> ignoredBy;
-    List<Note> userNotes;
-    List<Section> userSections;
+    int rating;
 }

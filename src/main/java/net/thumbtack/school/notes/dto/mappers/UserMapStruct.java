@@ -4,6 +4,7 @@ import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
 import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
+import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
 import net.thumbtack.school.notes.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -19,4 +20,6 @@ public interface UserMapStruct {
     User requestUpdateUser(UpdateUserInfoRequest updateUserInfoRequest);
 
     UpdateUserInfoResponse responseUpdateUserInfo(User user);
+
+    UsersInfoResponse responseGetAllUsers(User user);
 }

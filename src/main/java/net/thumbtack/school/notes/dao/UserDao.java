@@ -17,7 +17,7 @@ public interface UserDao {
 
     void changeUserStatus(User user);
 
-    List<User> getUsersWithParams(String userToken, UserRequestParam param);
+    List<User> getAllUsers();
 
     void followUser(String userToken, String login);
 

@@ -15,6 +15,6 @@ import net.thumbtack.school.notes.enums.ParamType;
 public class UserRequestParam {
     ParamSort sortByRating;
     ParamType type;
-    int from;
-    int count;
+    String from;
+    String count;
 }

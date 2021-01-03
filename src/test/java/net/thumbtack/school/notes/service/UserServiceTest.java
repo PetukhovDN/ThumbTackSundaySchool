@@ -43,10 +43,14 @@ public class UserServiceTest {
         testSessionId = UUID.randomUUID().toString();
     }
 
-    public void makeAdminForTests() throws NoteServerException {
-        User admin = userService.registerUser(rightRegisterRequest, testSessionId);
+    public String makeAdminForTests(){
+        User admin = new User();
+        admin.setFirstName("Admin");
+        admin.setLastName("Adminov");
+        admin.setLogin("admin");
+        admin.setPassword("admin_password");
         admin.setUserStatus(UserStatus.ADMIN);
-        debugService.makeAdmin(admin);
+        return debugService.makeAdmin(admin);
     }
 
     @Test
@@ -71,7 +75,7 @@ public class UserServiceTest {
 
     @Test
     public void testGiveUserAdminRoot_withRoot() throws NoteServerException {
-        makeAdminForTests();
+        String adminSession = makeAdminForTests();
         RegisterRequest newRequest = new RegisterRequest(
                 "Test2",
                 "Testov2",
@@ -80,7 +84,7 @@ public class UserServiceTest {
                 "test_password2");
         String testSessionIdSecond = UUID.randomUUID().toString();
         User user = userService.registerUser(newRequest, testSessionIdSecond);
-        userService.makeAdmin(user.getId(), testSessionId);
+        userService.makeAdmin(user.getId(), adminSession);
 
         User resultUser = userService.getUserInfo(testSessionIdSecond);
 

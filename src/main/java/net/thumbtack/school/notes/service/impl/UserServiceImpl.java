@@ -11,11 +11,14 @@ import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
 import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
+import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
+import net.thumbtack.school.notes.enums.ParamType;
 import net.thumbtack.school.notes.enums.UserStatus;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
+import net.thumbtack.school.notes.params.UserRequestParam;
 import net.thumbtack.school.notes.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -127,6 +132,27 @@ public class UserServiceImpl implements UserService {
         User resultUser = userDao.getUserInfo(userId);
         resultUser.setUserStatus(UserStatus.ADMIN);
         userDao.changeUserStatus(resultUser);
+    }
+
+    @Override
+    @Transactional
+    public ArrayList<UsersInfoResponse> getAllUsersInfo(UserRequestParam userRequestParam, String sessionId) throws NoteServerException{
+        log.info("Trying to get all users info");
+        checkSessionIdNotNull(sessionId);
+        Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        checkSessionExpired(userSession);
+        List<User> users = userDao.getAllUsers();
+
+        //logic
+
+        ArrayList<UsersInfoResponse> usersResponse = new ArrayList<>();
+        for (User user : users) {
+            UsersInfoResponse response = UserMapStruct.INSTANCE.responseGetAllUsers(user);
+            usersResponse.add(response);
+        }
+        //logic
+
+        return usersResponse;
     }
 
 

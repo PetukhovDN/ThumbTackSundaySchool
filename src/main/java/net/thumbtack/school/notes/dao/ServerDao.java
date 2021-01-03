@@ -5,5 +5,7 @@ import net.thumbtack.school.notes.model.User;
 public interface ServerDao {
     void clear();
 
-    void makeAdmin(User user);
+    String makeAdmin(User user);
+
+    User getUserIdByLogin(String login);
 }

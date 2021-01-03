@@ -10,7 +10,11 @@ import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
 import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
+import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
+import net.thumbtack.school.notes.enums.ParamSort;
+import net.thumbtack.school.notes.enums.ParamType;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
+import net.thumbtack.school.notes.params.UserRequestParam;
 import net.thumbtack.school.notes.service.impl.UserServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -88,13 +94,28 @@ public class UserController {
         return userService.updateUserInfo(updateRequest, sessionId);
     }
 
-    @PutMapping(value = "accounts/{id}")
+    @PutMapping(value = "accounts/{id}/super")
     @ResponseStatus(HttpStatus.OK)
-    public void makeAdmin(@PathVariable("id") int id,
+    public void makeAdmin(@PathVariable(value = "id") int id,
                           @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
         userService.makeAdmin(id, sessionId);
     }
 
 
+    @GetMapping(value = "accounts",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public List<UsersInfoResponse> getAllUsersInfoWithParams(@CookieValue(name = JAVASESSIONID, required = false) String sessionId,
+                                                   @RequestParam(value = "sortByRating", required = false) ParamSort paramSort,
+                                                   @RequestParam(value = "type ", required = false) ParamType paramType,
+                                                   @RequestParam(value = "from", required = false) String from,
+                                                   @RequestParam(value = "count", required = false) String count) throws NoteServerException {
+        UserRequestParam userRequestParam = new UserRequestParam();
+        userRequestParam.setSortByRating(paramSort);
+        userRequestParam.setType(paramType);
+        userRequestParam.setFrom(from);
+        userRequestParam.setCount(count);
+        return userService.getAllUsersInfo(userRequestParam, sessionId);
+    }
 }
 

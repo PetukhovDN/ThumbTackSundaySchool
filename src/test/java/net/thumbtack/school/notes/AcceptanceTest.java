@@ -7,6 +7,8 @@ import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
 import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
+import net.thumbtack.school.notes.enums.UserStatus;
+import net.thumbtack.school.notes.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -206,6 +208,29 @@ public class AcceptanceTest {
         assertAll(
                 () -> assertEquals(400, exc.getStatusCode().value()),
                 () -> assertTrue(exc.getResponseBodyAsString().contains("Wrong password"))
+        );
+    }
+
+    @Test
+    public void testMakeAdmin() {
+        HttpEntity<Void> makeAdminDebugResponse = template.postForEntity(userUrl + "debug/super", "", Void.class);
+        HttpEntity<UserInfoResponse> registerResponse = template.postForEntity(userUrl + "accounts", rightRegisterRequest, UserInfoResponse.class);
+        String registeredUserLogin = registerResponse.getBody().getLogin();
+        HttpEntity<User> userResponse = template.getForEntity(userUrl + "debug/" + registeredUserLogin + "/get", User.class);
+        int userId = userResponse.getBody().getId();
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Cookie", makeAdminDebugResponse.getHeaders().getFirst("Set-Cookie"));
+        HttpEntity<UpdateUserInfoRequest> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Void> makeAdminResponse = template.exchange(userUrl + "accounts/" + userId + "/super", HttpMethod.PUT, entity, Void.class);
+
+        HttpEntity<User> adminResponse = template.getForEntity(userUrl + "debug/" + registeredUserLogin + "/get", User.class);
+
+        assertAll(
+                () -> assertEquals(200, makeAdminResponse.getStatusCodeValue()),
+                () -> assertNotNull(userResponse.getBody().getFirstName()),
+                () -> assertEquals(UserStatus.USER, userResponse.getBody().getUserStatus()),
+                () -> assertEquals(UserStatus.ADMIN, adminResponse.getBody().getUserStatus())
         );
     }
 

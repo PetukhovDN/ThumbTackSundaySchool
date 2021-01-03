@@ -27,7 +27,7 @@ public class UserDaoImpl implements UserDao {
         log.info("DAO insert User {} to Database", user);
         try {
             userMapper.registerUser(user);
-            return userMapper.getUserByLogin(user.getLogin(), user.getPassword());
+            return userMapper.getUserByLoginAndPassword(user.getLogin(), user.getPassword());
         } catch (DuplicateKeyException ex) {
             log.error("Login {} already exists", user.getLogin(), ex);
             throw new NoteServerException(ExceptionErrorInfo.LOGIN_ALREADY_EXISTS, user.getLogin());
@@ -93,8 +93,14 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public List<User> getUsersWithParams(String userToken, UserRequestParam param) {
-        return null;
+    public List<User> getAllUsers() {
+        log.info("DAO get all users");
+        try {
+            return userMapper.getAllUsers();
+        } catch (RuntimeException ex) {
+            log.error("Can't get all users", ex);
+            throw ex;
+        }
     }
 
     @Override

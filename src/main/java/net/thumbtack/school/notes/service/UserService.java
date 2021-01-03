@@ -6,9 +6,13 @@ import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
 import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
+import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.User;
+import net.thumbtack.school.notes.params.UserRequestParam;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 
 public interface UserService {
 
@@ -32,4 +36,7 @@ public interface UserService {
 
     @Transactional
     void makeAdmin(int userId, String sessionId) throws NoteServerException;
+
+    @Transactional
+    ArrayList<UsersInfoResponse> getAllUsersInfo(UserRequestParam userRequestParam, String sessionId) throws NoteServerException;
 }

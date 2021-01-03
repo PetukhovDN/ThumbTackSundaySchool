@@ -16,7 +16,11 @@ public class DebugService {
         serverDao.clear();
     }
 
-    public void makeAdmin(User user) {
-        serverDao.makeAdmin(user);
+    public String makeAdmin(User user) {
+        return serverDao.makeAdmin(user);
+    }
+
+    public User getUserIdByLogin(String login){
+        return serverDao.getUserIdByLogin(login);
     }
 }
