@@ -12,7 +12,6 @@ import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
 import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
-import net.thumbtack.school.notes.enums.ParamType;
 import net.thumbtack.school.notes.enums.UserStatus;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
@@ -136,7 +135,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public ArrayList<UsersInfoResponse> getAllUsersInfo(UserRequestParam userRequestParam, String sessionId) throws NoteServerException{
+    public ArrayList<UsersInfoResponse> getAllUsersInfo(UserRequestParam userRequestParam, String sessionId) throws NoteServerException {
         log.info("Trying to get all users info");
         checkSessionIdNotNull(sessionId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
@@ -153,6 +152,58 @@ public class UserServiceImpl implements UserService {
         //logic
 
         return usersResponse;
+    }
+
+    @Override
+    @Transactional
+    public void followUser(String login, String sessionId) throws NoteServerException {
+        log.info("Trying to start following for user with login {} ", login);
+        checkSessionIdNotNull(sessionId);
+        Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        checkSessionExpired(userSession);
+        int currentUserId = userSession.getUserId();
+        int userIdToFollow = userDao.getUserByLogin(login).getId();
+
+        userDao.followUser(currentUserId, userIdToFollow);
+    }
+
+    @Override
+    @Transactional
+    public void ignoreUser(String login, String sessionId) throws NoteServerException {
+        log.info("Trying to start ignoring for user with login {} ", login);
+        checkSessionIdNotNull(sessionId);
+        Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        checkSessionExpired(userSession);
+        int currentUserId = userSession.getUserId();
+        int userIdToFollow = userDao.getUserByLogin(login).getId();
+
+        userDao.ignoreUser(currentUserId, userIdToFollow);
+    }
+
+    @Override
+    @Transactional
+    public void stopFollowUser(String login, String sessionId) throws NoteServerException {
+        log.info("Trying to stop following for user with login {} ", login);
+        checkSessionIdNotNull(sessionId);
+        Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        checkSessionExpired(userSession);
+        int currentUserId = userSession.getUserId();
+        int userIdToFollow = userDao.getUserByLogin(login).getId();
+
+        userDao.stopFollowUser(currentUserId, userIdToFollow);
+    }
+
+    @Override
+    @Transactional
+    public void stopIgnoreUser(String login, String sessionId) throws NoteServerException {
+        log.info("Trying to stop ignoring for user with login {} ", login);
+        checkSessionIdNotNull(sessionId);
+        Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        checkSessionExpired(userSession);
+        int currentUserId = userSession.getUserId();
+        int userIdToFollow = userDao.getUserByLogin(login).getId();
+
+        userDao.stopIgnoreUser(currentUserId, userIdToFollow);
     }
 
 

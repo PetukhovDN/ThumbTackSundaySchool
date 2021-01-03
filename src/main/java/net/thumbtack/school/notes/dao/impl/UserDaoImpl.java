@@ -9,7 +9,6 @@ import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.mappers.UserMapper;
 import net.thumbtack.school.notes.model.User;
-import net.thumbtack.school.notes.params.UserRequestParam;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
@@ -104,22 +103,63 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void followUser(String userToken, String login) {
-
+    public void followUser(int currentUserId, int userIdToFollow) {
+        log.info("DAO adding user with id {} to following list", userIdToFollow);
+        try {
+            userMapper.followUser(currentUserId, userIdToFollow);
+        } catch (RuntimeException ex) {
+            log.error("Can't add user with id {} to following list", userIdToFollow, ex);
+            throw ex;
+        }
     }
 
     @Override
-    public void ignoreUser(String userToken, String login) {
-
+    public void ignoreUser(int currentUserId, int userIdToFollow) {
+        log.info("DAO adding user with id {} to ignoring list", userIdToFollow);
+        try {
+            userMapper.ignoreUser(currentUserId, userIdToFollow);
+        } catch (RuntimeException ex) {
+            log.error("Can't add user with id {} to ignoring list", userIdToFollow, ex);
+            throw ex;
+        }
     }
 
     @Override
-    public void stopFollowUser(String userToken, String login) {
-
+    public void stopFollowUser(int currentUserId, int userIdToFollow) {
+        log.info("DAO removing user with id {} from following list", userIdToFollow);
+        try {
+            userMapper.stopFollowing(currentUserId, userIdToFollow);
+        } catch (RuntimeException ex) {
+            log.error("Can't remove user with id {} from following list", userIdToFollow, ex);
+            throw ex;
+        }
     }
 
     @Override
-    public void stopIgnoreUser(String userToken, String login) {
+    public void stopIgnoreUser(int currentUserId, int userIdToFollow) {
+        log.info("DAO removing user with id {} from ignoring list", userIdToFollow);
+        try {
+            userMapper.stopIgnoring(currentUserId, userIdToFollow);
+        } catch (RuntimeException ex) {
+            log.error("Can't remove user with id {} from ignoring list", userIdToFollow, ex);
+            throw ex;
+        }
+    }
 
+
+    @Override
+    public User getUserByLogin(String login) throws NoteServerException {
+        log.info("Trying to get user");
+        try {
+            User user = userMapper.getUserByLogin(login);
+            if (user == null) {
+                log.error("No user with login = {} in database", login);
+                throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, login);
+            }
+            return user;
+        } catch (RuntimeException ex) {
+            log.error("Can't get user");
+            throw ex;
+        }
     }
 }

@@ -6,6 +6,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.ServerDao;
 import net.thumbtack.school.notes.enums.UserStatus;
+import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
+import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.mappers.*;
 import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
@@ -61,10 +63,14 @@ public class ServerDaoImpl implements ServerDao {
     }
 
     @Override
-    public User getUserIdByLogin(String login){
-        log.info("Trying to get user id");
+    public User getUserByLogin(String login) throws NoteServerException {
+        log.info("Trying to get user");
         try {
             User user = userMapper.getUserByLogin(login);
+            if (user == null) {
+                log.error("No user with login = {} in database", login);
+                throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, login);
+            }
             log.info("User with login {} was got", login);
             return user;
         } catch (RuntimeException ex) {

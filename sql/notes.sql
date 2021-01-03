@@ -43,8 +43,8 @@ create TABLE ignore_user (
 
 create TABLE following_user (
 	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    follower_user_id INT(11),
 	following_user_id INT(11),
-	follower_user_id INT(11),
 	FOREIGN KEY (following_user_id) REFERENCES note_user (id) ON update CASCADE ON delete CASCADE,
 	FOREIGN KEY (follower_user_id) REFERENCES note_user (id) ON update CASCADE ON delete CASCADE)
 	ENGINE=INNODB DEFAULT CHARSET=utf8;

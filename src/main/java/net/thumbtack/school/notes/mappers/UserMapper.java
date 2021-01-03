@@ -66,6 +66,23 @@ public interface UserMapper {
                     many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getRatings", fetchType = FetchType.LAZY))})
     List<User> getAllUsers();
 
+    @Insert("INSERT INTO following_user (follower_user_id, following_user_id)" +
+            " VALUES " +
+            "( #{currentUserId}, #{userIdToFollow} )")
+    @Options(useGeneratedKeys = true)
+    Integer followUser(int currentUserId, int userIdToFollow);
+
+    @Delete("DELETE FROM following_user WHERE follower_user_id = #{currentUserId} AND following_user_id = #{followingUserId}")
+    void stopFollowing(int currentUserId, int followingUserId);
+
+    @Insert("INSERT INTO ignore_user (ignored_by_user_id, ignore_user_id)" +
+            " VALUES " +
+            "( #{currentUserId}, #{userIdToIgnore} )")
+    @Options(useGeneratedKeys = true)
+    Integer ignoreUser(int currentUserId, int userIdToIgnore);
+
+    @Delete("DELETE FROM ignore_user WHERE ignored_by_user_id = #{currentUserId} AND ignore_user_id = #{ignoringUserId}")
+    void stopIgnoring(int currentUserId, int ignoringUserId);
 
     @Delete("DELETE FROM note_user WHERE id = #{userId}")
     void deleteUser(int userId);

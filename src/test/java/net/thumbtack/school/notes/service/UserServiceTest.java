@@ -43,7 +43,7 @@ public class UserServiceTest {
         testSessionId = UUID.randomUUID().toString();
     }
 
-    public String makeAdminForTests(){
+    public String makeAdminForTests() {
         User admin = new User();
         admin.setFirstName("Admin");
         admin.setLastName("Adminov");

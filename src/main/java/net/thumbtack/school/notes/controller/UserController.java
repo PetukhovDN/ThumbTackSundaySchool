@@ -4,10 +4,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dto.mappers.UserMapStruct;
-import net.thumbtack.school.notes.dto.request.user.LeaveServerRequest;
-import net.thumbtack.school.notes.dto.request.user.LoginRequest;
-import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
-import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
+import net.thumbtack.school.notes.dto.request.user.*;
 import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
@@ -23,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -106,16 +102,46 @@ public class UserController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<UsersInfoResponse> getAllUsersInfoWithParams(@CookieValue(name = JAVASESSIONID, required = false) String sessionId,
-                                                   @RequestParam(value = "sortByRating", required = false) ParamSort paramSort,
-                                                   @RequestParam(value = "type ", required = false) ParamType paramType,
-                                                   @RequestParam(value = "from", required = false) String from,
-                                                   @RequestParam(value = "count", required = false) String count) throws NoteServerException {
+                                                             @RequestParam(value = "sortByRating", required = false) ParamSort paramSort,
+                                                             @RequestParam(value = "type ", required = false) ParamType paramType,
+                                                             @RequestParam(value = "from", required = false) String from,
+                                                             @RequestParam(value = "count", required = false) String count) throws NoteServerException {
         UserRequestParam userRequestParam = new UserRequestParam();
         userRequestParam.setSortByRating(paramSort);
         userRequestParam.setType(paramType);
         userRequestParam.setFrom(from);
         userRequestParam.setCount(count);
         return userService.getAllUsersInfo(userRequestParam, sessionId);
+    }
+
+    @PostMapping(value = "followings",
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public void followUser(@RequestBody @Valid FollowIgnoreRequest request,
+                           @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
+        userService.followUser(request.getLogin(), sessionId);
+    }
+
+    @DeleteMapping(value = "followings/{login}")
+    @ResponseStatus(HttpStatus.OK)
+    public void stopFollowUser(@RequestParam(name = "login") String login,
+                               @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
+        userService.stopFollowUser(login, sessionId);
+    }
+
+    @PostMapping(value = "ignore",
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public void ignoreUser(@RequestBody @Valid FollowIgnoreRequest request,
+                           @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
+        userService.ignoreUser(request.getLogin(), sessionId);
+    }
+
+    @DeleteMapping(value = "ignore/{login}")
+    @ResponseStatus(HttpStatus.OK)
+    public void stopIgnoreUser(@RequestParam(name = "login") String login,
+                               @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
+        userService.stopIgnoreUser(login, sessionId);
     }
 }
 

@@ -5,7 +5,6 @@ import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
 import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
-import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.User;
@@ -39,4 +38,16 @@ public interface UserService {
 
     @Transactional
     ArrayList<UsersInfoResponse> getAllUsersInfo(UserRequestParam userRequestParam, String sessionId) throws NoteServerException;
+
+    @Transactional
+    void followUser(String login, String sessionId) throws NoteServerException;
+
+    @Transactional
+    void ignoreUser(String login, String sessionId) throws NoteServerException;
+
+    @Transactional
+    void stopFollowUser(String login, String sessionId) throws NoteServerException;
+
+    @Transactional
+    void stopIgnoreUser(String login, String sessionId) throws NoteServerException;
 }

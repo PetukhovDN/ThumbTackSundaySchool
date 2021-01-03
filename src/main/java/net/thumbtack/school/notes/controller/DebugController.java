@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.service.impl.DebugService;
 import org.springframework.http.HttpStatus;
@@ -42,7 +43,7 @@ public class DebugController {
 
     @GetMapping(value = "{login}/get", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public User getUserIdByLogin(@PathVariable(value = "login") String login) {
+    public User getUserIdByLogin(@PathVariable(value = "login") String login) throws NoteServerException {
         return debugService.getUserIdByLogin(login);
     }
 }

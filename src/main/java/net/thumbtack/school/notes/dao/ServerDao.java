@@ -1,5 +1,6 @@
 package net.thumbtack.school.notes.dao;
 
+import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.User;
 
 public interface ServerDao {
@@ -7,5 +8,5 @@ public interface ServerDao {
 
     String makeAdmin(User user);
 
-    User getUserIdByLogin(String login);
+    User getUserByLogin(String login) throws NoteServerException;
 }
