@@ -90,14 +90,10 @@ public class SessionDaoTest {
     }
 
     @Test
-    public void testGetUserIdBySessionId_wrongSessionId() {
-        NoteServerException exception = assertThrows(NoteServerException.class, () -> {
-            sessionDao.getSessionBySessionId("wrong_session_id");
-        });
+    public void testGetUserIdBySessionId_wrongSessionId() throws NoteServerException {
+        Session session = sessionDao.getSessionBySessionId("wrong_session_id");
         assertAll(
-                () -> assertNotNull(exception.getExceptionErrorInfo()),
-                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
-                        .contains("No such session on the server"))
+                () -> assertNull(session)
         );
     }
 

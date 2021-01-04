@@ -8,6 +8,9 @@ import lombok.experimental.FieldDefaults;
 import net.thumbtack.school.notes.enums.ParamSort;
 import net.thumbtack.school.notes.enums.ParamType;
 
+/**
+ * User request parameters for getting list of user accounts from the server
+ */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor

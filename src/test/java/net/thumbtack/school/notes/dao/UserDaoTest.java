@@ -64,7 +64,7 @@ class UserDaoTest {
     @Test
     public void testGetUserInfo_rightParameters() throws NoteServerException {
         User registeredUser = userDao.registerUser(rightParametersUser);
-        User userInfo = userDao.getUserInfo(registeredUser.getId());
+        User userInfo = userDao.getUserById(registeredUser.getId());
 
         assertEquals(registeredUser.getFirstName(), userInfo.getFirstName());
     }
@@ -72,7 +72,7 @@ class UserDaoTest {
     @Test
     public void testGetUserInfo_userDoesNotExists() {
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
-            userDao.getUserInfo(1);
+            userDao.getUserById(1);
 
         });
         assertAll(
@@ -85,14 +85,14 @@ class UserDaoTest {
     @Test
     public void testLeaveServer_loggedInUser() throws NoteServerException {
         User registeredUser = userDao.registerUser(rightParametersUser);
-        userDao.leaveNotesServer(registeredUser.getId());
+        userDao.changeUserDeletedStatusToDeleted(registeredUser.getId());
 
     }
 
     @Test
     public void testLeaveServer_userDoesNotExists() {
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
-            userDao.leaveNotesServer(100);
+            userDao.changeUserDeletedStatusToDeleted(100);
 
         });
         assertAll(
@@ -109,7 +109,7 @@ class UserDaoTest {
         registeredUser.setLastName("NewLastName");
         userDao.editUserInfo(registeredUser);
 
-        User updatedUser = userDao.getUserInfo(registeredUser.getId());
+        User updatedUser = userDao.getUserById(registeredUser.getId());
 
         assertAll(
                 () -> assertEquals(registeredUser.getFirstName(), updatedUser.getFirstName()),

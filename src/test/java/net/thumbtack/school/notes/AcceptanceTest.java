@@ -74,13 +74,18 @@ public class AcceptanceTest {
 
     @Test
     public void testLogin_alreadyLoggedIn() {
-        template.postForObject(userUrl + "accounts", rightRegisterRequest, UserInfoResponse.class);
+        ResponseEntity<UserInfoResponse> registerResponse = template.postForEntity(userUrl + "accounts", rightRegisterRequest, UserInfoResponse.class);
 
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Cookie", registerResponse.getHeaders().getFirst("Set-Cookie"));
         LoginRequest loginRequest = new LoginRequest(
                 rightRegisterRequest.getLogin(),
                 rightRegisterRequest.getPassword());
+        HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest, headers);
 
-        ResponseEntity<Void> response = template.postForEntity(userUrl + "sessions", loginRequest, Void.class);
+        ResponseEntity<Void> response = template.exchange(
+                userUrl + "sessions", HttpMethod.POST, entity,
+                Void.class);
 
         assertAll(
                 () -> assertEquals(200, response.getStatusCodeValue()),
@@ -142,7 +147,7 @@ public class AcceptanceTest {
         });
         assertAll(
                 () -> assertEquals(400, exc.getStatusCode().value()),
-                () -> assertTrue(exc.getResponseBodyAsString().contains("You are not logged in"))
+                () -> assertTrue(exc.getResponseBodyAsString().contains("No such session on the server"))
         );
     }
 

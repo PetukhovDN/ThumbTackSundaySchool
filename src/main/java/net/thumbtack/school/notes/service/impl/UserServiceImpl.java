@@ -10,7 +10,6 @@ import net.thumbtack.school.notes.dto.request.user.LeaveServerRequest;
 import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
-import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
 import net.thumbtack.school.notes.enums.UserStatus;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
@@ -23,89 +22,150 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service to work with user`s accounts and user`s sessions
+ */
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Service
 public class UserServiceImpl implements UserService {
     final UserDao userDao;
     final SessionDao sessionDao;
-    final String JAVASESSIONID = "JAVASESSIONID";
 
+    /**
+     * Time for which user session is alive
+     * Set in application.properties
+     */
     @Value("${user_idle_timeout}")
-    int user_idle_timeout;
+    int sessionLifeTime;
 
     public UserServiceImpl(UserDao userDao, SessionDao sessionDao) {
         this.userDao = userDao;
         this.sessionDao = sessionDao;
     }
 
+    /**
+     * Method to register new user account on the server and automatically log in to the server
+     * New User session will be created
+     *
+     * @param registerRequest contains registration information about user:
+     *                        first name, last name, patronymic, login and password
+     * @param sessionId       session token for new user
+     * @return new user information in success
+     */
     @Override
     @Transactional
-    public User registerUser(RegisterRequest userRequest, String sessionId) throws NoteServerException {
+    public User registerUser(RegisterRequest registerRequest, String sessionId) throws NoteServerException {
         log.info("Trying to register user");
-        User user = UserMapStruct.INSTANCE.requestRegisterUser(userRequest);
+        User user = UserMapStruct.INSTANCE.requestRegisterUser(registerRequest);
         User registeredUser = userDao.registerUser(user);
         Session userSession = new Session();
         userSession.setSessionId(sessionId);
-        userSession.setExpiryTime(user_idle_timeout);
+        userSession.setExpiryTime(sessionLifeTime);
         sessionDao.logInUser(registeredUser.getLogin(), registeredUser.getPassword(), userSession);
         return registeredUser;
     }
 
+    /**
+     * Method for the registered user to log in to the server
+     * If user is already logged in, it will be new user session created
+     *
+     * @param loginRequest contains information about user to log in: user login and password
+     * @param sessionId    user session token (to check if user is already online)
+     * @param newSessionID user new session token (if user was offline)
+     * @return user new session token in success
+     */
     @Override
     @Transactional
-    public String loginUser(LoginRequest loginRequest, String sessionId) throws NoteServerException {
+    public String loginUser(LoginRequest loginRequest, String sessionId, String newSessionID) throws NoteServerException {
         log.info("Trying to login user");
+        if (sessionDao.getSessionBySessionId(sessionId) != null) {
+            sessionDao.stopUserSession(sessionId);
+        }
         Session userSession = new Session();
-        userSession.setSessionId(sessionId);
-        userSession.setExpiryTime(user_idle_timeout);
+        userSession.setSessionId(newSessionID);
+        userSession.setExpiryTime(sessionLifeTime);
         Session resultSession = sessionDao.logInUser(loginRequest.getLogin(), loginRequest.getPassword(), userSession);
         updateSession(resultSession);
         return resultSession.getSessionId();
     }
 
+    /**
+     * Method for user to log out from the server
+     * Checks for not null session token (user must be logged in to the server if he wants lo log out)
+     *
+     * @param sessionId user session token
+     */
     @Override
     @Transactional
-    public void logoutUser(String sessionId) throws NoteServerException {
+    public void logoutUser(@NotNull String sessionId) throws NoteServerException {
         log.info("Trying to logout user");
-        checkSessionIdNotNull(sessionId);
         sessionDao.stopUserSession(sessionId);
     }
 
+    /**
+     * Method for user to get information about his account
+     * Requires for user to be logged in to the server
+     *
+     * @param sessionId user session token
+     * @return this user information in success
+     * @throws NoteServerException if user is not logged in to the server, or user session token is incorrect
+     */
     @Override
     @Transactional
-    public User getUserInfo(String sessionId) throws NoteServerException {
+    public User getUserInfo(@NotNull String sessionId) throws NoteServerException {
         log.info("Trying to get user info");
-        checkSessionIdNotNull(sessionId);
-        Session userSession = sessionDao.getSessionBySessionId(sessionId);
-        checkSessionExpired(userSession);
-        User user = userDao.getUserInfo(userSession.getUserId());
-        updateSession(userSession);
-        return user;
+        try {
+            Session userSession = sessionDao.getSessionBySessionId(sessionId);
+            checkSessionExpired(userSession);
+            User user = userDao.getUserById(userSession.getUserId());
+            updateSession(userSession);
+            return user;
+        } catch (NullPointerException ex) {
+            log.error("No such session on the server");
+            throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, "No such session on the server");
+        }
     }
 
+    /**
+     * Method for user to leave server
+     * User status will be changed for "deleted", but user account will remain on the server
+     * Requires for user to be logged in to the server
+     * Checks if password is correct for this user account
+     *
+     * @param leaveRequest contains information about this user: user login
+     * @param sessionId    user session token
+     */
     @Override
     @Transactional
-    public void leaveServer(LeaveServerRequest leaveRequest, String sessionId) throws NoteServerException {
+    public void leaveServer(LeaveServerRequest leaveRequest, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to delete user account");
-        checkSessionIdNotNull(sessionId);
         int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
         String password = leaveRequest.getPassword();
         checkIsPasswordCorrect(userId, password);
         sessionDao.stopUserSession(sessionId);
-        userDao.leaveNotesServer(userId);
+        userDao.changeUserDeletedStatusToDeleted(userId);
     }
 
+    /**
+     * Method to update user account information
+     * Requires for user to be logged in to the server
+     * Requires old password and checks if password is correct for this user account
+     *
+     * @param updateRequest contains user information to be updated: first name, last name, patronymic and password
+     * @param sessionId     user session token
+     * @return this user information in success
+     */
     @Override
     @Transactional
-    public UpdateUserInfoResponse updateUserInfo(UpdateUserInfoRequest updateRequest, String sessionId) throws NoteServerException {
+    public User updateUserInfo(UpdateUserInfoRequest updateRequest, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to update user account");
-        checkSessionIdNotNull(sessionId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         checkSessionExpired(userSession);
         String oldPassword = updateRequest.getOldPassword();
@@ -114,51 +174,69 @@ public class UserServiceImpl implements UserService {
         userToUpdate.setId(userSession.getUserId());
         User resultUser = userDao.editUserInfo(userToUpdate);
         updateSession(userSession);
-        return UserMapStruct.INSTANCE.responseUpdateUserInfo(resultUser);
+        return resultUser;
     }
 
+    /**
+     * Method to change status for user with the given id from USER to ADMIN
+     * Requires for user who is changing to have ADMIN status already
+     *
+     * @param userId    id of the user, to whom the status will be changed
+     * @param sessionId session id of user, who is changing another user status
+     * @throws NoteServerException if user who is changing status have not enough rights for this
+     */
     @Override
     @Transactional
-    public void makeAdmin(int userId, String sessionId) throws NoteServerException {
+    public void makeAdmin(int userId, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to make user admin");
-        checkSessionIdNotNull(sessionId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         checkSessionExpired(userSession);
-        User currentUser = userDao.getUserInfo(userSession.getUserId());
+        User currentUser = userDao.getUserById(userSession.getUserId());
         if (!currentUser.getUserStatus().equals(UserStatus.ADMIN)) {
             throw new NoteServerException(ExceptionErrorInfo.NOT_ENOUGH_RIGHTS, currentUser.getUserStatus().toString());
         }
-        User resultUser = userDao.getUserInfo(userId);
+        User resultUser = userDao.getUserById(userId);
         resultUser.setUserStatus(UserStatus.ADMIN);
         userDao.changeUserStatus(resultUser);
     }
 
+    /**
+     * Method to get users information in dependence of user request parameters
+     *
+     * @param requestParam contains four types of parameters:
+     *                     how to sort list of accounts, type of user accounts to be returned,
+     *                     from what position need to take accounts and how many accounts will be returned
+     * @param sessionId    user session token
+     * @return list of user accounts, depending on the user request parameters
+     */
+    //TODO: logic for parameters
     @Override
     @Transactional
-    public ArrayList<UsersInfoResponse> getAllUsersInfo(UserRequestParam userRequestParam, String sessionId) throws NoteServerException {
+    public List<UsersInfoResponse> getAllUsersInfo(UserRequestParam requestParam, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to get all users info");
-        checkSessionIdNotNull(sessionId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         checkSessionExpired(userSession);
         List<User> users = userDao.getAllUsers();
-
-        //logic
-
         ArrayList<UsersInfoResponse> usersResponse = new ArrayList<>();
         for (User user : users) {
             UsersInfoResponse response = UserMapStruct.INSTANCE.responseGetAllUsers(user);
             usersResponse.add(response);
         }
-        //logic
-
         return usersResponse;
     }
 
+    /**
+     * Method to follow user
+     * If started following, must stop ignoring
+     *
+     * @param login     login of the user who was followed
+     * @param sessionId session token of the user, who started following
+     */
+    //TODO: if start following, delete from ignoring, and vice versa
     @Override
     @Transactional
-    public void followUser(String login, String sessionId) throws NoteServerException {
+    public void followUser(String login, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to start following for user with login {} ", login);
-        checkSessionIdNotNull(sessionId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         checkSessionExpired(userSession);
         int currentUserId = userSession.getUserId();
@@ -167,11 +245,17 @@ public class UserServiceImpl implements UserService {
         userDao.followUser(currentUserId, userIdToFollow);
     }
 
+    /**
+     * Method to ignore user
+     * If started ignoring, must stop following
+     *
+     * @param login     login of the user who is being ignored
+     * @param sessionId session token of the user, who started ignoring
+     */
     @Override
     @Transactional
-    public void ignoreUser(String login, String sessionId) throws NoteServerException {
+    public void ignoreUser(String login, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to start ignoring for user with login {} ", login);
-        checkSessionIdNotNull(sessionId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         checkSessionExpired(userSession);
         int currentUserId = userSession.getUserId();
@@ -180,11 +264,16 @@ public class UserServiceImpl implements UserService {
         userDao.ignoreUser(currentUserId, userIdToFollow);
     }
 
+    /**
+     * Method to stop following user
+     *
+     * @param login     login of the user who was no longer followed
+     * @param sessionId session token of the user, who stopped following
+     */
     @Override
     @Transactional
-    public void stopFollowUser(String login, String sessionId) throws NoteServerException {
+    public void stopFollowUser(String login, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to stop following for user with login {} ", login);
-        checkSessionIdNotNull(sessionId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         checkSessionExpired(userSession);
         int currentUserId = userSession.getUserId();
@@ -193,11 +282,16 @@ public class UserServiceImpl implements UserService {
         userDao.stopFollowUser(currentUserId, userIdToFollow);
     }
 
+    /**
+     * Method to stop ignoring user
+     *
+     * @param login     login of the user who was no longer ignored
+     * @param sessionId session token of the user, who stopped ignoring
+     */
     @Override
     @Transactional
-    public void stopIgnoreUser(String login, String sessionId) throws NoteServerException {
+    public void stopIgnoreUser(String login, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to stop ignoring for user with login {} ", login);
-        checkSessionIdNotNull(sessionId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         checkSessionExpired(userSession);
         int currentUserId = userSession.getUserId();
@@ -207,21 +301,28 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    /**
+     * Method to check that given password is correct for account with this user id
+     *
+     * @param userId   id of the account, which is being checked
+     * @param password given password, which is needed to be checked
+     * @throws NoteServerException if the password is incorrect for account with this id
+     */
     public void checkIsPasswordCorrect(int userId, String password) throws NoteServerException {
         log.info("Checking user password");
-        if (!userDao.getUserInfo(userId).getPassword().equals(password)) {
+        if (!userDao.getUserById(userId).getPassword().equals(password)) {
             log.error("Wrong password {}", password);
             throw new NoteServerException(ExceptionErrorInfo.WRONG_PASSWORD, password);
         }
     }
 
-    public void checkSessionIdNotNull(String sessionId) throws NoteServerException {
-        if (sessionId == null) {
-            log.error("User is not logged in");
-            throw new NoteServerException(ExceptionErrorInfo.USER_IS_NOT_LOGGED_IN, "Please log in");
-        }
-    }
-
+    /**
+     * Method to check that session is not expired
+     * Time for which user session is alive is set in application.properties with value user_idle_timeout
+     *
+     * @param userSession session to check
+     * @throws NoteServerException if session is expired
+     */
     public void checkSessionExpired(Session userSession) throws NoteServerException {
         log.info("Checking if session expired");
         long sessionStartTimeInSec = userSession
@@ -230,14 +331,20 @@ public class UserServiceImpl implements UserService {
                 .toInstant()
                 .toEpochMilli() / 1000;
         long currentTimeInSec = LocalDateTime.now().atZone(ZoneId.of("Asia/Omsk")).toInstant().toEpochMilli() / 1000;
-        if (currentTimeInSec > sessionStartTimeInSec + user_idle_timeout) {
+        if (currentTimeInSec > sessionStartTimeInSec + sessionLifeTime) {
             log.info("Session expired");
             sessionDao.stopUserSession(userSession.getSessionId());
             throw new NoteServerException(ExceptionErrorInfo.SESSION_EXPIRED, "Please log in");
         }
     }
 
-    public void updateSession(Session userSession) throws NoteServerException {
+    /**
+     * Method to update user session life time
+     * Called after each method which needs user to be logged in
+     *
+     * @param userSession user session to update
+     */
+    public void updateSession(Session userSession) {
         log.info("Updating session last access time");
         userSession.setLastAccessTime(LocalDateTime.now());
         sessionDao.updateSession(userSession);

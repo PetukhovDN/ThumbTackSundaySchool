@@ -12,6 +12,6 @@ public interface SessionDao {
 
     Session getSessionByUserId(int userId) throws NoteServerException;
 
-    void updateSession(Session session) throws NoteServerException;
+    void updateSession(Session session);
 
 }

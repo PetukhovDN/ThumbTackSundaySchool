@@ -11,6 +11,7 @@ import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
 import net.thumbtack.school.notes.enums.ParamSort;
 import net.thumbtack.school.notes.enums.ParamType;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
+import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.params.UserRequestParam;
 import net.thumbtack.school.notes.service.impl.UserServiceImpl;
 import org.springframework.http.HttpStatus;
@@ -51,12 +52,12 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public void loginUser(@RequestBody @Valid LoginRequest loginRequest,
+                          @CookieValue(name = JAVASESSIONID, required = false) String sessionId,
                           HttpServletResponse response) throws NoteServerException {
-        String sessionId = UUID.randomUUID().toString();
-        Cookie cookie = new Cookie(JAVASESSIONID, sessionId);
+        String newSessionId = UUID.randomUUID().toString();
+        userService.loginUser(loginRequest, sessionId, newSessionId);
+        Cookie cookie = new Cookie(JAVASESSIONID, newSessionId);
         response.addCookie(cookie);
-        userService.loginUser(loginRequest, sessionId);
-
     }
 
     @DeleteMapping(value = "sessions")
@@ -87,7 +88,8 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public UpdateUserInfoResponse updateUserInfo(@RequestBody @Valid UpdateUserInfoRequest updateRequest,
                                                  @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        return userService.updateUserInfo(updateRequest, sessionId);
+        User resultUser = userService.updateUserInfo(updateRequest, sessionId);
+        return UserMapStruct.INSTANCE.responseUpdateUserInfo(resultUser);
     }
 
     @PutMapping(value = "accounts/{id}/super")

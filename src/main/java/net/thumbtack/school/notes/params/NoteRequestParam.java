@@ -11,6 +11,9 @@ import net.thumbtack.school.notes.enums.ParamSort;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * User request parameters for getting list of notes from the server
+ */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor

@@ -8,9 +8,9 @@ import java.util.List;
 public interface UserDao {
     User registerUser(User user) throws NoteServerException;
 
-    User getUserInfo(int userId) throws NoteServerException;
+    User getUserById(int userId) throws NoteServerException;
 
-    void leaveNotesServer(int userId) throws NoteServerException;
+    void changeUserDeletedStatusToDeleted(int userId) throws NoteServerException;
 
     User editUserInfo(User userToUpdate);
 

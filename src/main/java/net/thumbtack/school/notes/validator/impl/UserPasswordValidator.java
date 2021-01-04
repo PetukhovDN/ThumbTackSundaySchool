@@ -13,13 +13,17 @@ import javax.validation.ConstraintValidatorContext;
  */
 public class UserPasswordValidator implements ConstraintValidator<UserPassword, String> {
 
+    /**
+     * Minimum user password length
+     * Set in application.properties
+     */
     @Value("${min_password_length}")
-    private long min_password_length;
+    private long minPasswordLength;
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
         return s != null
                 && !s.isBlank()
-                && s.length() >= min_password_length;
+                && s.length() >= minPasswordLength;
     }
 }

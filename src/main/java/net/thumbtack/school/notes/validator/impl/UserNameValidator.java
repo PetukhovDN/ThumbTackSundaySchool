@@ -13,15 +13,19 @@ import javax.validation.ConstraintValidatorContext;
  */
 public class UserNameValidator implements ConstraintValidator<UserName, String> {
 
-    private final String regex = "^[a-zA-Zа-яА-ЯёЁ\\s.'-]+$";
+    /**
+     * Maximum user first name and last name length
+     * Set in application.properties
+     */
     @Value("${max_name_length}")
-    private long max_name_length;
+    private long maxNameLength;
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
+        String regex = "^[a-zA-Zа-яА-ЯёЁ\\s.'-]+$";
         return s != null
                 && !s.isBlank()
-                && s.length() <= max_name_length
+                && s.length() <= maxNameLength
                 && s.matches(regex);
     }
 }
