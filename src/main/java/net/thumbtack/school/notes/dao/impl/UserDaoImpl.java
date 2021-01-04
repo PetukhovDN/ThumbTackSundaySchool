@@ -61,7 +61,8 @@ public class UserDaoImpl implements UserDao {
                 log.error("No user with userId = {} in database", userId);
                 throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, String.valueOf(userId));
             }
-            userMapper.deleteUser(userId);
+            userById.setDeleted(true);
+            userMapper.leaveNotesServer(userById);
         } catch (RuntimeException ex) {
             log.error("Can't get user info from Database, ", ex);
             throw ex;
@@ -159,6 +160,50 @@ public class UserDaoImpl implements UserDao {
             return user;
         } catch (RuntimeException ex) {
             log.error("Can't get user");
+            throw ex;
+        }
+    }
+
+    @Override
+    public List<User> getUsersFollowingTo(int userId){
+        log.info("Trying to get users following to");
+        try {
+            return userMapper.getFollowingTo(userId);
+        } catch (RuntimeException ex) {
+            log.error("Can't get users");
+            throw ex;
+        }
+    }
+
+    @Override
+    public List<User> getUsersFollowedBy(int userId){
+        log.info("Trying to get users followed by");
+        try {
+            return userMapper.getFollowedBy(userId);
+        } catch (RuntimeException ex) {
+            log.error("Can't get users");
+            throw ex;
+        }
+    }
+
+    @Override
+    public List<User> getUsersIgnoringTo(int userId){
+        log.info("Trying to get users ignoring to");
+        try {
+            return userMapper.getIgnoringTo(userId);
+        } catch (RuntimeException ex) {
+            log.error("Can't get users");
+            throw ex;
+        }
+    }
+
+    @Override
+    public List<User> getUsersIgnoredBy(int userId){
+        log.info("Trying to get users ignored by");
+        try {
+            return userMapper.getIgnoredBy(userId);
+        } catch (RuntimeException ex) {
+            log.error("Can't get users");
             throw ex;
         }
     }

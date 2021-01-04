@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
@@ -101,7 +103,7 @@ class UserDaoTest {
     }
 
     @Test
-    public void testUpdateUserInfo_success() throws NoteServerException {
+    public void testUpdateUserInfo_rightParameters() throws NoteServerException {
         User registeredUser = userDao.registerUser(rightParametersUser);
         registeredUser.setFirstName("NewFirstName");
         registeredUser.setLastName("NewLastName");
@@ -115,4 +117,59 @@ class UserDaoTest {
                 () -> assertEquals(registeredUser.getLogin(), updatedUser.getLogin())
         );
     }
+
+    @Test
+    public void testFollowUser_rightParameters() throws NoteServerException {
+        User firstRegisteredUser = userDao.registerUser(rightParametersUser);
+        rightRegisterRequest.setLogin("second_user_login");
+        rightRegisterRequest.setLastName("SecondUserLastName");
+        rightParametersUser = UserMapStruct.INSTANCE.requestRegisterUser(rightRegisterRequest);
+        User secondRegisteredUser = userDao.registerUser(rightParametersUser);
+
+        userDao.followUser(firstRegisteredUser.getId(), secondRegisteredUser.getId());
+        List<User> followers = userDao.getUsersFollowedBy(firstRegisteredUser.getId());
+        User follower = followers.get(0);
+
+        assertAll(
+                () -> assertEquals(secondRegisteredUser.getId(), follower.getId()),
+                () -> assertEquals(secondRegisteredUser.getLastName(), follower.getLastName())
+        );
+
+        userDao.stopFollowUser(firstRegisteredUser.getId(), secondRegisteredUser.getId());
+        List<User> followersEmptyList = userDao.getUsersFollowedBy(firstRegisteredUser.getId());
+
+        assertAll(
+                () -> assertEquals(0, followersEmptyList.size())
+        );
+    }
+
+    @Test
+    public void testIgnoreUser_rightParameters() throws NoteServerException {
+        User firstRegisteredUser = userDao.registerUser(rightParametersUser);
+        rightRegisterRequest.setLogin("second_user_login");
+        rightRegisterRequest.setLastName("SecondUserLastName");
+        rightParametersUser = UserMapStruct.INSTANCE.requestRegisterUser(rightRegisterRequest);
+        User secondRegisteredUser = userDao.registerUser(rightParametersUser);
+
+        userDao.ignoreUser(firstRegisteredUser.getId(), secondRegisteredUser.getId());
+        List<User> ignoringUsers = userDao.getUsersIgnoredBy(firstRegisteredUser.getId());
+        User ignoringUser = ignoringUsers.get(0);
+
+        assertAll(
+                () -> assertEquals(secondRegisteredUser.getId(), ignoringUser.getId()),
+                () -> assertEquals(secondRegisteredUser.getLastName(), ignoringUser.getLastName())
+        );
+
+        userDao.stopIgnoreUser(firstRegisteredUser.getId(), secondRegisteredUser.getId());
+        List<User> ignoringUsersEmptyList = userDao.getUsersIgnoredBy(firstRegisteredUser.getId());
+
+        assertAll(
+                () -> assertEquals(0, ignoringUsersEmptyList.size())
+        );
+
+    }
+
+    //TODO
+    //test follow/ignore user
+    //javadoc
 }

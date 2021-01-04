@@ -2,6 +2,7 @@ package net.thumbtack.school.notes;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import net.thumbtack.school.notes.dto.request.user.FollowIgnoreRequest;
 import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
@@ -212,7 +213,7 @@ public class AcceptanceTest {
     }
 
     @Test
-    public void testMakeAdmin() {
+    public void testMakeAdmin_rightParameters() {
         HttpEntity<Void> makeAdminDebugResponse = template.postForEntity(userUrl + "debug/super", "", Void.class);
         HttpEntity<UserInfoResponse> registerResponse = template.postForEntity(userUrl + "accounts", rightRegisterRequest, UserInfoResponse.class);
         String registeredUserLogin = registerResponse.getBody().getLogin();
@@ -231,6 +232,27 @@ public class AcceptanceTest {
                 () -> assertNotNull(userResponse.getBody().getFirstName()),
                 () -> assertEquals(UserStatus.USER, userResponse.getBody().getUserStatus()),
                 () -> assertEquals(UserStatus.ADMIN, adminResponse.getBody().getUserStatus())
+        );
+    }
+
+    @Test
+    public void tesFollowAndIgnoreUser_rightParameters() {
+        HttpEntity<UserInfoResponse> registerResponse = template.postForEntity(userUrl + "accounts", rightRegisterRequest, UserInfoResponse.class);
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Cookie", registerResponse.getHeaders().getFirst("Set-Cookie"));
+
+        FollowIgnoreRequest request = new FollowIgnoreRequest(registerResponse.getBody().getLogin());
+        HttpEntity<FollowIgnoreRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<Void> followResponse = template.exchange(
+                userUrl + "followings", HttpMethod.POST, entity, Void.class);
+
+        ResponseEntity<Void> ignoreResponse = template.exchange(
+                userUrl + "ignore", HttpMethod.POST, entity, Void.class);
+
+        assertAll(
+                () -> assertEquals(200, followResponse.getStatusCodeValue()),
+                () -> assertEquals(200, ignoreResponse.getStatusCodeValue())
         );
     }
 

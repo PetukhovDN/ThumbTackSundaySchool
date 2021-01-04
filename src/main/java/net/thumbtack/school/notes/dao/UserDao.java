@@ -27,4 +27,12 @@ public interface UserDao {
     void stopIgnoreUser(int currentUserId, int userIdToFollow);
 
     User getUserByLogin(String login) throws NoteServerException;
+
+    List<User> getUsersFollowingTo(int userId);
+
+    List<User> getUsersFollowedBy(int userId);
+
+    List<User> getUsersIgnoringTo(int userId);
+
+    List<User> getUsersIgnoredBy(int userId);
 }
