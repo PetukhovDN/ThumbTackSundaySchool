@@ -146,11 +146,15 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void leaveServer(LeaveServerRequest leaveRequest, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to delete user account");
-        int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
-        String password = leaveRequest.getPassword();
-        checkIsPasswordCorrect(userId, password);
-        sessionDao.stopUserSession(sessionId);
-        userDao.changeUserDeletedStatusToDeleted(userId);
+        try {
+            int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
+            String password = leaveRequest.getPassword();
+            checkIsPasswordCorrect(userId, password);
+            sessionDao.stopUserSession(sessionId);
+            userDao.changeUserDeletedStatusToDeleted(userId);
+        } catch (NullPointerException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.WRONG_PASSWORD, ex.getMessage());
+        }
     }
 
     /**

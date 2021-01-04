@@ -11,7 +11,6 @@ import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
 import net.thumbtack.school.notes.enums.ParamSort;
 import net.thumbtack.school.notes.enums.ParamType;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
-import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.params.UserRequestParam;
 import net.thumbtack.school.notes.service.impl.UserServiceImpl;
 import org.springframework.http.HttpStatus;
@@ -42,22 +41,20 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public UserInfoResponse registerUser(@RequestBody @Valid RegisterRequest registerRequest,
                                          HttpServletResponse response) throws NoteServerException {
-        String sessionId = UUID.randomUUID().toString();
-        Cookie cookie = new Cookie(JAVASESSIONID, sessionId);
-        response.addCookie(cookie);
-        return UserMapStruct.INSTANCE.responseRegisterUser(userService.registerUser(registerRequest, sessionId));
+        String newSessionId = UUID.randomUUID().toString();
+        response.addCookie(new Cookie(JAVASESSIONID, newSessionId));
+        return UserMapStruct.INSTANCE.responseRegisterUser(userService.registerUser(registerRequest, newSessionId));
     }
 
     @PostMapping(value = "sessions",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public void loginUser(@RequestBody @Valid LoginRequest loginRequest,
+    public void loginUser(@RequestBody LoginRequest loginRequest,
                           @CookieValue(name = JAVASESSIONID, required = false) String sessionId,
                           HttpServletResponse response) throws NoteServerException {
         String newSessionId = UUID.randomUUID().toString();
         userService.loginUser(loginRequest, sessionId, newSessionId);
-        Cookie cookie = new Cookie(JAVASESSIONID, newSessionId);
-        response.addCookie(cookie);
+        response.addCookie(new Cookie(JAVASESSIONID, newSessionId));
     }
 
     @DeleteMapping(value = "sessions")
@@ -77,7 +74,7 @@ public class UserController {
     @DeleteMapping(value = "accounts",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public void leaveServer(@RequestBody @Valid LeaveServerRequest leaveRequest,
+    public void leaveServer(@RequestBody LeaveServerRequest leaveRequest,
                             @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
         userService.leaveServer(leaveRequest, sessionId);
     }
@@ -86,10 +83,9 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public UpdateUserInfoResponse updateUserInfo(@RequestBody @Valid UpdateUserInfoRequest updateRequest,
+    public UpdateUserInfoResponse updateUserInfo(@RequestBody UpdateUserInfoRequest updateRequest,
                                                  @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        User resultUser = userService.updateUserInfo(updateRequest, sessionId);
-        return UserMapStruct.INSTANCE.responseUpdateUserInfo(resultUser);
+        return UserMapStruct.INSTANCE.responseUpdateUserInfo(userService.updateUserInfo(updateRequest, sessionId));
     }
 
     @PutMapping(value = "accounts/{id}/super")
@@ -108,18 +104,13 @@ public class UserController {
                                                              @RequestParam(value = "type ", required = false) ParamType paramType,
                                                              @RequestParam(value = "from", required = false) String from,
                                                              @RequestParam(value = "count", required = false) String count) throws NoteServerException {
-        UserRequestParam userRequestParam = new UserRequestParam();
-        userRequestParam.setSortByRating(paramSort);
-        userRequestParam.setType(paramType);
-        userRequestParam.setFrom(from);
-        userRequestParam.setCount(count);
-        return userService.getAllUsersInfo(userRequestParam, sessionId);
+        return userService.getAllUsersInfo(new UserRequestParam(paramSort, paramType, from, count), sessionId);
     }
 
     @PostMapping(value = "followings",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public void followUser(@RequestBody @Valid FollowIgnoreRequest request,
+    public void followUser(@RequestBody FollowIgnoreRequest request,
                            @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
         userService.followUser(request.getLogin(), sessionId);
     }
@@ -134,7 +125,7 @@ public class UserController {
     @PostMapping(value = "ignore",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public void ignoreUser(@RequestBody @Valid FollowIgnoreRequest request,
+    public void ignoreUser(@RequestBody FollowIgnoreRequest request,
                            @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
         userService.ignoreUser(request.getLogin(), sessionId);
     }

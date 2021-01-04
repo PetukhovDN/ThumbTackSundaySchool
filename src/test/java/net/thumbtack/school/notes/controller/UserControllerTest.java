@@ -118,17 +118,4 @@ class UserControllerTest {
 
         assertEquals(200, result.getResponse().getStatus());
     }
-
-    @Test
-    public void testUserLeaveServer_fail() throws Exception {
-        LeaveServerRequest leaveRequest = new LeaveServerRequest(null);
-        MvcResult result = mvc.perform(delete("/api/accounts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(leaveRequest))
-                .cookie(testCookie))
-                .andReturn();
-        assertEquals(result.getResponse().getStatus(), 400);
-        GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(), GlobalErrorHandler.MyError.class);
-        assertEquals(1, error.getErrors().size());
-    }
 }

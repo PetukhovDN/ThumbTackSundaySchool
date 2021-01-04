@@ -104,9 +104,10 @@ public class AcceptanceTest {
         HttpClientErrorException exc = assertThrows(HttpClientErrorException.class, () -> {
             template.postForObject(userUrl + "sessions", loginRequest, Void.class);
         });
+        System.out.println(exc.getResponseBodyAsString());
         assertAll(
                 () -> assertEquals(400, exc.getStatusCode().value()),
-                () -> assertTrue(exc.getResponseBodyAsString().contains("Invalid user password"))
+                () -> assertTrue(exc.getResponseBodyAsString().contains("User with this login not registered on server"))
         );
     }
 
