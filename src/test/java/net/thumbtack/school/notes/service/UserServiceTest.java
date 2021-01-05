@@ -2,6 +2,7 @@ package net.thumbtack.school.notes.service;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import net.thumbtack.school.notes.dto.request.user.LeaveServerRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
 import net.thumbtack.school.notes.enums.UserStatus;
@@ -114,6 +115,56 @@ public class UserServiceTest {
                 () -> assertNotNull(exception.getExceptionErrorInfo()),
                 () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
                         .contains("Not enough rights for this action"))
+        );
+    }
+
+    @Test
+    public void testLeaveServer_rightParameters() throws NoteServerException {
+        userService.registerUser(rightRegisterRequest, testSessionId);
+        LeaveServerRequest leaveRequest = new LeaveServerRequest(rightRegisterRequest.getPassword());
+        userService.leaveServer(leaveRequest, testSessionId);
+
+        User user = debugService.getUserAccountInfoByLogin(rightRegisterRequest.getLogin());
+
+        assertAll(
+                () -> assertNotNull(user),
+                () -> assertTrue(user.isDeleted())
+        );
+    }
+
+    @Test
+    public void testLeaveServer_wrongPassword() throws NoteServerException {
+        userService.registerUser(rightRegisterRequest, testSessionId);
+        LeaveServerRequest leaveRequest = new LeaveServerRequest("wrong_password");
+
+        NoteServerException exception = assertThrows(NoteServerException.class, () -> {
+            userService.leaveServer(leaveRequest, testSessionId);
+        });
+        User user = debugService.getUserAccountInfoByLogin(rightRegisterRequest.getLogin());
+
+        assertAll(
+                () -> assertNotNull(exception.getExceptionErrorInfo()),
+                () -> assertFalse(user.isDeleted()),
+                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString().contains("Wrong password"))
+        );
+    }
+
+
+    @Test
+    public void testLeaveServer_loggedOut() throws NoteServerException {
+        userService.registerUser(rightRegisterRequest, testSessionId);
+        LeaveServerRequest leaveRequest = new LeaveServerRequest(rightRegisterRequest.getPassword());
+
+        NoteServerException exception = assertThrows(NoteServerException.class, () -> {
+            userService.leaveServer(leaveRequest, null);
+        });
+        User user = debugService.getUserAccountInfoByLogin(rightRegisterRequest.getLogin());
+
+        System.out.println(exception.getExceptionErrorInfo().toString());
+        assertAll(
+                () -> assertNotNull(exception.getExceptionErrorInfo()),
+                () -> assertFalse(user.isDeleted()),
+                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString().contains("You are not logged in"))
         );
     }
 

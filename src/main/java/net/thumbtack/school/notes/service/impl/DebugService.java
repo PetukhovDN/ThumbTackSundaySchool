@@ -68,7 +68,7 @@ public class DebugService {
      * @return user information
      * @throws NoteServerException will be thrown if user does`nt exists
      */
-    public User getUserIdByLogin(String login) throws NoteServerException {
+    public User getUserAccountInfoByLogin(String login) throws NoteServerException {
         return serverDao.getUserByLogin(login);
     }
 

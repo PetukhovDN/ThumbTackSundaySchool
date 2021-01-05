@@ -141,6 +141,7 @@ public class UserServiceImpl implements UserService {
      *
      * @param leaveRequest contains information about this user: user login
      * @param sessionId    user session token
+     * @throws NoteServerException if user is not logged in to the server
      */
     @Override
     @Transactional
@@ -153,7 +154,7 @@ public class UserServiceImpl implements UserService {
             sessionDao.stopUserSession(sessionId);
             userDao.changeUserDeletedStatusToDeleted(userId);
         } catch (NullPointerException ex) {
-            throw new NoteServerException(ExceptionErrorInfo.WRONG_PASSWORD, ex.getMessage());
+            throw new NoteServerException(ExceptionErrorInfo.USER_IS_NOT_LOGGED_IN, sessionId);
         }
     }
 
@@ -236,7 +237,6 @@ public class UserServiceImpl implements UserService {
      * @param login     login of the user who was followed
      * @param sessionId session token of the user, who started following
      */
-    //TODO: if start following, delete from ignoring, and vice versa
     @Override
     @Transactional
     public void followUser(String login, @NotNull String sessionId) throws NoteServerException {
@@ -246,6 +246,7 @@ public class UserServiceImpl implements UserService {
         int currentUserId = userSession.getUserId();
         int userIdToFollow = userDao.getUserByLogin(login).getId();
 
+        userDao.stopIgnoreUser(currentUserId, userIdToFollow);
         userDao.followUser(currentUserId, userIdToFollow);
     }
 
@@ -265,6 +266,7 @@ public class UserServiceImpl implements UserService {
         int currentUserId = userSession.getUserId();
         int userIdToFollow = userDao.getUserByLogin(login).getId();
 
+        userDao.stopFollowUser(currentUserId, userIdToFollow);
         userDao.ignoreUser(currentUserId, userIdToFollow);
     }
 
