@@ -49,24 +49,62 @@ public class ServerDaoImpl implements ServerDao {
     }
 
     /**
-     * Method that makes user an administrator
-     * Also user will be registered and logged in to the server
+     * Method to save information about user in database
      *
-     * @param user user to become administrator
-     * @return session id of given user in success
+     * @return user in success
      */
     @Override
-    public String makeAdmin(User user) {
-        log.info("Trying to make admin");
+    public User registerUser() {
+        log.info("Trying to save user account to database");
+        try {
+            User user = new User();
+            user.setFirstName("User");
+            user.setLastName("Userov");
+            user.setLogin("userLogin" + Math.random() * 10);
+            user.setPassword("user_password");
+            userMapper.registerUser(user);
+            return userMapper.getUserByLogin(user.getLogin());
+        } catch (RuntimeException ex) {
+            log.error("Can't save user to database");
+            throw ex;
+        }
+    }
+
+    /**
+     * Method to save information about user session in database
+     *
+     * @param userId identifier of user
+     * @return session token of user session
+     */
+    @Override
+    public String logInUser(int userId) {
+        log.info("Trying to save user session to database");
         try {
             Session session = new Session();
-            session.setSessionId(UUID.randomUUID().toString());
-            userMapper.registerUser(user);
-            User resultUser = userMapper.getUserByLoginAndPassword(user.getLogin(), user.getPassword());
+            String sessionId = UUID.randomUUID().toString();
+            session.setSessionId(sessionId);
+            sessionMapper.startUserSession(session, userId);
+            return sessionId;
+        } catch (RuntimeException ex) {
+            log.error("Can't save user session to database");
+            throw ex;
+        }
+    }
+
+    /**
+     * Method that makes user an administrator
+     *
+     * @param user user account information who will be administrator
+     * @return admin user account information
+     */
+    @Override
+    public User makeAdmin(User user) {
+        log.info("Trying to make admin");
+        try {
+            User resultUser = userMapper.getUserByLogin(user.getLogin());
             resultUser.setUserStatus(UserStatus.ADMIN);
             userMapper.changeUserStatus(resultUser);
-            sessionMapper.startUserSession(session, resultUser.getId());
-            return session.getSessionId();
+            return resultUser;
         } catch (RuntimeException ex) {
             log.error("Can't create admin user");
             throw ex;

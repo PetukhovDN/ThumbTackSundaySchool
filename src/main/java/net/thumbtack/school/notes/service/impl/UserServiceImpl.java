@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,17 +55,17 @@ public class UserServiceImpl implements UserService {
      *
      * @param registerRequest contains registration information about user:
      *                        first name, last name, patronymic, login and password
-     * @param sessionId       session token for new user
+     * @param newSessionId    session token for new user
      * @return new user information in success
      */
     @Override
     @Transactional
-    public User registerUser(RegisterRequest registerRequest, String sessionId) throws NoteServerException {
+    public User registerUser(RegisterRequest registerRequest, String newSessionId) throws NoteServerException {
         log.info("Trying to register user");
         User user = UserMapStruct.INSTANCE.requestRegisterUser(registerRequest);
         User registeredUser = userDao.registerUser(user);
         Session userSession = new Session();
-        userSession.setSessionId(sessionId);
+        userSession.setSessionId(newSessionId);
         userSession.setExpiryTime(sessionLifeTime);
         sessionDao.logInUser(registeredUser.getLogin(), registeredUser.getPassword(), userSession);
         return registeredUser;
@@ -123,7 +122,6 @@ public class UserServiceImpl implements UserService {
         log.info("Trying to get user info");
         try {
             Session userSession = sessionDao.getSessionBySessionId(sessionId);
-            checkSessionExpired(userSession);
             User user = userDao.getUserById(userSession.getUserId());
             updateSession(userSession);
             return user;
@@ -148,7 +146,8 @@ public class UserServiceImpl implements UserService {
     public void leaveServer(LeaveServerRequest leaveRequest, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to delete user account");
         try {
-            int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
+            Session session = sessionDao.getSessionBySessionId(sessionId);
+            int userId = session.getUserId();
             String password = leaveRequest.getPassword();
             checkIsPasswordCorrect(userId, password);
             sessionDao.stopUserSession(sessionId);
@@ -172,7 +171,6 @@ public class UserServiceImpl implements UserService {
     public User updateUserInfo(UpdateUserInfoRequest updateRequest, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to update user account");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
-        checkSessionExpired(userSession);
         String oldPassword = updateRequest.getOldPassword();
         checkIsPasswordCorrect(userSession.getUserId(), oldPassword);
         User userToUpdate = UserMapStruct.INSTANCE.requestUpdateUser(updateRequest);
@@ -195,7 +193,6 @@ public class UserServiceImpl implements UserService {
     public void makeAdmin(int userId, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to make user admin");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
-        checkSessionExpired(userSession);
         User currentUser = userDao.getUserById(userSession.getUserId());
         if (!currentUser.getUserStatus().equals(UserStatus.ADMIN)) {
             throw new NoteServerException(ExceptionErrorInfo.NOT_ENOUGH_RIGHTS, currentUser.getUserStatus().toString());
@@ -203,6 +200,7 @@ public class UserServiceImpl implements UserService {
         User resultUser = userDao.getUserById(userId);
         resultUser.setUserStatus(UserStatus.ADMIN);
         userDao.changeUserStatus(resultUser);
+        updateSession(userSession);
     }
 
     /**
@@ -220,13 +218,13 @@ public class UserServiceImpl implements UserService {
     public List<UsersInfoResponse> getAllUsersInfo(UserRequestParam requestParam, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to get all users info");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
-        checkSessionExpired(userSession);
         List<User> users = userDao.getAllUsers();
         ArrayList<UsersInfoResponse> usersResponse = new ArrayList<>();
         for (User user : users) {
             UsersInfoResponse response = UserMapStruct.INSTANCE.responseGetAllUsers(user);
             usersResponse.add(response);
         }
+        updateSession(userSession);
         return usersResponse;
     }
 
@@ -242,12 +240,12 @@ public class UserServiceImpl implements UserService {
     public void followUser(String login, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to start following for user with login {} ", login);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
-        checkSessionExpired(userSession);
         int currentUserId = userSession.getUserId();
         int userIdToFollow = userDao.getUserByLogin(login).getId();
 
         userDao.stopIgnoreUser(currentUserId, userIdToFollow);
         userDao.followUser(currentUserId, userIdToFollow);
+        updateSession(userSession);
     }
 
     /**
@@ -262,12 +260,12 @@ public class UserServiceImpl implements UserService {
     public void ignoreUser(String login, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to start ignoring for user with login {} ", login);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
-        checkSessionExpired(userSession);
         int currentUserId = userSession.getUserId();
         int userIdToFollow = userDao.getUserByLogin(login).getId();
 
         userDao.stopFollowUser(currentUserId, userIdToFollow);
         userDao.ignoreUser(currentUserId, userIdToFollow);
+        updateSession(userSession);
     }
 
     /**
@@ -281,11 +279,11 @@ public class UserServiceImpl implements UserService {
     public void stopFollowUser(String login, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to stop following for user with login {} ", login);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
-        checkSessionExpired(userSession);
         int currentUserId = userSession.getUserId();
         int userIdToFollow = userDao.getUserByLogin(login).getId();
 
         userDao.stopFollowUser(currentUserId, userIdToFollow);
+        updateSession(userSession);
     }
 
     /**
@@ -299,11 +297,11 @@ public class UserServiceImpl implements UserService {
     public void stopIgnoreUser(String login, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to stop ignoring for user with login {} ", login);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
-        checkSessionExpired(userSession);
         int currentUserId = userSession.getUserId();
         int userIdToFollow = userDao.getUserByLogin(login).getId();
 
         userDao.stopIgnoreUser(currentUserId, userIdToFollow);
+        updateSession(userSession);
     }
 
 
@@ -323,28 +321,6 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Method to check that session is not expired
-     * Time for which user session is alive is set in application.properties with value user_idle_timeout
-     *
-     * @param userSession session to check
-     * @throws NoteServerException if session is expired
-     */
-    public void checkSessionExpired(Session userSession) throws NoteServerException {
-        log.info("Checking if session expired");
-        long sessionStartTimeInSec = userSession
-                .getLastAccessTime()
-                .atZone(ZoneId.of("Asia/Omsk"))
-                .toInstant()
-                .toEpochMilli() / 1000;
-        long currentTimeInSec = LocalDateTime.now().atZone(ZoneId.of("Asia/Omsk")).toInstant().toEpochMilli() / 1000;
-        if (currentTimeInSec > sessionStartTimeInSec + sessionLifeTime) {
-            log.info("Session expired");
-            sessionDao.stopUserSession(userSession.getSessionId());
-            throw new NoteServerException(ExceptionErrorInfo.SESSION_EXPIRED, "Please log in");
-        }
-    }
-
-    /**
      * Method to update user session life time
      * Called after each method which needs user to be logged in
      *
@@ -355,4 +331,5 @@ public class UserServiceImpl implements UserService {
         userSession.setLastAccessTime(LocalDateTime.now());
         sessionDao.updateSession(userSession);
     }
+
 }

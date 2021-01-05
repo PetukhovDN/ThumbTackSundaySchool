@@ -1,4 +1,4 @@
-package net.thumbtack.school.notes.model;
+package net.thumbtack.school.notes.dto.response.section;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -6,15 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
-
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Section {
-    long id;
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class SectionResponse {
+    int id;
     String sectionName;
-    int authorId;
-    LocalDateTime creationTime;
 }

@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserServiceTest {
-    RegisterRequest rightRegisterRequest;
+    User registeredUser;
     String testSessionId;
 
     @Autowired
@@ -35,33 +35,17 @@ public class UserServiceTest {
     @BeforeEach
     public void setUp() {
         debugService.clearDatabase();
-        rightRegisterRequest = new RegisterRequest(
-                "Test",
-                "Testov",
-                "Testovitch",
-                "login",
-                "test_password");
-        testSessionId = UUID.randomUUID().toString();
-    }
-
-    public String makeAdminForTests() {
-        User admin = new User();
-        admin.setFirstName("Admin");
-        admin.setLastName("Adminov");
-        admin.setLogin("admin");
-        admin.setPassword("admin_password");
-        admin.setUserStatus(UserStatus.ADMIN);
-        return debugService.makeAdmin(admin);
+        registeredUser = debugService.registerUser();
+        testSessionId = debugService.loginUser(registeredUser.getId());
     }
 
     @Test
     public void testUpdateUserInfo_rightParameters() throws NoteServerException {
-        userService.registerUser(rightRegisterRequest, testSessionId);
         UpdateUserInfoRequest request = new UpdateUserInfoRequest(
                 "NewFirstName",
                 "NewLastName",
                 null,
-                rightRegisterRequest.getPassword(),
+                registeredUser.getPassword(),
                 "new_good_password");
         userService.updateUserInfo(request, testSessionId);
 
@@ -70,13 +54,15 @@ public class UserServiceTest {
         assertAll(
                 () -> assertEquals(request.getFirstName(), resultUser.getFirstName()),
                 () -> assertEquals(request.getLastName(), resultUser.getLastName()),
-                () -> assertEquals(rightRegisterRequest.getLogin(), resultUser.getLogin())
+                () -> assertEquals(registeredUser.getLogin(), resultUser.getLogin())
         );
     }
 
     @Test
     public void testGiveUserAdminRoot_withRoot() throws NoteServerException {
-        String adminSession = makeAdminForTests();
+        User testUser = debugService.registerUser();
+        User admin = debugService.makeAdmin(testUser);
+        String adminSession = debugService.loginUser(admin.getId());
         RegisterRequest newRequest = new RegisterRequest(
                 "Test2",
                 "Testov2",
@@ -97,7 +83,6 @@ public class UserServiceTest {
 
     @Test
     public void testGiveUserAdminRoot_withoutRoot() throws NoteServerException {
-        userService.registerUser(rightRegisterRequest, testSessionId);
         RegisterRequest newRequest = new RegisterRequest(
                 "Test2",
                 "Testov2",
@@ -120,11 +105,10 @@ public class UserServiceTest {
 
     @Test
     public void testLeaveServer_rightParameters() throws NoteServerException {
-        userService.registerUser(rightRegisterRequest, testSessionId);
-        LeaveServerRequest leaveRequest = new LeaveServerRequest(rightRegisterRequest.getPassword());
+        LeaveServerRequest leaveRequest = new LeaveServerRequest(registeredUser.getPassword());
         userService.leaveServer(leaveRequest, testSessionId);
 
-        User user = debugService.getUserAccountInfoByLogin(rightRegisterRequest.getLogin());
+        User user = debugService.getUserAccountInfoByLogin(registeredUser.getLogin());
 
         assertAll(
                 () -> assertNotNull(user),
@@ -134,13 +118,12 @@ public class UserServiceTest {
 
     @Test
     public void testLeaveServer_wrongPassword() throws NoteServerException {
-        userService.registerUser(rightRegisterRequest, testSessionId);
         LeaveServerRequest leaveRequest = new LeaveServerRequest("wrong_password");
 
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
             userService.leaveServer(leaveRequest, testSessionId);
         });
-        User user = debugService.getUserAccountInfoByLogin(rightRegisterRequest.getLogin());
+        User user = debugService.getUserAccountInfoByLogin(registeredUser.getLogin());
 
         assertAll(
                 () -> assertNotNull(exception.getExceptionErrorInfo()),
@@ -152,19 +135,19 @@ public class UserServiceTest {
 
     @Test
     public void testLeaveServer_loggedOut() throws NoteServerException {
-        userService.registerUser(rightRegisterRequest, testSessionId);
-        LeaveServerRequest leaveRequest = new LeaveServerRequest(rightRegisterRequest.getPassword());
+        userService.logoutUser(testSessionId);
+        LeaveServerRequest leaveRequest = new LeaveServerRequest(registeredUser.getPassword());
 
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
-            userService.leaveServer(leaveRequest, null);
+            userService.leaveServer(leaveRequest, testSessionId);
         });
-        User user = debugService.getUserAccountInfoByLogin(rightRegisterRequest.getLogin());
+        User user = debugService.getUserAccountInfoByLogin(registeredUser.getLogin());
 
         System.out.println(exception.getExceptionErrorInfo().toString());
         assertAll(
                 () -> assertNotNull(exception.getExceptionErrorInfo()),
                 () -> assertFalse(user.isDeleted()),
-                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString().contains("You are not logged in"))
+                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString().contains("No such session on the server"))
         );
     }
 

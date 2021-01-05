@@ -21,10 +21,10 @@ public class GlobalErrorHandler {
     @ResponseBody
     public MyError exceptionHandler(NoteServerException ex) {
         final MyError errors = new MyError();
-        final ErrorResponse error = new ErrorResponse();
-        error.setErrorCode(ex.getExceptionErrorInfo().toString());
-        error.setField(ex.getField());
-        error.setMessage(ex.getExceptionErrorInfo().getErrorString());
+        final ErrorResponse error = new ErrorResponse(
+                ex.getExceptionErrorInfo().toString(),
+                ex.getField(),
+                ex.getExceptionErrorInfo().getErrorString());
         errors.getErrors().add(error);
         return errors;
     }
@@ -35,10 +35,10 @@ public class GlobalErrorHandler {
     public MyError exceptionHandler(MethodArgumentNotValidException exc) {
         final MyError errors = new MyError();
         exc.getBindingResult().getFieldErrors().forEach(fieldError -> {
-            ErrorResponse error = new ErrorResponse();
-            error.setErrorCode(fieldError.getCode());
-            error.setField(fieldError.getField());
-            error.setMessage(fieldError.getDefaultMessage());
+            ErrorResponse error = new ErrorResponse(
+                    fieldError.getCode(),
+                    fieldError.getField(),
+                    fieldError.getDefaultMessage());
             errors.getErrors().add(error);
         });
         return errors;
@@ -49,10 +49,10 @@ public class GlobalErrorHandler {
     @ResponseBody
     public MyError exceptionHandler(Exception ex) {
         final MyError errors = new MyError();
-        final ErrorResponse error = new ErrorResponse();
-        error.setErrorCode(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-        error.setField(ex.getCause().getMessage());
-        error.setMessage("Global Error");
+        final ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                ex.getCause().getMessage(),
+                "Global Error");
         errors.getErrors().add(error);
         return errors;
     }

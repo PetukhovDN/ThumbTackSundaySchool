@@ -38,12 +38,9 @@ public class DebugController {
     @PostMapping(value = "super")
     @ResponseStatus(HttpStatus.OK)
     public void makeSuper(HttpServletResponse response) {
-        User admin = new User();
-        admin.setFirstName("Admin");
-        admin.setLastName("Adminov");
-        admin.setLogin("admin");
-        admin.setPassword("admin_password");
-        String sessionId = debugService.makeAdmin(admin);
+        User user = debugService.registerUser();
+        User admin = debugService.makeAdmin(user);
+        String sessionId = debugService.loginUser(admin.getId());
         Cookie cookie = new Cookie("JAVASESSIONID", sessionId);
         response.addCookie(cookie);
     }

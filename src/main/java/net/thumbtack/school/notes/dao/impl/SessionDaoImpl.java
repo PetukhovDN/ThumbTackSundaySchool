@@ -1,7 +1,6 @@
 package net.thumbtack.school.notes.dao.impl;
 
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.SessionDao;
@@ -11,18 +10,32 @@ import net.thumbtack.school.notes.mappers.SessionMapper;
 import net.thumbtack.school.notes.mappers.UserMapper;
 import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 /**
  * DataAccessObject to work with user sessions
  */
 @Slf4j
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Component
 public class SessionDaoImpl implements SessionDao {
-    UserMapper userMapper;
-    SessionMapper sessionMapper;
+    final UserMapper userMapper;
+    final SessionMapper sessionMapper;
+    /**
+     * Time for which user session is alive
+     * Set in application.properties
+     */
+    @Value("${user_idle_timeout}")
+    int sessionLifeTime;
+
+    public SessionDaoImpl(UserMapper userMapper, SessionMapper sessionMapper) {
+        this.userMapper = userMapper;
+        this.sessionMapper = sessionMapper;
+    }
 
     /**
      * Method to save user session to the database
@@ -77,10 +90,14 @@ public class SessionDaoImpl implements SessionDao {
      * @return user session token in success
      */
     @Override
-    public Session getSessionBySessionId(String sessionId) {
+    public Session getSessionBySessionId(String sessionId) throws NoteServerException {
         log.info("DAO Get user session from database");
         try {
-            return sessionMapper.getSessionBySessionId(sessionId);
+            Session userSession = sessionMapper.getSessionBySessionId(sessionId);
+            if (sessionExpired(userSession)) {
+                throw new NoteServerException(ExceptionErrorInfo.SESSION_EXPIRED, "Session with id " + sessionId + " expired");
+            }
+            return userSession;
         } catch (RuntimeException ex) {
             log.error("Can't get user session from server, ", ex);
             throw ex;
@@ -94,10 +111,14 @@ public class SessionDaoImpl implements SessionDao {
      * @return user session token in success
      */
     @Override
-    public Session getSessionByUserId(int userId) {
+    public Session getSessionByUserId(int userId) throws NoteServerException {
         log.info("DAO Get user session from database");
         try {
-            return sessionMapper.getSessionByUserId(userId);
+            Session userSession = sessionMapper.getSessionByUserId(userId);
+            if (sessionExpired(userSession)) {
+                throw new NoteServerException(ExceptionErrorInfo.SESSION_EXPIRED, "Session for user with id " + userId + " expired");
+            }
+            return userSession;
         } catch (RuntimeException ex) {
             log.error("Can't get user session from server, ", ex);
             throw ex;
@@ -117,6 +138,27 @@ public class SessionDaoImpl implements SessionDao {
         } catch (RuntimeException ex) {
             log.error("Can't update user session, ", ex);
             throw ex;
+        }
+    }
+
+    /**
+     * Method to check is session alive
+     *
+     * @param session user session to check
+     * @return true if session expired
+     */
+    public boolean sessionExpired(Session session) throws NoteServerException {
+        log.info("Checking if session is expired");
+        try {
+            long sessionStartTimeInSec = session.getLastAccessTime()
+                    .atZone(ZoneId.of("Asia/Omsk"))
+                    .toInstant()
+                    .toEpochMilli() / 1000;
+            long currentTimeInSec = LocalDateTime.now().atZone(ZoneId.of("Asia/Omsk")).toInstant().toEpochMilli() / 1000;
+            return currentTimeInSec > sessionStartTimeInSec + sessionLifeTime;
+        } catch (NullPointerException ex) {
+            log.error("No such session on the server");
+            throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, "No such session on the server");
         }
     }
 }

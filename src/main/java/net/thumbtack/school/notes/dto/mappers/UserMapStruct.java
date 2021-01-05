@@ -10,7 +10,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
- * MapStruct methods to transform user requests to the models and models to the user responses
+ * MapStruct methods to transform user requests from user controller to the models and models to the user responses
  */
 @Mapper
 public interface UserMapStruct {

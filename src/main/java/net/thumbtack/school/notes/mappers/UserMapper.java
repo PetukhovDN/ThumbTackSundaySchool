@@ -84,8 +84,7 @@ public interface UserMapper {
     void stopFollowing(int currentUserId, int followingUserId);
 
     @Insert("INSERT INTO ignore_user (ignored_by_user_id, ignoring_user_id)" +
-            " VALUES " +
-            "( #{currentUserId}, #{userIdToIgnore} )")
+            " VALUES ( #{currentUserId}, #{userIdToIgnore} )")
     @Options(useGeneratedKeys = true)
     Integer ignoreUser(int currentUserId, int userIdToIgnore);
 

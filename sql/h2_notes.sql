@@ -52,7 +52,7 @@ create TABLE section (
     author_id INT(11) NOT NULL,
     KEY section_name (section_name),
     KEY section_creation_time (section_creation_time),
-    FOREIGN KEY (author_id) REFERENCES note_user (id))
+    FOREIGN KEY (author_id) REFERENCES note_user (id) ON update CASCADE ON delete CASCADE)
 	ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 create TABLE note (

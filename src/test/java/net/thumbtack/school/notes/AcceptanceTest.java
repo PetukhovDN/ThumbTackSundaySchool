@@ -2,10 +2,12 @@ package net.thumbtack.school.notes;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import net.thumbtack.school.notes.dto.request.section.SectionRequest;
 import net.thumbtack.school.notes.dto.request.user.FollowIgnoreRequest;
 import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
+import net.thumbtack.school.notes.dto.response.section.SectionResponse;
 import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
 import net.thumbtack.school.notes.enums.UserStatus;
@@ -96,13 +98,17 @@ public class AcceptanceTest {
 
     @Test
     public void testLoginWithWrongParameters() {
+        ResponseEntity<UserInfoResponse> registerResponse = template.postForEntity(userUrl + "accounts", rightRegisterRequest, UserInfoResponse.class);
+
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Cookie", registerResponse.getHeaders().getFirst("Set-Cookie"));
         LoginRequest loginRequest = new LoginRequest(
                 "wrong login",
-                "wrongpass"
-        );
+                "wrongpass");
+        HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest, headers);
 
         HttpClientErrorException exc = assertThrows(HttpClientErrorException.class, () -> {
-            template.postForObject(userUrl + "sessions", loginRequest, Void.class);
+            template.exchange(userUrl + "sessions", HttpMethod.POST, entity, Void.class);
         });
         System.out.println(exc.getResponseBodyAsString());
         assertAll(
@@ -259,6 +265,77 @@ public class AcceptanceTest {
         assertAll(
                 () -> assertEquals(200, followResponse.getStatusCodeValue()),
                 () -> assertEquals(200, ignoreResponse.getStatusCodeValue())
+        );
+    }
+
+    @Test
+    public void testGetSectionInfoSection_rightParameters() {
+        HttpEntity<UserInfoResponse> registerResponse = template.postForEntity(userUrl + "accounts", rightRegisterRequest, UserInfoResponse.class);
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Cookie", registerResponse.getHeaders().getFirst("Set-Cookie"));
+
+        SectionRequest createRequest = new SectionRequest("TestSection");
+        HttpEntity<SectionRequest> createEntity = new HttpEntity<>(createRequest, headers);
+        ResponseEntity<SectionResponse> createSectionResponse = template.exchange(
+                userUrl + "sections", HttpMethod.POST, createEntity, SectionResponse.class);
+
+        HttpEntity<Void> getSectionEntity = new HttpEntity<>(headers);
+        ResponseEntity<SectionResponse> getSectionInfoResponse = template.exchange(userUrl + "sections/" + createSectionResponse.getBody().getId(),
+                HttpMethod.GET, getSectionEntity, SectionResponse.class);
+
+        assertAll(
+                () -> assertEquals(200, getSectionInfoResponse.getStatusCodeValue()),
+                () -> assertEquals(createSectionResponse.getBody().getId(), getSectionInfoResponse.getBody().getId()),
+                () -> assertEquals(createSectionResponse.getBody().getSectionName(), getSectionInfoResponse.getBody().getSectionName())
+        );
+    }
+
+    @Test
+    public void testGetSectionInfoSection_notExistingSection() {
+        HttpEntity<UserInfoResponse> registerResponse = template.postForEntity(userUrl + "accounts", rightRegisterRequest, UserInfoResponse.class);
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Cookie", registerResponse.getHeaders().getFirst("Set-Cookie"));
+
+        SectionRequest createRequest = new SectionRequest("TestSection");
+        HttpEntity<SectionRequest> createEntity = new HttpEntity<>(createRequest, headers);
+        template.exchange(userUrl + "sections", HttpMethod.POST, createEntity, SectionResponse.class);
+
+        HttpEntity<Void> getSectionEntity = new HttpEntity<>(headers);
+
+        HttpClientErrorException exc = assertThrows(HttpClientErrorException.class, () -> {
+            template.exchange(userUrl + "sections/" + 77,
+                    HttpMethod.GET, getSectionEntity, Void.class);
+        });
+        System.out.println(exc.getResponseBodyAsString());
+
+        assertAll(
+                () -> assertEquals(400, exc.getStatusCode().value()),
+                () -> assertTrue(exc.getResponseBodyAsString().contains("No such section on the server"))
+        );
+    }
+
+    @Test
+    public void testRenameSection_wrongSectionName() {
+        HttpEntity<UserInfoResponse> registerResponse = template.postForEntity(userUrl + "accounts", rightRegisterRequest, UserInfoResponse.class);
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Cookie", registerResponse.getHeaders().getFirst("Set-Cookie"));
+
+        SectionRequest createRequest = new SectionRequest("TestSection");
+        HttpEntity<SectionRequest> createEntity = new HttpEntity<>(createRequest, headers);
+        ResponseEntity<SectionResponse> createSectionResponse = template.exchange(
+                userUrl + "sections", HttpMethod.POST, createEntity, SectionResponse.class);
+
+        SectionRequest renameRequest = new SectionRequest("WrongSectionName_!@#$%^&*()");
+        HttpEntity<SectionRequest> renameEntity = new HttpEntity<>(renameRequest, headers);
+
+        HttpClientErrorException exc = assertThrows(HttpClientErrorException.class, () -> {
+            template.exchange(userUrl + "sections/" + createSectionResponse.getBody().getId(),
+                    HttpMethod.PUT, renameEntity, SectionResponse.class);
+        });
+
+        assertAll(
+                () -> assertEquals(400, exc.getStatusCode().value()),
+                () -> assertTrue(exc.getResponseBodyAsString().contains("Invalid section name"))
         );
     }
 

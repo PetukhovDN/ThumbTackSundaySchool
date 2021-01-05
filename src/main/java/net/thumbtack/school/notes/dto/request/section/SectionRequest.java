@@ -1,20 +1,17 @@
-package net.thumbtack.school.notes.model;
+package net.thumbtack.school.notes.dto.request.section;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDateTime;
+import net.thumbtack.school.notes.validator.SectionName;
 
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Section {
-    long id;
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class SectionRequest {
+    @SectionName
     String sectionName;
-    int authorId;
-    LocalDateTime creationTime;
 }

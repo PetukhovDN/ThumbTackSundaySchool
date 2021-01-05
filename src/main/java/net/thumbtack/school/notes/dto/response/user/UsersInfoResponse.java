@@ -10,9 +10,9 @@ import net.thumbtack.school.notes.enums.UserStatus;
 import java.time.LocalDateTime;
 
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UsersInfoResponse {
     int id;
     String firstName;

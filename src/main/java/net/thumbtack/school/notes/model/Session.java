@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import net.thumbtack.school.notes.validator.SessionLifeTime;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +18,7 @@ public class Session {
     String sessionId;
     int userId;
     LocalDateTime creationTime;
+    @SessionLifeTime
     LocalDateTime lastAccessTime;
     long expiryTime;
 }

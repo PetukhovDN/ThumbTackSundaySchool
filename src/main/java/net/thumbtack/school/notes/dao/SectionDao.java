@@ -1,17 +1,18 @@
 package net.thumbtack.school.notes.dao;
 
+import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.Section;
 
 import java.util.List;
 
 public interface SectionDao {
-    Section createSection(String token, Section section);
+    Section createSection(Section section) throws NoteServerException;
 
-    Section renameSection(String token, int sectionId, String newSectionName);
+    Section renameSection(long sectionId, String newSectionName);
 
-    void deleteSection(String token, int sectionId);
+    void deleteSection(long sectionId);
 
-    Section getSectionInfo(String token, int sectionId);
+    Section getSectionInfo(long sectionId) throws NoteServerException;
 
-    List<Section> getAllSections(String token);
+    List<Section> getAllSections();
 }

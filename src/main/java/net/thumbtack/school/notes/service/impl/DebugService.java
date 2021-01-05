@@ -52,12 +52,31 @@ public class DebugService {
     }
 
     /**
+     * Method to create user account without session (to use in tests)
+     *
+     * @return user account information
+     */
+    public User registerUser() {
+        return serverDao.registerUser();
+    }
+
+
+    /**
+     * Method to login user account (to use in tests)
+     *
+     * @param userId identifier of user to log in to the server
+     * @return user session token
+     */
+    public String loginUser(int userId) {
+        return serverDao.logInUser(userId);
+    }
+
+    /**
      * Method to make user administrator without session (to use in tests)
      *
-     * @param user note user who will become admin
      * @return session id of user in success
      */
-    public String makeAdmin(User user) {
+    public User makeAdmin(User user) {
         return serverDao.makeAdmin(user);
     }
 

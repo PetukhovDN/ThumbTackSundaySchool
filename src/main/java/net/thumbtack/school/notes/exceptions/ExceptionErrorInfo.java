@@ -17,7 +17,10 @@ public enum ExceptionErrorInfo {
     SESSION_DOES_NOT_EXISTS("No such session on the server"),
     WRONG_PASSWORD("Wrong password"),
     SESSION_EXPIRED("Session expired, please log in"),
-    NOT_ENOUGH_RIGHTS("Not enough rights for this action");
+    NOT_ENOUGH_RIGHTS("Not enough rights for this action"),
+    SECTION_ALREADY_EXISTS("Section with this name already exists"),
+    NOT_AUTHOR_OF_SECTION("You are not creator of this section"),
+    SECTION_DOES_NOT_EXISTS("No such section on the server");
 
     @Getter
     String errorString;

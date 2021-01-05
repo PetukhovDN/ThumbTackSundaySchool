@@ -6,7 +6,11 @@ import net.thumbtack.school.notes.model.User;
 public interface ServerDao {
     void clear();
 
-    String makeAdmin(User user);
+    User registerUser();
+
+    String logInUser(int userId);
+
+    User makeAdmin(User user);
 
     User getUserByLogin(String login) throws NoteServerException;
 }
