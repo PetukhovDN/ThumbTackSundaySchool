@@ -8,11 +8,11 @@ import java.util.List;
 public interface SectionDao {
     Section createSection(Section section) throws NoteServerException;
 
-    Section renameSection(long sectionId, String newSectionName);
+    Section renameSection(int sectionId, String newSectionName);
 
-    void deleteSection(long sectionId);
+    void deleteSection(int sectionId);
 
-    Section getSectionInfo(long sectionId) throws NoteServerException;
+    Section getSectionInfo(int sectionId) throws NoteServerException;
 
     List<Section> getAllSections();
 }

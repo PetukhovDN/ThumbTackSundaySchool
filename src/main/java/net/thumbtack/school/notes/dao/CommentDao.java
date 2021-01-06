@@ -5,11 +5,11 @@ import net.thumbtack.school.notes.model.Comment;
 import java.util.List;
 
 public interface CommentDao {
-    Comment createComment(String token, Comment comment);
+    Comment createComment(Comment comment);
 
-    List<Comment> getAllCommentsForNote(String token, int noteId);
+    List<Comment> getAllCommentsForNote(int noteId);
 
-    Comment changeComment(String token, int commentId, String newCommentBody);
+    Comment changeComment(int commentId, String newCommentBody);
 
-    void deleteComment(String token, int commentId);
+    void deleteComment(int commentId);
 }

@@ -19,13 +19,13 @@ public interface SectionMapper {
 
     @Select("SELECT id, section_name as sectionName, section_creation_time as creationTime, author_id as authorId " +
             "FROM section WHERE id = #{sectionId} ")
-    Section getSectionById(long sectionId);
+    Section getSectionById(int sectionId);
 
     @Update("UPDATE section SET section_name = #{newSectionName} WHERE id = #{sectionId}")
-    void updateSection(long sectionId, String newSectionName);
+    void updateSection(int sectionId, String newSectionName);
 
     @Delete("DELETE FROM section WHERE id = #{sectionId}")
-    void deleteSection(long sectionId);
+    void deleteSection(int sectionId);
 
     @Select("SELECT id, section_name as sectionName, section_creation_time as creationTime, author_id as authorId FROM section")
     List<Section> getAllSections();

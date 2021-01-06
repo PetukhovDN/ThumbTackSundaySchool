@@ -7,9 +7,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 /**
- * User firstname and lastname validation during registration.
- * Cannot be null or longer max_name_length.
- * User can only use letters of the Russian and English alphabets and space and dash characters.
+ * User firstname and lastname validation during registration
  */
 public class UserNameValidator implements ConstraintValidator<UserName, String> {
 
@@ -18,14 +16,19 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
      * Set in application.properties
      */
     @Value("${max_name_length}")
-    private long maxNameLength;
+    private int maxNameLength;
 
+    /**
+     * @param userName cannot be null or longer max_name_length, user can only use
+     *                 letters of the Russian and English alphabets and space and dash characters
+     * @return success if name is valid
+     */
     @Override
-    public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(String userName, ConstraintValidatorContext constraintValidatorContext) {
         String regex = "^[a-zA-Zа-яА-ЯёЁ\\s.'-]+$";
-        return s != null
-                && !s.isBlank()
-                && s.length() <= maxNameLength
-                && s.matches(regex);
+        return userName != null
+                && !userName.isBlank()
+                && userName.length() <= maxNameLength
+                && userName.matches(regex);
     }
 }

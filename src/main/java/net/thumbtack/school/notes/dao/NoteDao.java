@@ -3,17 +3,17 @@ package net.thumbtack.school.notes.dao;
 import net.thumbtack.school.notes.model.Note;
 
 public interface NoteDao {
-    Note createNote(String token, Note note, int sectionId);
+    Note createNote(Note note, int sectionId);
 
-    Note getNoteInfo(String token, int noteId);
+    Note getNoteInfo(int noteId);
 
-    Note changeNote(String token, int noteId, String noteBody);
+    Note changeNote(int noteId, String noteBody);
 
-    Note replaceNote(String token, int noteId, int sectionId);
+    Note replaceNote(int noteId, int sectionId);
 
-    void deleteNote(String token, int noteId);
+    void deleteNote(int noteId);
 
-    void deleteAllCommentsForNote(String token, int noteId);
+    void deleteAllCommentsForNote(int noteId);
 
-    void rateNote(String token, int noteId, int rating);
+    void rateNote(int noteId, int rating);
 }

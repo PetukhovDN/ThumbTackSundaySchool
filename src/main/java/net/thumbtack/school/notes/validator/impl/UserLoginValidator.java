@@ -7,9 +7,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 /**
- * User login validation during registration.
- * Cannot be null, empty and longer max_name_length.
- * User can only use letters of the Russian and English alphabets and numbers.
+ * User login validation during registration
  */
 public class UserLoginValidator implements ConstraintValidator<UserLogin, String> {
 
@@ -18,14 +16,19 @@ public class UserLoginValidator implements ConstraintValidator<UserLogin, String
      * Set in application.properties
      */
     @Value("${max_name_length}")
-    private long maxNameLength;
+    private int maxNameLength;
 
+    /**
+     * @param userLogin cannot be null, empty and longer max_name_length, user can only use
+     *                  letters of the Russian and English alphabets and numbers
+     * @return success if login is valid
+     */
     @Override
-    public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(String userLogin, ConstraintValidatorContext constraintValidatorContext) {
         String regex = "^[a-zA-Zа-яА-ЯёЁ0-9]+$";
-        return s != null
-                && !s.isBlank()
-                && s.length() <= maxNameLength
-                && s.matches(regex);
+        return userLogin != null
+                && !userLogin.isBlank()
+                && userLogin.length() <= maxNameLength
+                && userLogin.matches(regex);
     }
 }

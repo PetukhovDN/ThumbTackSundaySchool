@@ -8,8 +8,7 @@ import javax.validation.ConstraintValidatorContext;
 
 
 /**
- * User password validation during registration.
- * Cannot be null, empty or shorter min_password_length.
+ * User password validation during registration
  */
 public class UserPasswordValidator implements ConstraintValidator<UserPassword, String> {
 
@@ -18,12 +17,16 @@ public class UserPasswordValidator implements ConstraintValidator<UserPassword, 
      * Set in application.properties
      */
     @Value("${min_password_length}")
-    private long minPasswordLength;
+    private int minPasswordLength;
 
+    /**
+     * @param userPassword cannot be null, empty or shorter min_password_length
+     * @return success if password is valid
+     */
     @Override
-    public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
-        return s != null
-                && !s.isBlank()
-                && s.length() >= minPasswordLength;
+    public boolean isValid(String userPassword, ConstraintValidatorContext constraintValidatorContext) {
+        return userPassword != null
+                && !userPassword.isBlank()
+                && userPassword.length() >= minPasswordLength;
     }
 }

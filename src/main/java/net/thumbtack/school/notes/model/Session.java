@@ -20,5 +20,5 @@ public class Session {
     LocalDateTime creationTime;
     @SessionLifeTime
     LocalDateTime lastAccessTime;
-    long expiryTime;
+    int expiryTime;
 }

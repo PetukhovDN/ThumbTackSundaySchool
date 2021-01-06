@@ -17,37 +17,37 @@ public class NoteDaoImpl implements NoteDao {
     NoteMapper noteMapper;
 
     @Override
-    public Note createNote(String token, Note note, int sectionId) {
+    public Note createNote(Note note, int sectionId) {
         return null;
     }
 
     @Override
-    public Note getNoteInfo(String token, int noteId) {
+    public Note getNoteInfo(int noteId) {
         return null;
     }
 
     @Override
-    public Note changeNote(String token, int noteId, String noteBody) {
+    public Note changeNote(int noteId, String noteBody) {
         return null;
     }
 
     @Override
-    public Note replaceNote(String token, int noteId, int sectionId) {
+    public Note replaceNote(int noteId, int sectionId) {
         return null;
     }
 
     @Override
-    public void deleteNote(String token, int noteId) {
+    public void deleteNote(int noteId) {
 
     }
 
     @Override
-    public void deleteAllCommentsForNote(String token, int noteId) {
+    public void deleteAllCommentsForNote(int noteId) {
 
     }
 
     @Override
-    public void rateNote(String token, int noteId, int rating) {
+    public void rateNote(int noteId, int rating) {
 
     }
 }

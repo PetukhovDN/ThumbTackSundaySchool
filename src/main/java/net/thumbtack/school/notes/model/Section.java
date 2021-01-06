@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Section {
-    long id;
+    int id;
     String sectionName;
     int authorId;
     LocalDateTime creationTime;

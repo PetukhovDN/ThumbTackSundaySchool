@@ -14,6 +14,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * DataAccessObject to work with note`s sections
+ */
 @Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -21,6 +24,13 @@ import java.util.List;
 public class SectionDaoImpl implements SectionDao {
     SectionMapper sectionMapper;
 
+    /**
+     * Method to save section to the database
+     *
+     * @param section contains new section information
+     * @return section information in success
+     * @throws NoteServerException if section with such name already exists in database
+     */
     @Override
     public Section createSection(Section section) throws NoteServerException {
         log.info("DAO insert Section {} to Database", section);
@@ -36,8 +46,15 @@ public class SectionDaoImpl implements SectionDao {
         }
     }
 
+    /**
+     * Method to change section name in database
+     *
+     * @param sectionId      identifier of section to be changed
+     * @param newSectionName new section name
+     * @return section information in success
+     */
     @Override
-    public Section renameSection(long sectionId, String newSectionName) {
+    public Section renameSection(int sectionId, String newSectionName) {
         log.info("DAO change Section name {} in Database", newSectionName);
         try {
             sectionMapper.updateSection(sectionId, newSectionName);
@@ -48,8 +65,13 @@ public class SectionDaoImpl implements SectionDao {
         }
     }
 
+    /**
+     * Method to delete section information from database
+     *
+     * @param sectionId identifier of section to be deleted
+     */
     @Override
-    public void deleteSection(long sectionId) {
+    public void deleteSection(int sectionId) {
         log.info("DAO delete Section with id {} from Database", sectionId);
         try {
             sectionMapper.deleteSection(sectionId);
@@ -59,8 +81,15 @@ public class SectionDaoImpl implements SectionDao {
         }
     }
 
+    /**
+     * Method to get section information
+     *
+     * @param sectionId identifier of section for which information is needed
+     * @return section information in success
+     * @throws NoteServerException if there is no section with given identifier in database
+     */
     @Override
-    public Section getSectionInfo(long sectionId) throws NoteServerException {
+    public Section getSectionInfo(int sectionId) throws NoteServerException {
         log.info("DAO get information about Section with id {} from Database", sectionId);
         try {
             Section section = sectionMapper.getSectionById(sectionId);
@@ -75,6 +104,11 @@ public class SectionDaoImpl implements SectionDao {
         }
     }
 
+    /**
+     * Method to get information about all sections, saved in database
+     *
+     * @return list of existing in database sections
+     */
     @Override
     public List<Section> getAllSections() {
         log.info("DAO get information about all Sections from Database");

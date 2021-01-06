@@ -12,13 +12,13 @@ public interface SectionService {
     Section createSection(SectionRequest createRequest, String sessionId) throws NoteServerException;
 
     @Transactional
-    Section renameSection(SectionRequest createRequest, String sessionId, long sectionId) throws NoteServerException;
+    Section renameSection(SectionRequest createRequest, String sessionId, int sectionId) throws NoteServerException;
 
     @Transactional
-    void deleteSection(String sessionId, long sectionId) throws NoteServerException;
+    void deleteSection(String sessionId, int sectionId) throws NoteServerException;
 
     @Transactional
-    Section getSectionInfo(String sessionId, long sectionId) throws NoteServerException;
+    Section getSectionInfo(String sessionId, int sectionId) throws NoteServerException;
 
     @Transactional
     List<Section> getAllSections(String sessionId) throws NoteServerException;

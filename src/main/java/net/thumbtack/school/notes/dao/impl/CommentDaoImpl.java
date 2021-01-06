@@ -16,22 +16,22 @@ public class CommentDaoImpl implements CommentDao {
     private final CommentMapper commentMapper;
 
     @Override
-    public Comment createComment(String token, Comment comment) {
+    public Comment createComment(Comment comment) {
         return null;
     }
 
     @Override
-    public List<Comment> getAllCommentsForNote(String token, int noteId) {
+    public List<Comment> getAllCommentsForNote(int noteId) {
         return null;
     }
 
     @Override
-    public Comment changeComment(String token, int commentId, String newCommentBody) {
+    public Comment changeComment(int commentId, String newCommentBody) {
         return null;
     }
 
     @Override
-    public void deleteComment(String token, int commentId) {
+    public void deleteComment(int commentId) {
 
     }
 }
