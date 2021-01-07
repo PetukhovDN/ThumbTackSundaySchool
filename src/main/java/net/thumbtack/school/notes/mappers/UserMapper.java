@@ -15,17 +15,17 @@ public interface UserMapper {
     Integer registerUser(@Param("user") User user);
 
     @Select("SELECT id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
-            "user_creation_time as creationTime, user_status as userStatus, deleted_status as isDeleted " +
+            "user_creation_time as creationTime, user_status as userStatus, deleted_status as deleted " +
             "FROM note_user WHERE login = #{login} AND password = #{password}")
     User getUserByLoginAndPassword(String login, String password);
 
     @Select("SELECT id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
-            "user_creation_time as creationTime, user_status as userStatus, deleted_status as isDeleted " +
+            "user_creation_time as creationTime, user_status as userStatus, deleted_status as deleted " +
             "FROM note_user WHERE login = #{login}")
     User getUserByLogin(String login);
 
     @Select("SELECT id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
-            "user_creation_time as creationTime, user_status as userStatus, deleted_status as isDeleted " +
+            "user_creation_time as creationTime, user_status as userStatus, deleted_status as deleted " +
             "FROM note_user WHERE id = #{id}")
     User getUserById(int id);
 
@@ -37,22 +37,22 @@ public interface UserMapper {
     void changeUserStatus(@Param("user") User user);
 
     @Select("SELECT follower_user_id as id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
-            "user_creation_time as creationTime, user_status as userStatus, deleted_status as isDeleted " +
+            "user_creation_time as creationTime, user_status as userStatus, deleted_status as deleted " +
             "FROM note_user n LEFT JOIN following_user f ON n.id = f.follower_user_id WHERE following_user_id = #{id}")
     List<User> getFollowingTo(int id);
 
     @Select("SELECT following_user_id as id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
-            "user_creation_time as creationTime, user_status as userStatus, deleted_status as isDeleted " +
+            "user_creation_time as creationTime, user_status as userStatus, deleted_status as deleted " +
             "FROM note_user n LEFT JOIN following_user f ON n.id = f.following_user_id WHERE follower_user_id = #{id}")
     List<User> getFollowedBy(int id);
 
     @Select("SELECT ignored_by_user_id as id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
-            "user_creation_time as creationTime, user_status as userStatus, deleted_status as isDeleted " +
+            "user_creation_time as creationTime, user_status as userStatus, deleted_status as deleted " +
             "FROM note_user n LEFT JOIN ignore_user i ON n.id = i.ignored_by_user_id WHERE ignoring_user_id = #{id}")
     List<User> getIgnoringTo(int id);
 
     @Select("SELECT ignoring_user_id as id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
-            "user_creation_time as creationTime, user_status as userStatus, deleted_status as isDeleted " +
+            "user_creation_time as creationTime, user_status as userStatus, deleted_status as deleted " +
             "FROM note_user n LEFT JOIN ignore_user i ON n.id = i.ignoring_user_id WHERE ignored_by_user_id = #{id}")
     List<User> getIgnoredBy(int id);
 
@@ -60,7 +60,7 @@ public interface UserMapper {
     List<Integer> getRatings(int id);
 
     @Select("SELECT id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
-            "user_creation_time as creationTime, user_status as userStatus, deleted_status as isDeleted FROM note_user")
+            "user_creation_time as creationTime, user_status as userStatus, deleted_status as deleted FROM note_user")
     @Results({
             @Result(property = "following", column = "id", javaType = List.class,
                     many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getFollowingTo", fetchType = FetchType.LAZY)),
@@ -91,7 +91,7 @@ public interface UserMapper {
     @Delete("DELETE FROM ignore_user WHERE ignored_by_user_id = #{currentUserId} AND ignoring_user_id = #{ignoringUserId}")
     void stopIgnoring(int currentUserId, int ignoringUserId);
 
-    @Update("UPDATE note_user SET deleted_status = #{user.isDeleted} WHERE id = #{user.id}")
+    @Update("UPDATE note_user SET deleted_status = #{user.deleted} WHERE id = #{user.id}")
     void leaveNotesServer(@Param("user") User user);
 
     @Delete("DELETE FROM note_user")

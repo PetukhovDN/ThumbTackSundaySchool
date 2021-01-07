@@ -107,13 +107,13 @@ public class SessionDaoTest {
     public void testUpdateSession_rightSessionId() throws NoteServerException {
         User user = userDao.registerUser(rightParametersUser);
         sessionDao.logInUser(user.getLogin(), user.getPassword(), testUserSession);
-        Session session = sessionDao.getSessionByUserId(user.getId());
+        Session session = sessionDao.getSessionBySessionId(testUserSession.getSessionId());
         LocalDateTime creationTime = session.getCreationTime();
         LocalDateTime lastAccessTime = LocalDateTime.now().plusNanos(1);
         session.setLastAccessTime(lastAccessTime);
 
         sessionDao.updateSession(session);
-        Session resultSession = sessionDao.getSessionByUserId(user.getId());
+        Session resultSession = sessionDao.getSessionBySessionId(testUserSession.getSessionId());
         assertAll(
                 () -> assertEquals(creationTime, resultSession.getCreationTime()),
                 () -> assertNotEquals(session.getLastAccessTime(), resultSession.getLastAccessTime()),

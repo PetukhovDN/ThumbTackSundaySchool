@@ -83,9 +83,9 @@ public class SectionServiceImpl implements SectionService {
     public void deleteSection(String sessionId, int sectionId) throws NoteServerException {
         log.info("Trying to delete section");
         int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
-        Section section = sectionDao.getSectionInfo(sectionId);
         User user = userDao.getUserById(userId);
         if (!user.getUserStatus().equals(UserStatus.ADMIN)) {
+            Section section = sectionDao.getSectionInfo(sectionId);
             if (section.getAuthor().getId() != userId) {
                 throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "You are not creator of this section");
             }

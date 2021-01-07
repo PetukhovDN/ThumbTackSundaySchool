@@ -25,12 +25,6 @@ import java.time.ZoneId;
 public class SessionDaoImpl implements SessionDao {
     final UserMapper userMapper;
     final SessionMapper sessionMapper;
-    /**
-     * Time for which user session is alive
-     * Set in application.properties
-     */
-    @Value("${user_idle_timeout}")
-    int sessionLifeTime;
 
     public SessionDaoImpl(UserMapper userMapper, SessionMapper sessionMapper) {
         this.userMapper = userMapper;
@@ -72,8 +66,7 @@ public class SessionDaoImpl implements SessionDao {
     public void stopUserSession(String sessionId) throws NoteServerException {
         log.info("DAO User logout from server");
         try {
-            Session session = sessionMapper.getSessionBySessionId(sessionId);
-            sessionMapper.stopUserSession(session.getUserId());
+            sessionMapper.stopUserSession(sessionId);
         } catch (NullPointerException ex) {
             log.error("No session with id {} running on server", sessionId);
             throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, "No such session on the server");
@@ -111,14 +104,10 @@ public class SessionDaoImpl implements SessionDao {
      * @return user session token in success
      */
     @Override
-    public Session getSessionByUserId(int userId) throws NoteServerException {
+    public Session getSessionByUserId(int userId){
         log.info("DAO Get user session from database");
         try {
-            Session userSession = sessionMapper.getSessionByUserId(userId);
-            if (sessionExpired(userSession)) {
-                throw new NoteServerException(ExceptionErrorInfo.SESSION_EXPIRED, "Session for user with id " + userId + " expired");
-            }
-            return userSession;
+            return sessionMapper.getSessionByUserId(userId);
         } catch (RuntimeException ex) {
             log.error("Can't get user session from server, ", ex);
             throw ex;
@@ -155,7 +144,7 @@ public class SessionDaoImpl implements SessionDao {
                     .toInstant()
                     .toEpochMilli() / 1000;
             long currentTimeInSec = LocalDateTime.now().atZone(ZoneId.of("Asia/Omsk")).toInstant().toEpochMilli() / 1000;
-            return currentTimeInSec > sessionStartTimeInSec + sessionLifeTime;
+            return currentTimeInSec > sessionStartTimeInSec + session.getExpiryTime();
         } catch (NullPointerException ex) {
             log.error("No such session on the server");
             throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, "No such session on the server");

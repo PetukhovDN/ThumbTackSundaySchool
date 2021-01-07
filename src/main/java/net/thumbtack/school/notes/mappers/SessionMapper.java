@@ -10,8 +10,8 @@ public interface SessionMapper {
     @Options(useGeneratedKeys = true, keyProperty = "session.id")
     Integer startUserSession(@Param("session") Session session, int userId);
 
-    @Delete("DELETE FROM session WHERE note_user_id = #{userId}")
-    void stopUserSession(int userId);
+    @Delete("DELETE FROM session WHERE session_id = #{sessionId}")
+    void stopUserSession(String sessionId);
 
     @Select("SELECT id, session_id as sessionId, note_user_id as userId, session_start_time as creationTime, " +
             "last_access_time as lastAccessTime, expiry_time as expiryTime " +

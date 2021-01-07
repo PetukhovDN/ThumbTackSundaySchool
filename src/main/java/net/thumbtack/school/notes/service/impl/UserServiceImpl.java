@@ -84,7 +84,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public String loginUser(LoginRequest loginRequest, String sessionId, String newSessionID) throws NoteServerException {
         log.info("Trying to login user");
-        if (sessionDao.getSessionBySessionId(sessionId) != null) {
+        User user = userDao.getUserByLogin(loginRequest.getLogin());
+        if (sessionDao.getSessionByUserId(user.getId()) != null) {
             sessionDao.stopUserSession(sessionId);
         }
         Session userSession = new Session();

@@ -20,8 +20,8 @@ public class UsersInfoResponse {
     String patronymic;
     String login;
     LocalDateTime creationTime;
-    boolean isOnline;
-    boolean isDeleted;
+    boolean online;
+    boolean deleted;
     UserStatus userStatus;
     int rating;
 }

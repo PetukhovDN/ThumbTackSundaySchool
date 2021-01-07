@@ -22,8 +22,8 @@ public class User {
     String login;
     String password;
     LocalDateTime creationTime;
-    boolean isDeleted;
-    boolean isOnline;
+    boolean deleted;
+    boolean online;
     UserStatus userStatus;
     List<Integer> ratings;
 

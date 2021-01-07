@@ -20,7 +20,11 @@ public enum ExceptionErrorInfo {
     NOT_ENOUGH_RIGHTS("Not enough rights for this action"),
     SECTION_ALREADY_EXISTS("Section with this name already exists"),
     NOT_AUTHOR_OF_SECTION("You are not creator of this section"),
-    SECTION_DOES_NOT_EXISTS("No such section on the server");
+    SECTION_DOES_NOT_EXISTS("No such section on the server"),
+    NOTE_ALREADY_EXISTS("Note with this subject already exists"),
+    NOTE_DOES_NOT_EXISTS("No such note on the server"),
+    EDIT_PARAMETERS_REQUIRED("At least one parameter is required"),
+    INCORRECT_SECTION_IDENTIFIER("Incorrect section id");
 
     @Getter
     String errorString;

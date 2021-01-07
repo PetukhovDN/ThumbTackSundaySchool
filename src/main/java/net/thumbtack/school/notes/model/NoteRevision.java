@@ -6,11 +6,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
 public class NoteRevision {
-    int revision;
-    String noteBody;
+    int id;
+    String revisionId;
+    String body;
+    int noteId;
+    LocalDateTime creationTime;
 }

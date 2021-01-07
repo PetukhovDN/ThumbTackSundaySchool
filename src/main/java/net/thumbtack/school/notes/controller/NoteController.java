@@ -4,7 +4,10 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dto.mappers.SectionMupStruct;
+import net.thumbtack.school.notes.dto.request.note.EditRequest;
+import net.thumbtack.school.notes.dto.request.note.NoteRequest;
 import net.thumbtack.school.notes.dto.request.section.SectionRequest;
+import net.thumbtack.school.notes.dto.response.note.NoteResponse;
 import net.thumbtack.school.notes.dto.response.section.SectionResponse;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.Section;
@@ -58,7 +61,8 @@ public class NoteController {
         sectionService.deleteSection(sessionId, id);
     }
 
-    @GetMapping(value = "sections/{id}")
+    @GetMapping(value = "sections/{id}",
+            produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public SectionResponse getSectionInfo(@PathVariable(value = "id") int id,
                                           @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
@@ -66,7 +70,8 @@ public class NoteController {
 
     }
 
-    @GetMapping(value = "sections")
+    @GetMapping(value = "sections",
+            produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<SectionResponse> getAllSectionsInfo(@CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
         List<SectionResponse> responses = new ArrayList<>();
@@ -77,7 +82,38 @@ public class NoteController {
         return responses;
     }
 
-    //TODO: notes methods
+    @PostMapping(value = "notes",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    @Valid
+    public NoteResponse createNote(@RequestBody @Valid NoteRequest createRequest,
+                                   @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
+        return noteService.createNote(createRequest, sessionId);
+    }
 
+    @GetMapping(value = "notes/{id}",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public NoteResponse getNoteInfo(@PathVariable(value = "id") int noteId,
+                                    @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
+        return noteService.getNoteInfo(noteId, sessionId);
+    }
 
+    @PutMapping(value = "notes/{id}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public NoteResponse editNote(@RequestBody @Valid EditRequest editRequest,
+                                 @PathVariable(value = "id") int noteId,
+                                 @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
+        return noteService.editNote(editRequest, noteId, sessionId);
+    }
+
+    @DeleteMapping(value = "notes/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteNote(@PathVariable(value = "id") int noteId,
+                           @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
+        noteService.deleteNote(noteId, sessionId);
+    }
 }

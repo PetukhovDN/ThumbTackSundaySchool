@@ -1,15 +1,21 @@
 package net.thumbtack.school.notes.dao;
 
+import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.Note;
+import net.thumbtack.school.notes.model.NoteRevision;
 
 public interface NoteDao {
-    Note createNote(Note note, int sectionId);
+    Note createNote(Note note) throws NoteServerException;
 
-    Note getNoteInfo(int noteId);
+    NoteRevision createNoteRevision(NoteRevision noteRevision);
 
-    Note changeNote(int noteId, String noteBody);
+    Note getNoteInfo(int noteId) throws NoteServerException;
 
-    Note replaceNote(int noteId, int sectionId);
+    NoteRevision getNoteRevisionInfo(String revisionId, int noteId) throws NoteServerException;
+
+    Note updateNoteLastRevision(int noteId, String revisionId);
+
+    void replaceNoteToOtherSection(int noteId, int sectionId);
 
     void deleteNote(int noteId);
 

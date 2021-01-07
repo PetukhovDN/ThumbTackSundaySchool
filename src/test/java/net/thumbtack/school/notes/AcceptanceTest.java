@@ -113,7 +113,7 @@ public class AcceptanceTest {
         System.out.println(exc.getResponseBodyAsString());
         assertAll(
                 () -> assertEquals(400, exc.getStatusCode().value()),
-                () -> assertTrue(exc.getResponseBodyAsString().contains("User with this login not registered on server"))
+                () -> assertTrue(exc.getResponseBodyAsString().contains("No such user on the server"))
         );
     }
 

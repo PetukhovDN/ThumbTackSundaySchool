@@ -57,12 +57,14 @@ create TABLE section (
 
 create TABLE note (
 	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    note_head VARCHAR(100) NOT NULL,
+    note_subject VARCHAR(100) NOT NULL,
+    last_revision_id VARCHAR(50),
     note_creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	author_id INT(11) NOT NULL,
     section_id INT(11) NOT NULL,
     KEY author_id (author_id),
     KEY section_id (section_id),
+    KEY last_revision_id (last_revision_id),
     KEY note_creation_time (note_creation_time),
     FOREIGN KEY (author_id) REFERENCES note_user (id),
     FOREIGN KEY (section_id) REFERENCES section (id) ON update CASCADE ON delete CASCADE)
@@ -70,11 +72,12 @@ create TABLE note (
 
 create TABLE note_revision (
 	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    revision INT(11) NOT NULL,
+	revision_id VARCHAR(50) NOT NULL,
     note_id INT(11) NOT NULL,
     note_body VARCHAR(5000) NOT NULL,
-    KEY revision (revision),
-    UNIQUE KEY note_revision (revision, note_id),
+    note_revision_creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY revision_id (revision_id),
+    KEY note_revision_creation_time (note_revision_creation_time),
     FOREIGN KEY (note_id) REFERENCES note (id) ON update CASCADE ON delete CASCADE)
     ENGINE=INNODB DEFAULT CHARSET=utf8;
 
