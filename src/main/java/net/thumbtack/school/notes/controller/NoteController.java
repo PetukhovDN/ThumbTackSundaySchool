@@ -66,19 +66,18 @@ public class NoteController {
 
     }
 
-
     @GetMapping(value = "sections")
     @ResponseStatus(HttpStatus.OK)
     public List<SectionResponse> getAllSectionsInfo(@CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
         List<SectionResponse> responses = new ArrayList<>();
         List<Section> sections = sectionService.getAllSections(sessionId);
-
         for (Section section : sections) {
             responses.add(SectionMupStruct.INSTANCE.responseCreateSection(section));
         }
-
         return responses;
-
     }
+
+    //TODO: notes methods
+
 
 }

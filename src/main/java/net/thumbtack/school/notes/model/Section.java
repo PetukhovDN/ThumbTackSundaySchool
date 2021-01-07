@@ -15,6 +15,6 @@ import java.time.LocalDateTime;
 public class Section {
     int id;
     String sectionName;
-    int authorId;
+    User author;
     LocalDateTime creationTime;
 }

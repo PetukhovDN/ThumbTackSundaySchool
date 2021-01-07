@@ -6,7 +6,7 @@ import net.thumbtack.school.notes.model.Section;
 import java.util.List;
 
 public interface SectionDao {
-    Section createSection(Section section) throws NoteServerException;
+    Section createSection(Section section, int userId) throws NoteServerException;
 
     Section renameSection(int sectionId, String newSectionName);
 

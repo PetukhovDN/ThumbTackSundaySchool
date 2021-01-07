@@ -45,8 +45,7 @@ public class SectionServiceImpl implements SectionService {
         log.info("Trying to create new section");
         int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
         Section section = SectionMupStruct.INSTANCE.requestCreateSection(createRequest);
-        section.setAuthorId(userId);
-        return sectionDao.createSection(section);
+        return sectionDao.createSection(section, userId);
     }
 
     /**
@@ -64,7 +63,7 @@ public class SectionServiceImpl implements SectionService {
         log.info("Trying to rename existed section");
         int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
         Section section = sectionDao.getSectionInfo(sectionId);
-        if (section.getAuthorId() != userId) {
+        if (section.getAuthor().getId() != userId) {
             throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "You are not creator of this section");
         }
         return sectionDao.renameSection(sectionId, section.getSectionName());
@@ -87,7 +86,7 @@ public class SectionServiceImpl implements SectionService {
         Section section = sectionDao.getSectionInfo(sectionId);
         User user = userDao.getUserById(userId);
         if (!user.getUserStatus().equals(UserStatus.ADMIN)) {
-            if (section.getAuthorId() != userId) {
+            if (section.getAuthor().getId() != userId) {
                 throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "You are not creator of this section");
             }
         }

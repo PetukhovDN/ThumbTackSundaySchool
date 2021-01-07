@@ -33,9 +33,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AcceptanceTest {
-    RestTemplate template = new RestTemplate();
-    RegisterRequest rightRegisterRequest = new RegisterRequest();
-    String userUrl = "http://localhost:8888/api/";
+    final RestTemplate template = new RestTemplate();
+    final RegisterRequest rightRegisterRequest = new RegisterRequest();
+    final String userUrl = "http://localhost:8888/api/";
 
     @BeforeEach
     void setUp() {
@@ -291,7 +291,7 @@ public class AcceptanceTest {
     }
 
     @Test
-    public void testGetSectionInfoSection_notExistingSection() {
+    public void testGetSectionInfo_notExistingSection() {
         HttpEntity<UserInfoResponse> registerResponse = template.postForEntity(userUrl + "accounts", rightRegisterRequest, UserInfoResponse.class);
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add("Cookie", registerResponse.getHeaders().getFirst("Set-Cookie"));

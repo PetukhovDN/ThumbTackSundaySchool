@@ -32,10 +32,10 @@ public class SectionDaoImpl implements SectionDao {
      * @throws NoteServerException if section with such name already exists in database
      */
     @Override
-    public Section createSection(Section section) throws NoteServerException {
+    public Section createSection(Section section, int userId) throws NoteServerException {
         log.info("DAO insert Section {} to Database", section);
         try {
-            sectionMapper.saveSection(section);
+            sectionMapper.saveSection(section, userId);
             return sectionMapper.getSectionByName(section.getSectionName());
         } catch (DuplicateKeyException ex) {
             log.error("Section {} already exists", section.getSectionName(), ex);

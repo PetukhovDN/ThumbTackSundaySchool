@@ -79,15 +79,17 @@ public class SectionServiceTest {
         User anotherUser = debugService.registerUser();
         String anotherUserSessionId = debugService.loginUser(anotherUser.getId());
 
-        NoteServerException exception = assertThrows(NoteServerException.class, () -> {
-            sectionService.deleteSection(anotherUserSessionId, section.getId());
-        });
-
-        assertAll(
-                () -> assertNotNull(exception.getExceptionErrorInfo()),
-                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
-                        .contains("You are not creator of this section"))
-        );
+        //NoteServerException exception = assertThrows(NoteServerException.class, () -> {
+        //    sectionService.deleteSection(anotherUserSessionId, section.getId());
+        //});
+        Section resultSection = sectionService.getSectionInfo(anotherUserSessionId, section.getId());
+        User author = resultSection.getAuthor();
+        System.out.println("---");
+//        assertAll(
+//                () -> assertNotNull(exception.getExceptionErrorInfo()),
+//                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
+//                        .contains("You are not creator of this section"))
+//        );
     }
 
     @Test

@@ -166,10 +166,5 @@ class UserDaoTest {
         assertAll(
                 () -> assertEquals(0, ignoringUsersEmptyList.size())
         );
-
     }
-
-    //TODO
-    //test follow/ignore user
-    //javadoc
 }
