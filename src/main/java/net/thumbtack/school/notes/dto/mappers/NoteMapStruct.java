@@ -20,8 +20,8 @@ public interface NoteMapStruct {
      * Transforms request to create note to the note model
      */
     @Mappings({
-            @Mapping(target = "subject", source = "createRequest.subject"),
-            @Mapping(target = "sectionId", source = "createRequest.sectionId")
+            @Mapping(target = "subject", source = "subject"),
+            @Mapping(target = "section.id", source = "sectionId")
     })
     Note requestCreateNote(NoteRequest createRequest);
 
@@ -29,7 +29,7 @@ public interface NoteMapStruct {
      * Transforms request to create note body to the note revision model
      */
     @Mappings({
-            @Mapping(target = "body", source = "createRequest.body")
+            @Mapping(target = "body", source = "body")
     })
     NoteRevision requestCreateNoteRevision(NoteRequest createRequest);
 
@@ -40,8 +40,8 @@ public interface NoteMapStruct {
             @Mapping(target = "id", source = "note.id"),
             @Mapping(target = "subject", source = "note.subject"),
             @Mapping(target = "body", source = "noteRevision.body"),
-            @Mapping(target = "sectionId", source = "note.sectionId"),
-            @Mapping(target = "authorId", source = "note.authorId"),
+            @Mapping(target = "sectionId", source = "note.section.id"),
+            @Mapping(target = "authorId", source = "note.author.id"),
             @Mapping(target = "created", source = "note.creationTime"),
             @Mapping(target = "revisionId", source = "note.lastRevisionId")
     })

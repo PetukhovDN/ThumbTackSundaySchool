@@ -36,9 +36,10 @@ public class NoteServiceImpl implements NoteService {
     @Transactional
     public NoteResponse createNote(NoteRequest createRequest, String sessionId) throws NoteServerException {
         log.info("Trying to create new note");
-        int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
+        int currentUserId = sessionDao.getSessionBySessionId(sessionId).getUserId();
+        User currentUser = userDao.getUserById(currentUserId);
         Note note = NoteMapStruct.INSTANCE.requestCreateNote(createRequest);
-        note.setAuthorId(userId);
+        note.setAuthor(currentUser);
 
         Note createdNote = noteDao.createNote(note);
 
@@ -72,7 +73,7 @@ public class NoteServiceImpl implements NoteService {
         int currentUserId = sessionDao.getSessionBySessionId(sessionId).getUserId();
         User user = userDao.getUserById(currentUserId);
         if (!user.getUserStatus().equals(UserStatus.ADMIN)) {
-            int authorId = noteDao.getNoteInfo(noteId).getAuthorId();
+            int authorId = noteDao.getNoteInfo(noteId).getAuthor().getId();
             if (authorId != currentUserId) {
                 throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "You are not creator of this section");
             }
@@ -116,7 +117,7 @@ public class NoteServiceImpl implements NoteService {
         int currentUserId = sessionDao.getSessionBySessionId(sessionId).getUserId();
         User user = userDao.getUserById(currentUserId);
         if (!user.getUserStatus().equals(UserStatus.ADMIN)) {
-            int authorId = noteDao.getNoteInfo(noteId).getAuthorId();
+            int authorId = noteDao.getNoteInfo(noteId).getAuthor().getId();
             if (authorId != currentUserId) {
                 throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "You are not creator of this section");
             }

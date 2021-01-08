@@ -2,7 +2,12 @@ package net.thumbtack.school.notes.mappers;
 
 import net.thumbtack.school.notes.model.Note;
 import net.thumbtack.school.notes.model.NoteRevision;
+import net.thumbtack.school.notes.model.Section;
+import net.thumbtack.school.notes.model.User;
 import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.mapping.FetchType;
+
+import java.util.List;
 
 @Mapper
 public interface NoteMapper {
@@ -20,17 +25,32 @@ public interface NoteMapper {
     @Select("SELECT id, note_subject as subject, last_revision_id as lastRevisionId, " +
             "author_id as authorId, section_id as sectionId, note_creation_time as creationTime " +
             "FROM note WHERE note_subject = #{subject} ")
+    @Results({
+            @Result(property = "revisions", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.notes.mappers.NoteMapper.getAllNoteRevisions", fetchType = FetchType.LAZY))})
     Note getNoteBySubject(String subject);
 
     @Select("SELECT id, note_subject as subject, last_revision_id as lastRevisionId, " +
-            "author_id as authorId, section_id as sectionId, note_creation_time as creationTime " +
+            "author_id, section_id, note_creation_time as creationTime " +
             "FROM note WHERE id = #{id} ")
+    @Results({
+            @Result(property = "author", column = "author_id", javaType = User.class,
+                    one = @One(select = "net.thumbtack.school.notes.mappers.UserMapper.getUserById", fetchType = FetchType.LAZY)),
+            @Result(property = "section", column = "section_id", javaType = Section.class,
+                    one = @One(select = "net.thumbtack.school.notes.mappers.SectionMapper.getSectionById", fetchType = FetchType.LAZY)),
+            @Result(property = "revisions", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.notes.mappers.NoteMapper.getAllNoteRevisions", fetchType = FetchType.LAZY))})
     Note getNoteById(int id);
 
     @Select("SELECT id, revision_id as revisionId, note_id as noteId, note_body as body, " +
             "note_revision_creation_time as creationTime " +
             "FROM note_revision WHERE revision_id = #{revisionId} AND note_id = #{noteId}")
     NoteRevision getNoteRevision(String revisionId, int noteId);
+
+    @Select("SELECT id, revision_id as revisionId, note_id as noteId, note_body as body, " +
+            "note_revision_creation_time as creationTime " +
+            "FROM note_revision WHERE note_id = #{noteId}")
+    List<NoteRevision> getAllNoteRevisions(int noteId);
 
     @Update("UPDATE note SET last_revision_id = #{revisionId} WHERE id = #{noteId}")
     void updateNoteLastRevisionId(int noteId, String revisionId);

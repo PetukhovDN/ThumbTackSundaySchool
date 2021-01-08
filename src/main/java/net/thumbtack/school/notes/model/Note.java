@@ -18,7 +18,7 @@ public class Note {
     String subject;
     String lastRevisionId;
     List<NoteRevision> revisions;
-    int authorId;
-    int sectionId;
+    User author;
+    Section section;
     LocalDateTime creationTime;
 }
