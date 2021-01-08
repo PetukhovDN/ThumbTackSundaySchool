@@ -53,10 +53,10 @@ create TABLE section (
 	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     section_name VARCHAR(50) NOT NULL,
     section_creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    author_id INT(11) NOT NULL,
+    author_id INT(11),
     KEY section_name (section_name),
     KEY section_creation_time (section_creation_time),
-    FOREIGN KEY (author_id) REFERENCES note_user (id) ON update CASCADE ON delete CASCADE)
+    FOREIGN KEY (author_id) REFERENCES note_user (id) ON update set null ON delete set null)
 	ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 create TABLE note (
@@ -75,12 +75,10 @@ create TABLE note (
 	ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 create TABLE note_revision (
-	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	revision_id VARCHAR(50) NOT NULL,
+	revision_id VARCHAR(50) NOT NULL PRIMARY KEY,
     note_id INT(11) NOT NULL,
     note_body VARCHAR(5000) NOT NULL,
     note_revision_creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    KEY revision_id (revision_id),
     KEY note_revision_creation_time (note_revision_creation_time),
     FOREIGN KEY (note_id) REFERENCES note (id) ON update CASCADE ON delete CASCADE)
     ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -91,7 +89,9 @@ create TABLE note_comment (
     comment_creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     author_id INT(11) NOT NULL,
     note_id INT(11) NOT NULL,
+    revision_id INT(11) NOT NULL,
 	KEY comment_creation_time (comment_creation_time),
+	KEY revision_id (revision_id),
     FOREIGN KEY (author_id) REFERENCES note_user (id),
     FOREIGN KEY (note_id) REFERENCES note (id) ON update CASCADE ON delete CASCADE)
     ENGINE=INNODB DEFAULT CHARSET=utf8;

@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +66,7 @@ public class UserServiceImpl implements UserService {
         Session userSession = new Session();
         userSession.setSessionId(newSessionId);
         userSession.setExpiryTime(sessionLifeTime);
-        sessionDao.logInUser(registeredUser.getLogin(), registeredUser.getPassword(), userSession);
+        sessionDao.logInUser(registeredUser.getId(), userSession);
         return registeredUser;
     }
 
@@ -84,15 +83,16 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public String loginUser(LoginRequest loginRequest, String sessionId, String newSessionID) throws NoteServerException {
         log.info("Trying to login user");
-        User user = userDao.getUserByLogin(loginRequest.getLogin());
-        if (sessionDao.getSessionByUserId(user.getId()) != null) {
+        int userId = userDao.getUserByLogin(loginRequest.getLogin()).getId();
+        checkIsPasswordCorrect(userId, loginRequest.getPassword());
+        if (sessionDao.getSessionByUserId(userId) != null) {
             sessionDao.stopUserSession(sessionId);
         }
         Session userSession = new Session();
         userSession.setSessionId(newSessionID);
         userSession.setExpiryTime(sessionLifeTime);
-        Session resultSession = sessionDao.logInUser(loginRequest.getLogin(), loginRequest.getPassword(), userSession);
-        updateSession(resultSession);
+        Session resultSession = sessionDao.logInUser(userId, userSession);
+        sessionDao.updateSession(userSession);
         return resultSession.getSessionId();
     }
 
@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
         try {
             Session userSession = sessionDao.getSessionBySessionId(sessionId);
             User user = userDao.getUserById(userSession.getUserId());
-            updateSession(userSession);
+            sessionDao.updateSession(userSession);
             return user;
         } catch (NullPointerException ex) {
             log.error("No such session on the server");
@@ -177,7 +177,7 @@ public class UserServiceImpl implements UserService {
         User userToUpdate = UserMapStruct.INSTANCE.requestUpdateUser(updateRequest);
         userToUpdate.setId(userSession.getUserId());
         User resultUser = userDao.editUserInfo(userToUpdate);
-        updateSession(userSession);
+        sessionDao.updateSession(userSession);
         return resultUser;
     }
 
@@ -201,7 +201,7 @@ public class UserServiceImpl implements UserService {
         User resultUser = userDao.getUserById(userId);
         resultUser.setUserStatus(UserStatus.ADMIN);
         userDao.changeUserStatus(resultUser);
-        updateSession(userSession);
+        sessionDao.updateSession(userSession);
     }
 
     /**
@@ -213,10 +213,11 @@ public class UserServiceImpl implements UserService {
      * @param sessionId    user session token
      * @return list of user accounts, depending on the user request parameters
      */
+
     //TODO: logic for parameters
     @Override
     @Transactional
-    public List<UsersInfoResponse> getAllUsersInfo(UserRequestParam requestParam, @NotNull String sessionId) throws NoteServerException {
+    public List<UsersInfoResponse> getUsersInfo(UserRequestParam requestParam, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to get all users info");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         List<User> users = userDao.getAllUsers();
@@ -225,7 +226,7 @@ public class UserServiceImpl implements UserService {
             UsersInfoResponse response = UserMapStruct.INSTANCE.responseGetAllUsers(user);
             usersResponse.add(response);
         }
-        updateSession(userSession);
+        sessionDao.updateSession(userSession);
         return usersResponse;
     }
 
@@ -243,10 +244,9 @@ public class UserServiceImpl implements UserService {
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         int currentUserId = userSession.getUserId();
         int userIdToFollow = userDao.getUserByLogin(login).getId();
-
         userDao.stopIgnoreUser(currentUserId, userIdToFollow);
         userDao.followUser(currentUserId, userIdToFollow);
-        updateSession(userSession);
+        sessionDao.updateSession(userSession);
     }
 
     /**
@@ -263,10 +263,9 @@ public class UserServiceImpl implements UserService {
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         int currentUserId = userSession.getUserId();
         int userIdToFollow = userDao.getUserByLogin(login).getId();
-
         userDao.stopFollowUser(currentUserId, userIdToFollow);
         userDao.ignoreUser(currentUserId, userIdToFollow);
-        updateSession(userSession);
+        sessionDao.updateSession(userSession);
     }
 
     /**
@@ -282,9 +281,8 @@ public class UserServiceImpl implements UserService {
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         int currentUserId = userSession.getUserId();
         int userIdToFollow = userDao.getUserByLogin(login).getId();
-
         userDao.stopFollowUser(currentUserId, userIdToFollow);
-        updateSession(userSession);
+        sessionDao.updateSession(userSession);
     }
 
     /**
@@ -300,9 +298,8 @@ public class UserServiceImpl implements UserService {
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         int currentUserId = userSession.getUserId();
         int userIdToFollow = userDao.getUserByLogin(login).getId();
-
         userDao.stopIgnoreUser(currentUserId, userIdToFollow);
-        updateSession(userSession);
+        sessionDao.updateSession(userSession);
     }
 
 
@@ -320,17 +317,4 @@ public class UserServiceImpl implements UserService {
             throw new NoteServerException(ExceptionErrorInfo.WRONG_PASSWORD, password);
         }
     }
-
-    /**
-     * Method to update user session life time
-     * Called after each method which needs user to be logged in
-     *
-     * @param userSession user session to update
-     */
-    public void updateSession(Session userSession) {
-        log.info("Updating session last access time");
-        userSession.setLastAccessTime(LocalDateTime.now());
-        sessionDao.updateSession(userSession);
-    }
-
 }

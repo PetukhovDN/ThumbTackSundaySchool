@@ -25,7 +25,7 @@ public class NoteRequestParam {
     boolean allTags;
     LocalDateTime timeFrom;
     LocalDateTime timeTo;
-    int noteUserId;
+    int userId;
     ParamInclude include;
     boolean comments;
     boolean allVersions;

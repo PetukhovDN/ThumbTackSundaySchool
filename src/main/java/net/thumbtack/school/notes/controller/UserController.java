@@ -95,16 +95,15 @@ public class UserController {
         userService.makeAdmin(id, sessionId);
     }
 
-
     @GetMapping(value = "accounts",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public List<UsersInfoResponse> getAllUsersInfoWithParams(@CookieValue(name = JAVASESSIONID, required = false) String sessionId,
-                                                             @RequestParam(value = "sortByRating", required = false) ParamSort paramSort,
-                                                             @RequestParam(value = "type ", required = false) ParamType paramType,
-                                                             @RequestParam(value = "from", required = false) String from,
-                                                             @RequestParam(value = "count", required = false) String count) throws NoteServerException {
-        return userService.getAllUsersInfo(new UserRequestParam(paramSort, paramType, from, count), sessionId);
+    public List<UsersInfoResponse> getUsersInfoWithParams(@CookieValue(name = JAVASESSIONID, required = false) String sessionId,
+                                                          @RequestParam(value = "sortByRating", required = false) ParamSort paramSort,
+                                                          @RequestParam(value = "type ", required = false) ParamType paramType,
+                                                          @RequestParam(value = "from", required = false) String from,
+                                                          @RequestParam(value = "count", required = false) String count) throws NoteServerException {
+        return userService.getUsersInfo(new UserRequestParam(paramSort, paramType, from, count), sessionId);
     }
 
     @PostMapping(value = "followings",

@@ -9,8 +9,6 @@ import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.mappers.SessionMapper;
 import net.thumbtack.school.notes.mappers.UserMapper;
 import net.thumbtack.school.notes.model.Session;
-import net.thumbtack.school.notes.model.User;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -34,23 +32,17 @@ public class SessionDaoImpl implements SessionDao {
     /**
      * Method to save user session to the database
      *
-     * @param login    user login
-     * @param password user password
-     * @param session  user session token
+     * @param userId  user identifier
+     * @param session user session token
      * @return user session token in success
-     * @throws NoteServerException if there is no user with such login in the database
      */
     @Override
-    public Session logInUser(String login, String password, Session session) throws NoteServerException {
-        log.info("DAO User with login {} logging in to the server", login);
+    public Session logInUser(int userId, Session session) {
+        log.info("DAO User with id {} logging in to the server", userId);
         try {
-            User user = userMapper.getUserByLoginAndPassword(login, password);
-            sessionMapper.startUserSession(session, user.getId());
-        } catch (NullPointerException ex) {
-            log.error("User with login {} doesn't exists", login, ex);
-            throw new NoteServerException(ExceptionErrorInfo.LOGIN_DOES_NOT_EXISTS, login);
+            sessionMapper.startUserSession(session, userId);
         } catch (RuntimeException ex) {
-            log.error("User with login {} can't login to server, ", login, ex);
+            log.error("User with id {} can't login to server, ", userId, ex);
             throw ex;
         }
         return session;
@@ -104,7 +96,7 @@ public class SessionDaoImpl implements SessionDao {
      * @return user session token in success
      */
     @Override
-    public Session getSessionByUserId(int userId){
+    public Session getSessionByUserId(int userId) {
         log.info("DAO Get user session from database");
         try {
             return sessionMapper.getSessionByUserId(userId);
@@ -123,6 +115,7 @@ public class SessionDaoImpl implements SessionDao {
     public void updateSession(Session session) {
         log.info("DAO update user session");
         try {
+            session.setLastAccessTime(LocalDateTime.now());
             sessionMapper.updateSessionLastAccessTime(session);
         } catch (RuntimeException ex) {
             log.error("Can't update user session, ", ex);

@@ -13,6 +13,7 @@ import net.thumbtack.school.notes.enums.UserStatus;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.Section;
+import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.service.SectionService;
 import org.springframework.stereotype.Service;
@@ -43,9 +44,13 @@ public class SectionServiceImpl implements SectionService {
     @Transactional
     public Section createSection(SectionRequest createRequest, String sessionId) throws NoteServerException {
         log.info("Trying to create new section");
-        int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
+        Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        User author = userDao.getUserById(userSession.getUserId());
         Section section = SectionMupStruct.INSTANCE.requestCreateSection(createRequest);
-        return sectionDao.createSection(section, userId);
+        section.setAuthor(author);
+        Section resultSection = sectionDao.createSection(section, author.getId());
+        sessionDao.updateSession(userSession);
+        return resultSection;
     }
 
     /**
@@ -61,12 +66,14 @@ public class SectionServiceImpl implements SectionService {
     @Transactional
     public Section renameSection(SectionRequest renameRequest, String sessionId, int sectionId) throws NoteServerException {
         log.info("Trying to rename existed section");
-        int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
+        Session userSession = sessionDao.getSessionBySessionId(sessionId);
         Section section = sectionDao.getSectionInfo(sectionId);
-        if (section.getAuthor().getId() != userId) {
+        if (section.getAuthor().getId() != userSession.getId()) {
             throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "You are not creator of this section");
         }
-        return sectionDao.renameSection(sectionId, section.getSectionName());
+        Section resultSection = sectionDao.renameSection(sectionId, section.getSectionName());
+        sessionDao.updateSession(userSession);
+        return resultSection;
     }
 
     /**
@@ -82,15 +89,16 @@ public class SectionServiceImpl implements SectionService {
     @Transactional
     public void deleteSection(String sessionId, int sectionId) throws NoteServerException {
         log.info("Trying to delete section");
-        int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
-        User user = userDao.getUserById(userId);
+        Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        User user = userDao.getUserById(userSession.getUserId());
         if (!user.getUserStatus().equals(UserStatus.ADMIN)) {
             Section section = sectionDao.getSectionInfo(sectionId);
-            if (section.getAuthor().getId() != userId) {
+            if (section.getAuthor().getId() != userSession.getId()) {
                 throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "You are not creator of this section");
             }
         }
         sectionDao.deleteSection(sectionId);
+        sessionDao.updateSession(userSession);
     }
 
     /**
@@ -104,8 +112,10 @@ public class SectionServiceImpl implements SectionService {
     @Transactional
     public Section getSectionInfo(String sessionId, int sectionId) throws NoteServerException {
         log.info("Trying to get information about section");
-        sessionDao.getSessionBySessionId(sessionId);
-        return sectionDao.getSectionInfo(sectionId);
+        Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        Section resultSection = sectionDao.getSectionInfo(sectionId);
+        sessionDao.updateSession(userSession);
+        return resultSection;
     }
 
     /**
@@ -118,9 +128,9 @@ public class SectionServiceImpl implements SectionService {
     @Transactional
     public List<Section> getAllSections(String sessionId) throws NoteServerException {
         log.info("Trying to get information about all sections");
-        sessionDao.getSessionBySessionId(sessionId);
-        return sectionDao.getAllSections();
+        Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        List<Section> sections = sectionDao.getAllSections();
+        sessionDao.updateSession(userSession);
+        return sections;
     }
-
-
 }

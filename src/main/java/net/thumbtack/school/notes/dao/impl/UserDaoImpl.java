@@ -36,7 +36,7 @@ public class UserDaoImpl implements UserDao {
         log.info("DAO insert User {} to Database", user);
         try {
             userMapper.registerUser(user);
-            return userMapper.getUserByLoginAndPassword(user.getLogin(), user.getPassword());
+            return userMapper.getUserById(user.getId());
         } catch (DuplicateKeyException ex) {
             log.error("Login {} already exists", user.getLogin(), ex);
             throw new NoteServerException(ExceptionErrorInfo.LOGIN_ALREADY_EXISTS, user.getLogin());
@@ -61,7 +61,7 @@ public class UserDaoImpl implements UserDao {
             log.info("User with login {} was got from database", userById.getLogin());
             return userById;
         } catch (NullPointerException ex) {
-            log.error("No user with login = {} in database", userId);
+            log.error("No user with id = {} in database", userId);
             throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, String.valueOf(userId));
         } catch (RuntimeException ex) {
             log.error("Can't get user info from Database, ", ex);

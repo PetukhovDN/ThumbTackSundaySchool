@@ -9,10 +9,9 @@ import java.util.List;
 
 @Mapper
 public interface SectionMapper {
-
     @Insert("INSERT INTO section (section_name, author_id) " +
             "VALUES ( #{section.sectionName}, #{userId})")
-    @Options(useGeneratedKeys = true, keyProperty = "section.id")
+    @Options(useGeneratedKeys = true, keyProperty = "section.id", keyColumn = "id")
     Integer saveSection(@Param("section") Section section, int userId);
 
     @Select("SELECT id, section_name as sectionName, section_creation_time as creationTime, author_id " +

@@ -9,7 +9,7 @@ import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 /**
- * MapStruct methods to transform user requests from note controller to the section models and models to the responses
+ * MapStruct methods to transform user requests from section requests to the section models, and models to the responses
  */
 @Mapper
 public interface SectionMupStruct {

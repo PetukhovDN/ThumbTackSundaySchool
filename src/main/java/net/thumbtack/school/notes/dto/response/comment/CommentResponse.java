@@ -1,4 +1,4 @@
-package net.thumbtack.school.notes.model;
+package net.thumbtack.school.notes.dto.response.comment;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -7,16 +7,16 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class NoteRevision {
-    String revisionId;
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class CommentResponse {
+    int id;
     String body;
     int noteId;
-    LocalDateTime creationTime;
-    List<Comment> comments;
+    int authorId;
+    String revisionId;
+    LocalDateTime created;
 }

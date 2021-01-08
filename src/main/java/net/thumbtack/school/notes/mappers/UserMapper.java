@@ -11,7 +11,7 @@ public interface UserMapper {
     @Insert("INSERT INTO note_user (first_name, last_name, patronymic, login, password)" +
             " VALUES " +
             "( #{user.firstName}, #{user.lastName}, #{user.patronymic}, #{user.login}, #{user.password} )")
-    @Options(useGeneratedKeys = true, keyProperty = "user.id")
+    @Options(useGeneratedKeys = true, keyProperty = "user.id", keyColumn = "id")
     Integer registerUser(@Param("user") User user);
 
     @Select("SELECT id, first_name as firstName, last_name as lastName, patronymic, login, password, " +

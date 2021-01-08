@@ -19,7 +19,5 @@ public interface NoteDao {
 
     void deleteNote(int noteId);
 
-    void deleteAllCommentsForNote(int noteId);
-
-    void rateNote(int noteId, int rating);
+    void rateNote(int noteId, int userId, int rating);
 }

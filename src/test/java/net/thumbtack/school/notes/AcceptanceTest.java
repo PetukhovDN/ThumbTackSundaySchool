@@ -338,5 +338,4 @@ public class AcceptanceTest {
                 () -> assertTrue(exc.getResponseBodyAsString().contains("Invalid section name"))
         );
     }
-
 }

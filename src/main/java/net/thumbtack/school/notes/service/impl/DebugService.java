@@ -10,6 +10,7 @@ import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Debug service for testing application.
@@ -47,6 +48,7 @@ public class DebugService {
     /**
      * Deletes all database information
      */
+    @Transactional
     public void clearDatabase() {
         serverDao.clear();
     }
@@ -56,10 +58,10 @@ public class DebugService {
      *
      * @return user account information
      */
+    @Transactional
     public User registerUser() {
         return serverDao.registerUser();
     }
-
 
     /**
      * Method to login user account (to use in tests)
@@ -67,6 +69,7 @@ public class DebugService {
      * @param userId identifier of user to log in to the server
      * @return user session token
      */
+    @Transactional
     public String loginUser(int userId) {
         return serverDao.logInUser(userId);
     }
@@ -76,6 +79,7 @@ public class DebugService {
      *
      * @return session id of user in success
      */
+    @Transactional
     public User makeAdmin(User user) {
         return serverDao.makeAdmin(user);
     }
@@ -87,6 +91,7 @@ public class DebugService {
      * @return user information
      * @throws NoteServerException will be thrown if user does`nt exists
      */
+    @Transactional
     public User getUserAccountInfoByLogin(String login) throws NoteServerException {
         return serverDao.getUserByLogin(login);
     }
@@ -96,6 +101,7 @@ public class DebugService {
      *
      * @return response, which contains current server settings
      */
+    @Transactional
     public ServerSettingsResponse getServerSettings() {
         return new ServerSettingsResponse(
                 maxNameLength,

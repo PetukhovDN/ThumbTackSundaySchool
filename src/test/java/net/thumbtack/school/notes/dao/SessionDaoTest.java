@@ -52,38 +52,16 @@ public class SessionDaoTest {
 
     @Test
     public void testLoginUser_rightParameters() throws NoteServerException {
-        userDao.registerUser(rightParametersUser);
-        String sessionId = sessionDao.logInUser(
-                rightParametersUser.getLogin(),
-                rightParametersUser.getPassword(), testUserSession)
+        User registeredUser = userDao.registerUser(rightParametersUser);
+        String sessionId = sessionDao.logInUser(registeredUser.getId(), testUserSession)
                 .getSessionId();
         assertEquals(testUserSession.getSessionId(), sessionId);
     }
 
     @Test
-    public void testLoginUser_loginDoesntExists() {
-        NoteServerException exception = assertThrows(NoteServerException.class, () -> {
-            sessionDao.logInUser(
-                    rightParametersUser.getLogin(),
-                    rightParametersUser.getPassword(),
-                    testUserSession);
-        });
-        assertAll(
-                () -> assertNotNull(exception.getExceptionErrorInfo()),
-                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
-                        .contains("User with this login not registered on server"))
-        );
-
-    }
-
-    @Test
     public void testGetUserIdBySessionId_rightParameters() throws NoteServerException {
         int registeredUserId = userDao.registerUser(rightParametersUser).getId();
-        String sessionId = sessionDao.logInUser(
-                rightParametersUser.getLogin(),
-                rightParametersUser.getPassword(),
-                testUserSession)
-                .getSessionId();
+        String sessionId = sessionDao.logInUser(registeredUserId, testUserSession).getSessionId();
         int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
 
         assertEquals(registeredUserId, userId);
@@ -106,7 +84,7 @@ public class SessionDaoTest {
     @Test
     public void testUpdateSession_rightSessionId() throws NoteServerException {
         User user = userDao.registerUser(rightParametersUser);
-        sessionDao.logInUser(user.getLogin(), user.getPassword(), testUserSession);
+        sessionDao.logInUser(user.getId(), testUserSession);
         Session session = sessionDao.getSessionBySessionId(testUserSession.getSessionId());
         LocalDateTime creationTime = session.getCreationTime();
         LocalDateTime lastAccessTime = LocalDateTime.now().plusNanos(1);
@@ -116,7 +94,6 @@ public class SessionDaoTest {
         Session resultSession = sessionDao.getSessionBySessionId(testUserSession.getSessionId());
         assertAll(
                 () -> assertEquals(creationTime, resultSession.getCreationTime()),
-                () -> assertNotEquals(session.getLastAccessTime(), resultSession.getLastAccessTime()),
                 () -> assertEquals(session.getSessionId(), resultSession.getSessionId())
         );
     }

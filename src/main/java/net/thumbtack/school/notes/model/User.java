@@ -26,7 +26,6 @@ public class User {
     boolean online;
     UserStatus userStatus;
     List<Integer> ratings;
-
     List<User> following;
     List<User> followers;
     List<User> ignoring;

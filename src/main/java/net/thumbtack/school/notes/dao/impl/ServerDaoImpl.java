@@ -37,10 +37,10 @@ public class ServerDaoImpl implements ServerDao {
         log.info("Trying to clear database");
         try {
             userMapper.deleteAll();
-            noteMapper.deleteAll();
-            sectionMapper.deleteAll();
-            commentMapper.deleteAll();
             sessionMapper.deleteAll();
+            sectionMapper.deleteAll();
+            noteMapper.deleteAll();
+            commentMapper.deleteAll();
             log.info("Database was cleared");
         } catch (RuntimeException ex) {
             log.error("Can't clear database");
@@ -60,10 +60,10 @@ public class ServerDaoImpl implements ServerDao {
             User user = new User();
             user.setFirstName("User");
             user.setLastName("Userov");
-            user.setLogin("userLogin" + Math.random() * 10);
+            user.setLogin("userLogin" + (int) (Math.random() * 10000 + 1));
             user.setPassword("user_password");
             userMapper.registerUser(user);
-            return userMapper.getUserByLogin(user.getLogin());
+            return userMapper.getUserById(user.getId());
         } catch (RuntimeException ex) {
             log.error("Can't save user to database");
             throw ex;
@@ -101,7 +101,7 @@ public class ServerDaoImpl implements ServerDao {
     public User makeAdmin(User user) {
         log.info("Trying to make admin");
         try {
-            User resultUser = userMapper.getUserByLogin(user.getLogin());
+            User resultUser = userMapper.getUserByLoginAndPassword(user.getLogin(), user.getPassword());
             resultUser.setUserStatus(UserStatus.ADMIN);
             userMapper.changeUserStatus(resultUser);
             return resultUser;

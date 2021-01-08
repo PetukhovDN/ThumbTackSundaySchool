@@ -17,5 +17,6 @@ public class Comment {
     String commentBody;
     User author;
     Note note;
+    NoteRevision noteRevision;
     LocalDateTime creationTime;
 }

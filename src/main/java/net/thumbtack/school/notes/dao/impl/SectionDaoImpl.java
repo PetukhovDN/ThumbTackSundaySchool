@@ -36,12 +36,12 @@ public class SectionDaoImpl implements SectionDao {
         log.info("DAO insert Section {} to Database", section);
         try {
             sectionMapper.saveSection(section, userId);
-            return sectionMapper.getSectionByName(section.getSectionName());
+            return sectionMapper.getSectionById(section.getId());
         } catch (DuplicateKeyException ex) {
             log.error("Section with name {} already exists", section.getSectionName(), ex);
             throw new NoteServerException(ExceptionErrorInfo.SECTION_ALREADY_EXISTS, section.getSectionName());
         } catch (RuntimeException ex) {
-            log.error("Can't insert Section {} to Database, {}", section, ex);
+            log.error("Can't insert Section {} with author id {} to Database, {}", section, userId, ex);
             throw ex;
         }
     }

@@ -24,7 +24,12 @@ public enum ExceptionErrorInfo {
     NOTE_ALREADY_EXISTS("Note with this subject already exists"),
     NOTE_DOES_NOT_EXISTS("No such note on the server"),
     EDIT_PARAMETERS_REQUIRED("At least one parameter is required"),
-    INCORRECT_SECTION_IDENTIFIER("Incorrect section id");
+    INCORRECT_SECTION_IDENTIFIER("Incorrect section id"),
+    NOT_AUTHOR_OF_NOTE("You are not creator of this note"),
+    CANNOT_RATE_YOUR_OWN_NOTE("You can`t rate note that you are the author of"),
+    NOT_AUTHOR_OF_COMMENT("You are not creator of this comment"),
+    COMMENT_ALREADY_EXISTS("Comment with this id already exist"),
+    COMMENT_DOES_NOT_EXISTS("No such comment on the server");
 
     @Getter
     String errorString;

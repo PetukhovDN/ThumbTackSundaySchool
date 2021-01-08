@@ -36,7 +36,7 @@ public interface UserService {
     void makeAdmin(int userId, String sessionId) throws NoteServerException;
 
     @Transactional
-    List<UsersInfoResponse> getAllUsersInfo(UserRequestParam userRequestParam, String sessionId) throws NoteServerException;
+    List<UsersInfoResponse> getUsersInfo(UserRequestParam userRequestParam, String sessionId) throws NoteServerException;
 
     @Transactional
     void followUser(String login, String sessionId) throws NoteServerException;

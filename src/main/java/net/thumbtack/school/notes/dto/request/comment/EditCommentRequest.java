@@ -1,4 +1,4 @@
-package net.thumbtack.school.notes.dto.request.note;
+package net.thumbtack.school.notes.dto.request.comment;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -12,9 +12,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class EditRequest {
+public class EditCommentRequest {
     @NotNull
     String body;
-    @NotNull
-    String sectionId;
 }

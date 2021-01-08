@@ -11,8 +11,6 @@ import java.time.ZoneId;
 
 /**
  * Session life time validation
- * The time elapsed since the last action in session must be less than session life time (in seconds)
- * Session life time is set in application.properties (value user_idle_timeout)
  */
 @Slf4j
 public class SessionLifeTimeValidator implements ConstraintValidator<SessionLifeTime, LocalDateTime> {
@@ -23,6 +21,10 @@ public class SessionLifeTimeValidator implements ConstraintValidator<SessionLife
     @Value("${user_idle_timeout}")
     int sessionLifeTime;
 
+    /**
+     * The time elapsed since the last action in session must be less than session life time (in seconds)
+     * Session life time is set in application.properties (value user_idle_timeout)
+     */
     @Override
     public boolean isValid(LocalDateTime lastAccessTime, ConstraintValidatorContext constraintValidatorContext) {
         log.info("Checking if session is valid");

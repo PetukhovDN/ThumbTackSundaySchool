@@ -13,6 +13,8 @@ import net.thumbtack.school.notes.model.NoteRevision;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -25,7 +27,7 @@ public class NoteDaoImpl implements NoteDao {
         log.info("DAO insert Note {} to Database", note);
         try {
             noteMapper.saveNote(note);
-            return noteMapper.getNoteBySubject(note.getSubject());
+            return noteMapper.getNoteById(note.getId());
         } catch (DuplicateKeyException ex) {
             log.error("Note with subject {} already exists", note.getSubject(), ex);
             throw new NoteServerException(ExceptionErrorInfo.NOTE_ALREADY_EXISTS, note.getSubject());
@@ -40,7 +42,7 @@ public class NoteDaoImpl implements NoteDao {
         log.info("DAO insert NoteRevision {} to Database", noteRevision);
         try {
             noteMapper.saveNoteRevision(noteRevision);
-            return noteMapper.getNoteRevision(noteRevision.getRevisionId(), noteRevision.getNoteId());
+            return noteMapper.getNoteRevision(noteRevision.getRevisionId());
         } catch (RuntimeException ex) {
             log.error("Can't insert Note revision {} to Database, {}", noteRevision, ex);
             throw ex;
@@ -67,7 +69,7 @@ public class NoteDaoImpl implements NoteDao {
     public NoteRevision getNoteRevisionInfo(String revisionId, int noteId) throws NoteServerException {
         log.info("DAO get Note with id {} body information from Database", noteId);
         try {
-            NoteRevision noteRevision = noteMapper.getNoteRevision(revisionId, noteId);
+            NoteRevision noteRevision = noteMapper.getNoteRevision(revisionId);
             if (noteRevision == null) {
                 log.error("No such note on the server");
                 throw new NoteServerException(ExceptionErrorInfo.NOTE_DOES_NOT_EXISTS, "No such note on the server");
@@ -108,18 +110,29 @@ public class NoteDaoImpl implements NoteDao {
         try {
             noteMapper.deleteNoteById(noteId);
         } catch (RuntimeException ex) {
-            log.error("Can't delete note with id {} from Database, {}", noteId, ex);
+            log.error("Can't delete Note with id {} from Database, {}", noteId, ex);
             throw ex;
         }
     }
 
     @Override
-    public void deleteAllCommentsForNote(int noteId) {
-
+    public void rateNote(int noteId, int userId, int rating) {
+        log.info("DAO add rating to Note with id {} to Database", noteId);
+        try {
+            noteMapper.addRatingForNote(noteId, userId, rating);
+        } catch (RuntimeException ex) {
+            log.error("Can't add rating to Note with id {} to Database, {}", noteId, ex);
+            throw ex;
+        }
     }
 
-    @Override
-    public void rateNote(int noteId, int rating) {
-
+    public List<Note> getAllNotes() {
+        log.info("DAO get all notes from Database");
+        try {
+            return noteMapper.getAllNotes();
+        } catch (RuntimeException ex) {
+            log.error("Can't get all notes from Database", ex);
+            throw ex;
+        }
     }
 }

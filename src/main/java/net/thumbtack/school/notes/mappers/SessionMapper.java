@@ -5,9 +5,8 @@ import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface SessionMapper {
-
     @Insert("INSERT INTO session (session_id, note_user_id, expiry_time) VALUES ( #{session.sessionId}, #{userId}, #{session.expiryTime} )")
-    @Options(useGeneratedKeys = true, keyProperty = "session.id")
+    @Options(useGeneratedKeys = true, keyProperty = "session.id", keyColumn = "id")
     Integer startUserSession(@Param("session") Session session, int userId);
 
     @Delete("DELETE FROM session WHERE session_id = #{sessionId}")
