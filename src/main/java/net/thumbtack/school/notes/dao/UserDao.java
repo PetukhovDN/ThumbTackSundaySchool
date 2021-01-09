@@ -6,15 +6,15 @@ import net.thumbtack.school.notes.model.User;
 import java.util.List;
 
 public interface UserDao {
-    User registerUser(User user) throws NoteServerException;
+    Integer registerUser(User user) throws NoteServerException;
 
     User getUserById(int userId) throws NoteServerException;
 
-    void changeUserDeletedStatusToDeleted(int userId) throws NoteServerException;
+    Integer changeUserDeletedStatusToDeleted(User user) throws NoteServerException;
 
-    User editUserInfo(User userToUpdate);
+    Integer editUserInfo(User userToUpdate);
 
-    void changeUserStatus(User user);
+    Integer changeUserStatus(User user);
 
     List<User> getAllUsers();
 

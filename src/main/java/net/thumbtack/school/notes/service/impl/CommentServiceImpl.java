@@ -93,8 +93,9 @@ public class CommentServiceImpl implements CommentService {
         if (authorId != currentUserId) {
             throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_COMMENT, "You are not creator of this comment");
         }
-        Comment comment = commentDao.changeComment(commentId, editRequest.getBody());
-        CommentResponse response = CommentMapStruct.INSTANCE.responseAddComment(comment);
+        int editedCommentId = commentDao.changeComment(commentId, editRequest.getBody());
+        Comment editedComment = commentDao.getCommentInfo(editedCommentId);
+        CommentResponse response = CommentMapStruct.INSTANCE.responseAddComment(editedComment);
         sessionDao.updateSession(userSession);
         return response;
     }

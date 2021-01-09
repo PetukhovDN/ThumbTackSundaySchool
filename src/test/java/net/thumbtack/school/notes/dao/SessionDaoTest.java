@@ -52,15 +52,15 @@ public class SessionDaoTest {
 
     @Test
     public void testLoginUser_rightParameters() throws NoteServerException {
-        User registeredUser = userDao.registerUser(rightParametersUser);
-        String sessionId = sessionDao.logInUser(registeredUser.getId(), testUserSession)
+        int userId = userDao.registerUser(rightParametersUser);
+        String sessionId = sessionDao.logInUser(userId, testUserSession)
                 .getSessionId();
         assertEquals(testUserSession.getSessionId(), sessionId);
     }
 
     @Test
     public void testGetUserIdBySessionId_rightParameters() throws NoteServerException {
-        int registeredUserId = userDao.registerUser(rightParametersUser).getId();
+        int registeredUserId = userDao.registerUser(rightParametersUser);
         String sessionId = sessionDao.logInUser(registeredUserId, testUserSession).getSessionId();
         int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
 
@@ -82,8 +82,8 @@ public class SessionDaoTest {
 
     @Test
     public void testUpdateSession_rightSessionId() throws NoteServerException {
-        User user = userDao.registerUser(rightParametersUser);
-        sessionDao.logInUser(user.getId(), testUserSession);
+        int userId = userDao.registerUser(rightParametersUser);
+        sessionDao.logInUser(userId, testUserSession);
         Session session = sessionDao.getSessionBySessionId(testUserSession.getSessionId());
         LocalDateTime creationTime = session.getCreationTime();
         LocalDateTime lastAccessTime = LocalDateTime.now().plusNanos(1);

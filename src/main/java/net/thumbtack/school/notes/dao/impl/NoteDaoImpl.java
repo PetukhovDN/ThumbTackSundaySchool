@@ -31,15 +31,15 @@ public class NoteDaoImpl implements NoteDao {
      * note subject, author identifier, section identifier
      *
      * @param note contains new note information
-     * @return note information in success
+     * @return created note identifier in success
      * @throws NoteServerException if note with such identifier already exists in database
      */
     @Override
-    public Note createNote(Note note) throws NoteServerException {
+    public Integer createNote(Note note) throws NoteServerException {
         log.info("DAO insert Note {} to Database", note);
         try {
             noteMapper.saveNote(note);
-            return noteMapper.getNoteById(note.getId());
+            return note.getId();
         } catch (DuplicateKeyException ex) {
             log.error("Note with subject {} already exists", note.getSubject(), ex);
             throw new NoteServerException(ExceptionErrorInfo.NOTE_ALREADY_EXISTS, note.getSubject());
@@ -53,14 +53,14 @@ public class NoteDaoImpl implements NoteDao {
      * Method to save new note revision to the database
      *
      * @param noteRevision contains note body, revision identifier, note identifier
-     * @return note revision information in success
+     * @return note revision identifier in success
      */
     @Override
-    public NoteRevision createNoteRevision(NoteRevision noteRevision) {
+    public String createNoteRevision(NoteRevision noteRevision) {
         log.info("DAO insert NoteRevision {} to Database", noteRevision);
         try {
             noteMapper.saveNoteRevision(noteRevision);
-            return noteMapper.getNoteRevision(noteRevision.getRevisionId());
+            return noteRevision.getRevisionId();
         } catch (RuntimeException ex) {
             log.error("Can't insert Note revision {} to Database, {}", noteRevision, ex);
             throw ex;
@@ -119,14 +119,14 @@ public class NoteDaoImpl implements NoteDao {
      *
      * @param noteId     note identifier
      * @param revisionId revision identifier
-     * @return note information in success
+     * @return note identifier in success
      */
     @Override
-    public Note updateNoteLastRevision(int noteId, String revisionId) {
+    public Integer updateNoteLastRevision(int noteId, String revisionId) {
         log.info("DAO save Note with id {} last revision id to Database", noteId);
         try {
             noteMapper.updateNoteLastRevisionId(noteId, revisionId);
-            return noteMapper.getNoteById(noteId);
+            return noteId;
         } catch (RuntimeException ex) {
             log.error("Can't save last revision id of the Note with id {} to Database, {}", noteId, ex);
             throw ex;

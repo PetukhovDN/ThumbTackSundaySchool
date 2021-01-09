@@ -43,11 +43,11 @@ public class SectionDaoTest {
         User user = serverDao.registerUser();
         int userId = user.getId();
         serverDao.logInUser(userId);
-        Section resultSection = sectionDao.createSection(testSection, userId);
-
+        int createdSectionId = sectionDao.createSection(testSection, userId);
+        Section createdSection = sectionDao.getSectionInfo(createdSectionId);
         assertAll(
-                () -> assertEquals(testSection.getSectionName(), resultSection.getSectionName()),
-                () -> assertEquals(userId, resultSection.getAuthor().getId())
+                () -> assertEquals(testSection.getSectionName(), createdSection.getSectionName()),
+                () -> assertEquals(userId, createdSection.getAuthor().getId())
         );
     }
 
@@ -56,8 +56,10 @@ public class SectionDaoTest {
         User user = serverDao.registerUser();
         int userId = user.getId();
         serverDao.logInUser(userId);
-        Section cratedSection = sectionDao.createSection(testSection, userId);
-        Section renamedSection = sectionDao.renameSection(cratedSection.getId(), "TestSectionNewName");
+        int createdSectionId = sectionDao.createSection(testSection, userId);
+        Section createdSection = sectionDao.getSectionInfo(createdSectionId);
+        int renamedSectionId = sectionDao.renameSection(createdSection.getId(), "TestSectionNewName");
+        Section renamedSection = sectionDao.getSectionInfo(renamedSectionId);
 
         assertAll(
                 () -> assertEquals("TestSectionNewName", renamedSection.getSectionName()),
@@ -70,7 +72,8 @@ public class SectionDaoTest {
         User user = serverDao.registerUser();
         int userId = user.getId();
         serverDao.logInUser(userId);
-        Section createdSection = sectionDao.createSection(testSection, userId);
+        int createdSectionId = sectionDao.createSection(testSection, userId);
+        Section createdSection = sectionDao.getSectionInfo(createdSectionId);
         sectionDao.deleteSection(createdSection.getId());
 
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
@@ -90,13 +93,12 @@ public class SectionDaoTest {
         User user = serverDao.registerUser();
         int userId = user.getId();
         serverDao.logInUser(userId);
-        Section cratedSection = sectionDao.createSection(testSection, userId);
-        Section resultSection = sectionDao.getSectionInfo(cratedSection.getId());
+        int createdSectionId = sectionDao.createSection(testSection, userId);
+        Section createdSection = sectionDao.getSectionInfo(createdSectionId);
 
         assertAll(
-                () -> assertEquals(cratedSection.getSectionName(), resultSection.getSectionName()),
-                () -> assertEquals(cratedSection.getId(), resultSection.getId()),
-                () -> assertEquals(cratedSection.getAuthor().getId(), resultSection.getAuthor().getId())
+                () -> assertEquals(testSection.getSectionName(), createdSection.getSectionName()),
+                () -> assertEquals(userId, createdSection.getAuthor().getId())
         );
     }
 

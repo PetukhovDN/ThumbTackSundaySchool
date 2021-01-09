@@ -64,7 +64,8 @@ public class UserServiceImpl implements UserService {
     public User registerUser(RegisterRequest registerRequest, String newSessionId) throws NoteServerException {
         log.info("Trying to register user");
         User user = UserMapStruct.INSTANCE.requestRegisterUser(registerRequest);
-        User registeredUser = userDao.registerUser(user);
+        int registeredUserId = userDao.registerUser(user);
+        User registeredUser = userDao.getUserById(registeredUserId);
         Session userSession = new Session();
         userSession.setSessionId(newSessionId);
         userSession.setExpiryTime(sessionLifeTime);
@@ -154,7 +155,9 @@ public class UserServiceImpl implements UserService {
             String password = leaveRequest.getPassword();
             checkIsPasswordCorrect(userId, password);
             sessionDao.stopUserSession(sessionId);
-            userDao.changeUserDeletedStatusToDeleted(userId);
+            User userById = userDao.getUserById(userId);
+            userById.setDeleted(true);
+            userDao.changeUserDeletedStatusToDeleted(userById);
         } catch (NullPointerException ex) {
             throw new NoteServerException(ExceptionErrorInfo.USER_IS_NOT_LOGGED_IN, sessionId);
         }
@@ -178,9 +181,10 @@ public class UserServiceImpl implements UserService {
         checkIsPasswordCorrect(userSession.getUserId(), oldPassword);
         User userToUpdate = UserMapStruct.INSTANCE.requestUpdateUser(updateRequest);
         userToUpdate.setId(userSession.getUserId());
-        User resultUser = userDao.editUserInfo(userToUpdate);
+        int updatedUserId = userDao.editUserInfo(userToUpdate);
+        User updatedUser = userDao.getUserById(updatedUserId);
         sessionDao.updateSession(userSession);
-        return resultUser;
+        return updatedUser;
     }
 
     /**

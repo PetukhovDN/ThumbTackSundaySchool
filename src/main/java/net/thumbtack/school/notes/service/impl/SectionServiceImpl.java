@@ -49,7 +49,8 @@ public class SectionServiceImpl implements SectionService {
         User author = userDao.getUserById(userSession.getUserId());
         Section section = SectionMupStruct.INSTANCE.requestCreateSection(createRequest);
         section.setAuthor(author);
-        Section resultSection = sectionDao.createSection(section, author.getId());
+        int resultSectionId = sectionDao.createSection(section, author.getId());
+        Section resultSection = sectionDao.getSectionInfo(resultSectionId);
         sessionDao.updateSession(userSession);
         return resultSection;
     }
@@ -72,7 +73,8 @@ public class SectionServiceImpl implements SectionService {
         if (section.getAuthor().getId() != userSession.getUserId()) {
             throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "You are not creator of this section");
         }
-        Section resultSection = sectionDao.renameSection(sectionId, section.getSectionName());
+        int resultSectionId = sectionDao.renameSection(sectionId, section.getSectionName());
+        Section resultSection = sectionDao.getSectionInfo(resultSectionId);
         sessionDao.updateSession(userSession);
         return resultSection;
     }

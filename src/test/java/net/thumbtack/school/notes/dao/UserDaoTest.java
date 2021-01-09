@@ -43,7 +43,8 @@ class UserDaoTest {
 
     @Test
     public void testRegisterUser_rightParameters() throws NoteServerException {
-        User registeredUser = userDao.registerUser(rightParametersUser);
+        int registeredUserId = userDao.registerUser(rightParametersUser);
+        User registeredUser = userDao.getUserById(registeredUserId);
         assertEquals(rightParametersUser.getFirstName(), registeredUser.getFirstName());
     }
 
@@ -63,7 +64,8 @@ class UserDaoTest {
 
     @Test
     public void testGetUserInfo_rightParameters() throws NoteServerException {
-        User registeredUser = userDao.registerUser(rightParametersUser);
+        int registeredUserId = userDao.registerUser(rightParametersUser);
+        User registeredUser = userDao.getUserById(registeredUserId);
         User userInfo = userDao.getUserById(registeredUser.getId());
 
         assertEquals(registeredUser.getFirstName(), userInfo.getFirstName());
@@ -84,27 +86,16 @@ class UserDaoTest {
 
     @Test
     public void testLeaveServer_loggedInUser() throws NoteServerException {
-        User registeredUser = userDao.registerUser(rightParametersUser);
-        userDao.changeUserDeletedStatusToDeleted(registeredUser.getId());
+        int registeredUserId = userDao.registerUser(rightParametersUser);
+        User registeredUser = userDao.getUserById(registeredUserId);
+        userDao.changeUserDeletedStatusToDeleted(registeredUser);
 
-    }
-
-    @Test
-    public void testLeaveServer_userDoesNotExists() {
-        NoteServerException exception = assertThrows(NoteServerException.class, () -> {
-            userDao.changeUserDeletedStatusToDeleted(100);
-
-        });
-        assertAll(
-                () -> assertNotNull(exception.getExceptionErrorInfo()),
-                () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
-                        .contains("No such user on the server"))
-        );
     }
 
     @Test
     public void testUpdateUserInfo_rightParameters() throws NoteServerException {
-        User registeredUser = userDao.registerUser(rightParametersUser);
+        int registeredUserId = userDao.registerUser(rightParametersUser);
+        User registeredUser = userDao.getUserById(registeredUserId);
         registeredUser.setFirstName("NewFirstName");
         registeredUser.setLastName("NewLastName");
         userDao.editUserInfo(registeredUser);
@@ -120,11 +111,13 @@ class UserDaoTest {
 
     @Test
     public void testFollowUser_rightParameters() throws NoteServerException {
-        User firstRegisteredUser = userDao.registerUser(rightParametersUser);
+        int firstRegisteredUserId = userDao.registerUser(rightParametersUser);
+        User firstRegisteredUser = userDao.getUserById(firstRegisteredUserId);
         rightRegisterRequest.setLogin("second_user_login");
         rightRegisterRequest.setLastName("SecondUserLastName");
         rightParametersUser = UserMapStruct.INSTANCE.requestRegisterUser(rightRegisterRequest);
-        User secondRegisteredUser = userDao.registerUser(rightParametersUser);
+        int secondRegisteredUserId = userDao.registerUser(rightParametersUser);
+        User secondRegisteredUser = userDao.getUserById(secondRegisteredUserId);
 
         userDao.followUser(firstRegisteredUser.getId(), secondRegisteredUser.getId());
         List<User> followers = userDao.getUsersFollowedBy(firstRegisteredUser.getId());
@@ -145,11 +138,13 @@ class UserDaoTest {
 
     @Test
     public void testIgnoreUser_rightParameters() throws NoteServerException {
-        User firstRegisteredUser = userDao.registerUser(rightParametersUser);
+        int firstRegisteredUserId = userDao.registerUser(rightParametersUser);
+        User firstRegisteredUser = userDao.getUserById(firstRegisteredUserId);
         rightRegisterRequest.setLogin("second_user_login");
         rightRegisterRequest.setLastName("SecondUserLastName");
         rightParametersUser = UserMapStruct.INSTANCE.requestRegisterUser(rightRegisterRequest);
-        User secondRegisteredUser = userDao.registerUser(rightParametersUser);
+        int secondRegisteredUserId = userDao.registerUser(rightParametersUser);
+        User secondRegisteredUser = userDao.getUserById(secondRegisteredUserId);
 
         userDao.ignoreUser(firstRegisteredUser.getId(), secondRegisteredUser.getId());
         List<User> ignoringUsers = userDao.getUsersIgnoredBy(firstRegisteredUser.getId());

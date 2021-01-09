@@ -18,7 +18,8 @@ public interface NoteMapper {
 
     @Insert("INSERT INTO note_revision (revision_id, note_id, note_body) " +
             "VALUES ( #{noteRevision.revisionId}, #{noteRevision.noteId}, #{noteRevision.body})")
-    Integer saveNoteRevision(@Param("noteRevision") NoteRevision noteRevision);
+    @Options(useGeneratedKeys = false, keyProperty = "noteRevision.revisionId", keyColumn = "revision_id")
+    String saveNoteRevision(@Param("noteRevision") NoteRevision noteRevision);
 
     @Select("SELECT id, note_subject as subject, last_revision_id as lastRevisionId, " +
             "author_id, section_id, note_creation_time as creationTime " +

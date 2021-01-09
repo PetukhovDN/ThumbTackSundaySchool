@@ -28,15 +28,15 @@ public class CommentDaoImpl implements CommentDao {
      * Method to save new comment to the database
      *
      * @param comment contains new comment information
-     * @return saved comment information in success
+     * @return created comment identifier in success
      * @throws NoteServerException if comment with such identifier already exists in database
      */
     @Override
-    public Comment createComment(Comment comment) throws NoteServerException {
+    public Integer createComment(Comment comment) throws NoteServerException {
         log.info("DAO insert Comment {} to Database", comment);
         try {
             commentMapper.saveComment(comment);
-            return commentMapper.getCommentById(comment.getId());
+            return comment.getId();
         } catch (DuplicateKeyException ex) {
             log.error("Comment {} already exists", comment, ex);
             throw new NoteServerException(ExceptionErrorInfo.COMMENT_ALREADY_EXISTS, "Comment with this id already exist");
@@ -68,14 +68,14 @@ public class CommentDaoImpl implements CommentDao {
      *
      * @param commentId      comment identifier
      * @param newCommentBody new comment information
-     * @return comment information in success
+     * @return identifier of changed comment in success
      */
     @Override
-    public Comment changeComment(int commentId, String newCommentBody) {
+    public Integer changeComment(int commentId, String newCommentBody) {
         log.info("DAO change text for Comment with id {} in Database", commentId);
         try {
             commentMapper.updateCommentText(commentId, newCommentBody);
-            return commentMapper.getCommentById(commentId);
+            return commentId;
         } catch (RuntimeException ex) {
             log.error("Can't change text for Comment with id {} in Database, {}", commentId, ex);
             throw ex;

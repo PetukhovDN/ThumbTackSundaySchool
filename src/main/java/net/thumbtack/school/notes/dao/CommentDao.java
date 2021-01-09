@@ -6,11 +6,11 @@ import net.thumbtack.school.notes.model.Comment;
 import java.util.List;
 
 public interface CommentDao {
-    Comment createComment(Comment comment) throws NoteServerException;
+    Integer createComment(Comment comment) throws NoteServerException;
 
     List<Comment> getAllCommentsForNote(int noteId);
 
-    Comment changeComment(int commentId, String newCommentBody);
+    Integer changeComment(int commentId, String newCommentBody);
 
     Comment getCommentInfo(int commentId) throws NoteServerException;
 

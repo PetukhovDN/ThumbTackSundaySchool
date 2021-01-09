@@ -21,7 +21,7 @@ public interface SectionMapper {
                     one = @One(select = "net.thumbtack.school.notes.mappers.UserMapper.getUserById", fetchType = FetchType.LAZY))})
     Section getSectionByName(String sectionName);
 
-    @Select("SELECT id, section_name as sectionName, section_creation_time as creationTime, author_id " +
+    @Select("SELECT id, section_name as sectionName, section_creation_time as creationTime, author_id  " +
             "FROM section WHERE id = #{sectionId} ")
     @Results({
             @Result(property = "author", column = "author_id", javaType = User.class,

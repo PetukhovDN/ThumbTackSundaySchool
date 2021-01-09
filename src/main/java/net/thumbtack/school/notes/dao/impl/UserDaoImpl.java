@@ -28,15 +28,15 @@ public class UserDaoImpl implements UserDao {
      * Method to save user information to the database
      *
      * @param user user account information
-     * @return user account information in success
+     * @return user account identifier in success
      * @throws NoteServerException if user with the same login is already saved to the database
      */
     @Override
-    public User registerUser(User user) throws NoteServerException {
+    public Integer registerUser(User user) throws NoteServerException {
         log.info("DAO insert User {} to Database", user);
         try {
             userMapper.registerUser(user);
-            return userMapper.getUserById(user.getId());
+            return user.getId();
         } catch (DuplicateKeyException ex) {
             log.error("Login {} already exists", user.getLogin(), ex);
             throw new NoteServerException(ExceptionErrorInfo.LOGIN_ALREADY_EXISTS, user.getLogin());
@@ -72,19 +72,18 @@ public class UserDaoImpl implements UserDao {
     /**
      * Method to change user deleted status to deleted in database
      *
-     * @param userId identifier of the user to change status
+     * @param user user account information
      * @throws NoteServerException if there is no user account with such identifier, saved in database
      */
     @Override
-    public void changeUserDeletedStatusToDeleted(int userId) throws NoteServerException {
+    public Integer changeUserDeletedStatusToDeleted(User user) throws NoteServerException {
         log.info("DAO delete user account from database");
         try {
-            User userById = userMapper.getUserById(userId);
-            userById.setDeleted(true);
-            userMapper.leaveNotesServer(userById);
+            userMapper.leaveNotesServer(user);
+            return user.getId();
         } catch (NullPointerException ex) {
-            log.error("No user with userId = {} in database", userId);
-            throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, String.valueOf(userId));
+            log.error("No user with id {} in database", user.getId());
+            throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, "No such user on the server");
         } catch (RuntimeException ex) {
             log.error("Can't get user info from Database, ", ex);
             throw ex;
@@ -95,14 +94,14 @@ public class UserDaoImpl implements UserDao {
      * Method to change user account information in database
      *
      * @param user user account to be changed
-     * @return user account information in success
+     * @return user identifier in success
      */
     @Override
-    public User editUserInfo(User user) {
+    public Integer editUserInfo(User user) {
         log.info("DAO update user account");
         try {
             userMapper.editUserInfo(user);
-            return userMapper.getUserById(user.getId());
+            return user.getId();
         } catch (RuntimeException ex) {
             log.error("Can't get user info from Database, ", ex);
             throw ex;
@@ -113,12 +112,14 @@ public class UserDaoImpl implements UserDao {
      * Method to change information about user status in database
      *
      * @param user user account to be changed
+     * @return user identifier in success
      */
     @Override
-    public void changeUserStatus(User user) {
+    public Integer changeUserStatus(User user) {
         log.info("DAO give user admin root");
         try {
             userMapper.changeUserStatus(user);
+            return user.getId();
         } catch (RuntimeException ex) {
             log.error("Can't give admin root to user with id {}, ", user.getId(), ex);
             throw ex;

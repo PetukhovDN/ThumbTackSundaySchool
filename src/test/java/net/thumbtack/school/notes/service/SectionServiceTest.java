@@ -37,13 +37,12 @@ public class SectionServiceTest {
     public void setUp() {
         debugService.clearDatabase();
         firstRegisteredUser = debugService.registerUser();
-        firstUserSessionId = debugService.loginUser(firstRegisteredUser.getId());
         secondRegisteredUser = debugService.registerUser();
-        secondUserSessionId = debugService.loginUser(secondRegisteredUser.getId());
     }
 
     @Test
     public void testCreateSection_wrongSessionID() {
+        firstUserSessionId = debugService.loginUser(firstRegisteredUser.getId());
         SectionRequest createRequest = new SectionRequest("TestSection");
 
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
@@ -59,6 +58,7 @@ public class SectionServiceTest {
 
     @Test
     public void testRenameSection_wrongSessionId() throws NoteServerException {
+        firstUserSessionId = debugService.loginUser(firstRegisteredUser.getId());
         SectionRequest createRequest = new SectionRequest("TestSection");
         Section section = sectionService.createSection(createRequest, firstUserSessionId);
 
@@ -78,6 +78,8 @@ public class SectionServiceTest {
 
     @Test
     public void testDeleteSection_notAuthorOfSection() throws NoteServerException {
+        firstUserSessionId = debugService.loginUser(firstRegisteredUser.getId());
+        secondUserSessionId = debugService.loginUser(secondRegisteredUser.getId());
         SectionRequest createRequest = new SectionRequest("TestSection");
         Section section = sectionService.createSection(createRequest, firstUserSessionId);
 
@@ -94,6 +96,7 @@ public class SectionServiceTest {
 
     @Test
     public void testGetSectionInfo_notExistingSection() {
+        firstUserSessionId = debugService.loginUser(firstRegisteredUser.getId());
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
             sectionService.getSectionInfo(firstUserSessionId, 77);
         });
@@ -107,6 +110,7 @@ public class SectionServiceTest {
 
     @Test
     public void testGetAllSectionsInfo_wrongSessionId() throws NoteServerException {
+        firstUserSessionId = debugService.loginUser(firstRegisteredUser.getId());
         sectionService.createSection(new SectionRequest("TestSection1"), firstUserSessionId);
         sectionService.createSection(new SectionRequest("TestSection2"), firstUserSessionId);
         sectionService.createSection(new SectionRequest("TestSection3"), firstUserSessionId);
@@ -124,6 +128,7 @@ public class SectionServiceTest {
 
     @Test
     public void testGetAllSectionsInfo_rightParameters() throws NoteServerException {
+        firstUserSessionId = debugService.loginUser(firstRegisteredUser.getId());
         sectionService.createSection(new SectionRequest("TestSection1"), firstUserSessionId);
         sectionService.createSection(new SectionRequest("TestSection2"), firstUserSessionId);
         sectionService.createSection(new SectionRequest("TestSection3"), firstUserSessionId);
@@ -141,6 +146,8 @@ public class SectionServiceTest {
 
     @Test
     public void testDeleteSection_superStatus() throws NoteServerException {
+        firstUserSessionId = debugService.loginUser(firstRegisteredUser.getId());
+        secondUserSessionId = debugService.loginUser(secondRegisteredUser.getId());
         debugService.makeAdmin(secondRegisteredUser);
         Section section = sectionService.createSection(new SectionRequest("TestSection"), firstUserSessionId);
 
@@ -156,6 +163,4 @@ public class SectionServiceTest {
                         .contains("No such section on the server"))
         );
     }
-
-
 }

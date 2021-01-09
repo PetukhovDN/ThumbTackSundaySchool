@@ -32,11 +32,11 @@ public class SectionDaoImpl implements SectionDao {
      * @throws NoteServerException if section with such name already exists in database
      */
     @Override
-    public Section createSection(Section section, int userId) throws NoteServerException {
+    public Integer createSection(Section section, int userId) throws NoteServerException {
         log.info("DAO insert Section {} to Database", section);
         try {
             sectionMapper.saveSection(section, userId);
-            return sectionMapper.getSectionById(section.getId());
+            return section.getId();
         } catch (DuplicateKeyException ex) {
             log.error("Section with name {} already exists", section.getSectionName(), ex);
             throw new NoteServerException(ExceptionErrorInfo.SECTION_ALREADY_EXISTS, section.getSectionName());
@@ -51,14 +51,14 @@ public class SectionDaoImpl implements SectionDao {
      *
      * @param sectionId      identifier of section to be changed
      * @param newSectionName new section name
-     * @return section information in success
+     * @return section identifier in success
      */
     @Override
-    public Section renameSection(int sectionId, String newSectionName) {
+    public Integer renameSection(int sectionId, String newSectionName) {
         log.info("DAO change Section name {} in Database", newSectionName);
         try {
             sectionMapper.updateSection(sectionId, newSectionName);
-            return sectionMapper.getSectionByName(newSectionName);
+            return sectionId;
         } catch (RuntimeException ex) {
             log.error("Can't rename Section with name {} in Database, {}", newSectionName, ex);
             throw ex;
