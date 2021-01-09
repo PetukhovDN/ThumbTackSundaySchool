@@ -8,7 +8,6 @@ import net.thumbtack.school.notes.dao.impl.ServerDaoImpl;
 import net.thumbtack.school.notes.dto.response.user.ServerSettingsResponse;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.User;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,31 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @Service
 public class DebugService {
-    final ServerDaoImpl serverDao;
-
-    /**
-     * Server settings, max user name length
-     * Set in application properties
-     */
-    @Value("${max_name_length}")
-    String maxNameLength;
-
-    /**
-     * Server settings, min user password length
-     * Set in application properties
-     */
-    @Value("${min_password_length}")
-    String minPasswordLength;
-
-    /**
-     * Server settings, time for which user session is alive
-     * Set in application properties
-     */
-    @Value("${user_idle_timeout}")
-    String userIdleTimeout;
+    ServerDaoImpl serverDao;
 
     /**
      * Deletes all database information
@@ -103,9 +81,6 @@ public class DebugService {
      */
     @Transactional
     public ServerSettingsResponse getServerSettings() {
-        return new ServerSettingsResponse(
-                maxNameLength,
-                minPasswordLength,
-                userIdleTimeout);
+        return serverDao.getServerSettings();
     }
 }

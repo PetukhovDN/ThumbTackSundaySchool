@@ -48,6 +48,7 @@ public class CommentServiceImpl implements CommentService {
         log.info("Trying to add new comment to note with id {} ", addRequest.getNoteId());
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         Comment comment = CommentMapStruct.INSTANCE.requestAddComment(addRequest);
+        commentDao.createComment(comment);
         CommentResponse response = CommentMapStruct.INSTANCE.responseAddComment(comment);
         sessionDao.updateSession(userSession);
         return response;

@@ -9,6 +9,7 @@ import net.thumbtack.school.notes.dao.impl.SessionDaoImpl;
 import net.thumbtack.school.notes.dao.impl.UserDaoImpl;
 import net.thumbtack.school.notes.dto.mappers.SectionMupStruct;
 import net.thumbtack.school.notes.dto.request.section.SectionRequest;
+import net.thumbtack.school.notes.dto.response.section.SectionResponse;
 import net.thumbtack.school.notes.enums.UserStatus;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
@@ -19,6 +20,7 @@ import net.thumbtack.school.notes.service.SectionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,7 +45,7 @@ public class SectionServiceImpl implements SectionService {
      */
     @Override
     @Transactional
-    public Section createSection(SectionRequest createRequest, String sessionId) throws NoteServerException {
+    public SectionResponse createSection(SectionRequest createRequest, String sessionId) throws NoteServerException {
         log.info("Trying to create new section");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         User author = userDao.getUserById(userSession.getUserId());
@@ -51,8 +53,9 @@ public class SectionServiceImpl implements SectionService {
         section.setAuthor(author);
         int resultSectionId = sectionDao.createSection(section, author.getId());
         Section resultSection = sectionDao.getSectionInfo(resultSectionId);
+        SectionResponse response = SectionMupStruct.INSTANCE.responseCreateSection(resultSection);
         sessionDao.updateSession(userSession);
-        return resultSection;
+        return response;
     }
 
     /**
@@ -66,7 +69,7 @@ public class SectionServiceImpl implements SectionService {
      */
     @Override
     @Transactional
-    public Section renameSection(SectionRequest renameRequest, String sessionId, int sectionId) throws NoteServerException {
+    public SectionResponse renameSection(SectionRequest renameRequest, String sessionId, int sectionId) throws NoteServerException {
         log.info("Trying to rename existed section");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         Section section = sectionDao.getSectionInfo(sectionId);
@@ -75,8 +78,9 @@ public class SectionServiceImpl implements SectionService {
         }
         int resultSectionId = sectionDao.renameSection(sectionId, section.getSectionName());
         Section resultSection = sectionDao.getSectionInfo(resultSectionId);
+        SectionResponse response = SectionMupStruct.INSTANCE.responseCreateSection(resultSection);
         sessionDao.updateSession(userSession);
-        return resultSection;
+        return response;
     }
 
     /**
@@ -113,12 +117,13 @@ public class SectionServiceImpl implements SectionService {
      */
     @Override
     @Transactional
-    public Section getSectionInfo(String sessionId, int sectionId) throws NoteServerException {
+    public SectionResponse getSectionInfo(String sessionId, int sectionId) throws NoteServerException {
         log.info("Trying to get information about section");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         Section resultSection = sectionDao.getSectionInfo(sectionId);
+        SectionResponse response = SectionMupStruct.INSTANCE.responseCreateSection(resultSection);
         sessionDao.updateSession(userSession);
-        return resultSection;
+        return response;
     }
 
     /**
@@ -129,11 +134,15 @@ public class SectionServiceImpl implements SectionService {
      */
     @Override
     @Transactional
-    public List<Section> getAllSections(String sessionId) throws NoteServerException {
+    public List<SectionResponse> getAllSections(String sessionId) throws NoteServerException {
         log.info("Trying to get information about all sections");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         List<Section> sections = sectionDao.getAllSections();
+        List<SectionResponse> responses = new ArrayList<>();
+        for (Section section : sections) {
+            responses.add(SectionMupStruct.INSTANCE.responseCreateSection(section));
+        }
         sessionDao.updateSession(userSession);
-        return sections;
+        return responses;
     }
 }

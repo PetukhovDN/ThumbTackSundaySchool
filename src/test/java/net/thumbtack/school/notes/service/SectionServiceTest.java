@@ -4,8 +4,8 @@ package net.thumbtack.school.notes.service;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import net.thumbtack.school.notes.dto.request.section.SectionRequest;
+import net.thumbtack.school.notes.dto.response.section.SectionResponse;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
-import net.thumbtack.school.notes.model.Section;
 import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.service.impl.DebugService;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +60,7 @@ public class SectionServiceTest {
     public void testRenameSection_wrongSessionId() throws NoteServerException {
         firstUserSessionId = debugService.loginUser(firstRegisteredUser.getId());
         SectionRequest createRequest = new SectionRequest("TestSection");
-        Section section = sectionService.createSection(createRequest, firstUserSessionId);
+        SectionResponse section = sectionService.createSection(createRequest, firstUserSessionId);
 
         SectionRequest renameRequest = new SectionRequest("TestSectionNewName");
 
@@ -81,7 +81,7 @@ public class SectionServiceTest {
         firstUserSessionId = debugService.loginUser(firstRegisteredUser.getId());
         secondUserSessionId = debugService.loginUser(secondRegisteredUser.getId());
         SectionRequest createRequest = new SectionRequest("TestSection");
-        Section section = sectionService.createSection(createRequest, firstUserSessionId);
+        SectionResponse section = sectionService.createSection(createRequest, firstUserSessionId);
 
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
             sectionService.deleteSection(secondUserSessionId, section.getId());
@@ -133,7 +133,7 @@ public class SectionServiceTest {
         sectionService.createSection(new SectionRequest("TestSection2"), firstUserSessionId);
         sectionService.createSection(new SectionRequest("TestSection3"), firstUserSessionId);
 
-        List<Section> sections = sectionService.getAllSections(firstUserSessionId);
+        List<SectionResponse> sections = sectionService.getAllSections(firstUserSessionId);
 
         assertAll(
                 () -> assertNotNull(sections),
@@ -149,7 +149,7 @@ public class SectionServiceTest {
         firstUserSessionId = debugService.loginUser(firstRegisteredUser.getId());
         secondUserSessionId = debugService.loginUser(secondRegisteredUser.getId());
         debugService.makeAdmin(secondRegisteredUser);
-        Section section = sectionService.createSection(new SectionRequest("TestSection"), firstUserSessionId);
+        SectionResponse section = sectionService.createSection(new SectionRequest("TestSection"), firstUserSessionId);
 
         sectionService.deleteSection(secondUserSessionId, section.getId());
 

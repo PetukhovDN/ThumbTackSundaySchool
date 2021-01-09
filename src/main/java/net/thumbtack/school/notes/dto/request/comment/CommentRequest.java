@@ -16,5 +16,5 @@ public class CommentRequest {
     @NotNull
     String body;
     @NotNull
-    String noteId;
+    int noteId;
 }

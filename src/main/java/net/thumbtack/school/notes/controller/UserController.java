@@ -10,6 +10,7 @@ import net.thumbtack.school.notes.dto.response.user.UserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
 import net.thumbtack.school.notes.enums.ParamSort;
 import net.thumbtack.school.notes.enums.ParamType;
+import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.params.UserRequestParam;
 import net.thumbtack.school.notes.service.impl.UserServiceImpl;
@@ -90,9 +91,14 @@ public class UserController {
 
     @PutMapping(value = "accounts/{id}/super")
     @ResponseStatus(HttpStatus.OK)
-    public void makeAdmin(@PathVariable(value = "id") int id,
+    public void makeAdmin(@PathVariable(value = "id") String id,
                           @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        userService.makeAdmin(id, sessionId);
+        try {
+            int userId = Integer.parseInt(id);
+            userService.makeAdmin(userId, sessionId);
+        } catch (NumberFormatException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_USER_IDENTIFIER, id);
+        }
     }
 
     @GetMapping(value = "accounts",

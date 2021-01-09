@@ -3,7 +3,6 @@ package net.thumbtack.school.notes.controller;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import net.thumbtack.school.notes.dto.mappers.SectionMupStruct;
 import net.thumbtack.school.notes.dto.request.comment.CommentRequest;
 import net.thumbtack.school.notes.dto.request.comment.EditCommentRequest;
 import net.thumbtack.school.notes.dto.request.comment.RateNoteRequest;
@@ -16,8 +15,8 @@ import net.thumbtack.school.notes.dto.response.note.NotesInfoResponseWithParams;
 import net.thumbtack.school.notes.dto.response.section.SectionResponse;
 import net.thumbtack.school.notes.enums.ParamInclude;
 import net.thumbtack.school.notes.enums.ParamSort;
+import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
-import net.thumbtack.school.notes.model.Section;
 import net.thumbtack.school.notes.params.NoteRequestParam;
 import net.thumbtack.school.notes.service.impl.CommentServiceImpl;
 import net.thumbtack.school.notes.service.impl.NoteServiceImpl;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -55,32 +53,47 @@ public class NoteController {
     @ResponseStatus(HttpStatus.OK)
     public SectionResponse createSection(@RequestBody @Valid SectionRequest createRequest,
                                          @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        return SectionMupStruct.INSTANCE.responseCreateSection(sectionService.createSection(createRequest, sessionId));
+        return sectionService.createSection(createRequest, sessionId);
     }
 
     @PutMapping(value = "sections/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public SectionResponse renameSection(@PathVariable(value = "id") int id,
+    public SectionResponse renameSection(@PathVariable(value = "id") String id,
                                          @RequestBody @Valid SectionRequest renameRequest,
                                          @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        return SectionMupStruct.INSTANCE.responseCreateSection(sectionService.renameSection(renameRequest, sessionId, id));
+        try {
+            int sectionId = Integer.parseInt(id);
+            return sectionService.renameSection(renameRequest, sessionId, sectionId);
+        } catch (NumberFormatException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_SECTION_IDENTIFIER, id);
+        }
     }
 
     @DeleteMapping(value = "sections/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteSection(@PathVariable(value = "id") int id,
+    public void deleteSection(@PathVariable(value = "id") String id,
                               @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        sectionService.deleteSection(sessionId, id);
+        try {
+            int sectionId = Integer.parseInt(id);
+            sectionService.deleteSection(sessionId, sectionId);
+        } catch (NumberFormatException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_SECTION_IDENTIFIER, id);
+        }
     }
 
     @GetMapping(value = "sections/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public SectionResponse getSectionInfo(@PathVariable(value = "id") int id,
+    public SectionResponse getSectionInfo(@PathVariable(value = "id") String id,
                                           @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        return SectionMupStruct.INSTANCE.responseCreateSection(sectionService.getSectionInfo(sessionId, id));
+        try {
+            int sectionId = Integer.parseInt(id);
+            return sectionService.getSectionInfo(sessionId, sectionId);
+        } catch (NumberFormatException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_SECTION_IDENTIFIER, id);
+        }
 
     }
 
@@ -88,12 +101,7 @@ public class NoteController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<SectionResponse> getAllSectionsInfo(@CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        List<SectionResponse> responses = new ArrayList<>();
-        List<Section> sections = sectionService.getAllSections(sessionId);
-        for (Section section : sections) {
-            responses.add(SectionMupStruct.INSTANCE.responseCreateSection(section));
-        }
-        return responses;
+        return sectionService.getAllSections(sessionId);
     }
 
     @PostMapping(value = "notes",
@@ -109,9 +117,14 @@ public class NoteController {
     @GetMapping(value = "notes/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public NoteResponse getNoteInfo(@PathVariable(value = "id") int noteId,
+    public NoteResponse getNoteInfo(@PathVariable(value = "id") String id,
                                     @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        return noteService.getNoteInfo(noteId, sessionId);
+        try {
+            int noteId = Integer.parseInt(id);
+            return noteService.getNoteInfo(noteId, sessionId);
+        } catch (NumberFormatException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_NOTE_IDENTIFIER, id);
+        }
     }
 
     @PutMapping(value = "notes/{id}",
@@ -119,16 +132,26 @@ public class NoteController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public NoteResponse editNote(@RequestBody @Valid EditNoteRequest editNoteRequest,
-                                 @PathVariable(value = "id") int noteId,
+                                 @PathVariable(value = "id") String id,
                                  @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        return noteService.editNote(editNoteRequest, noteId, sessionId);
+        try {
+            int noteId = Integer.parseInt(id);
+            return noteService.editNote(editNoteRequest, noteId, sessionId);
+        } catch (NumberFormatException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_NOTE_IDENTIFIER, id);
+        }
     }
 
     @DeleteMapping(value = "notes/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteNote(@PathVariable(value = "id") int noteId,
+    public void deleteNote(@PathVariable(value = "id") String id,
                            @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        noteService.deleteNote(noteId, sessionId);
+        try {
+            int noteId = Integer.parseInt(id);
+            noteService.deleteNote(noteId, sessionId);
+        } catch (NumberFormatException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_NOTE_IDENTIFIER, id);
+        }
     }
 
     @PostMapping(value = "comments",
@@ -143,9 +166,14 @@ public class NoteController {
     @GetMapping(value = "notes/{id}/comments",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public List<CommentResponse> getAllNoteComments(@PathVariable(value = "id") int noteId,
+    public List<CommentResponse> getAllNoteComments(@PathVariable(value = "id") String id,
                                                     @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        return commentService.getAllNoteComments(noteId, sessionId);
+        try {
+            int noteId = Integer.parseInt(id);
+            return commentService.getAllNoteComments(noteId, sessionId);
+        } catch (NumberFormatException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_NOTE_IDENTIFIER, id);
+        }
     }
 
     @PutMapping(value = "comments/{id}",
@@ -153,31 +181,51 @@ public class NoteController {
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public CommentResponse editComment(@RequestBody @Valid EditCommentRequest editRequest,
-                                       @PathVariable(value = "id") int commentId,
+                                       @PathVariable(value = "id") String id,
                                        @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        return commentService.editComment(editRequest, commentId, sessionId);
+        try {
+            int commentId = Integer.parseInt(id);
+            return commentService.editComment(editRequest, commentId, sessionId);
+        } catch (NumberFormatException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_COMMENT_IDENTIFIER, id);
+        }
     }
 
     @DeleteMapping(value = "comments/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteComment(@PathVariable(value = "id") int commentId,
+    public void deleteComment(@PathVariable(value = "id") String id,
                               @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        commentService.deleteComment(commentId, sessionId);
+        try {
+            int commentId = Integer.parseInt(id);
+            commentService.deleteComment(commentId, sessionId);
+        } catch (NumberFormatException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_COMMENT_IDENTIFIER, id);
+        }
     }
 
     @DeleteMapping(value = "notes/{id}/comments")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteAllNoteComments(@PathVariable(value = "id") int noteId,
+    public void deleteAllNoteComments(@PathVariable(value = "id") String id,
                                       @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        noteService.deleteAllNoteComments(noteId, sessionId);
+        try {
+            int noteId = Integer.parseInt(id);
+            noteService.deleteAllNoteComments(noteId, sessionId);
+        } catch (NumberFormatException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_NOTE_IDENTIFIER, id);
+        }
     }
 
     @PostMapping(value = "notes/{id}/rating")
     @ResponseStatus(HttpStatus.OK)
-    public void rateComment(@RequestBody @Valid RateNoteRequest rateRequest,
-                            @PathVariable(value = "id") int noteId,
-                            @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        noteService.rateNote(rateRequest, noteId, sessionId);
+    public void rateNote(@RequestBody @Valid RateNoteRequest rateRequest,
+                         @PathVariable(value = "id") String id,
+                         @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
+        try {
+            int noteId = Integer.parseInt(id);
+            noteService.rateNote(rateRequest, noteId, sessionId);
+        } catch (NumberFormatException ex) {
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_NOTE_IDENTIFIER, id);
+        }
     }
 
     @GetMapping(value = "notes",
@@ -197,10 +245,7 @@ public class NoteController {
                                                                     @RequestParam(value = "commentVersion", required = false) boolean commentVersion,
                                                                     @RequestParam(value = "from", required = false) int from,
                                                                     @RequestParam(value = "count", required = false) int count) throws NoteServerException {
-        return noteService.getNotesInfo(
-                new NoteRequestParam(
-                        sectionId, paramSort, tags, allTags, timeFrom, timeTo, userId,
-                        include, comments, allVersion, commentVersion, from, count),
-                sessionId);
+        return noteService.getNotesInfo(new NoteRequestParam(sectionId, paramSort, tags, allTags, timeFrom, timeTo, userId,
+                include, comments, allVersion, commentVersion, from, count), sessionId);
     }
 }

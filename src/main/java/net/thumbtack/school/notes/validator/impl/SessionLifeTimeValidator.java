@@ -9,6 +9,8 @@ import javax.validation.ConstraintValidatorContext;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+//TODO: start to use instead of method int session dao impl
+
 /**
  * Session life time validation
  */

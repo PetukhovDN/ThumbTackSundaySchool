@@ -7,7 +7,6 @@ import net.thumbtack.school.notes.dao.SessionDao;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.mappers.SessionMapper;
-import net.thumbtack.school.notes.mappers.UserMapper;
 import net.thumbtack.school.notes.model.Session;
 import org.springframework.stereotype.Component;
 
@@ -21,11 +20,9 @@ import java.time.ZoneId;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Component
 public class SessionDaoImpl implements SessionDao {
-    final UserMapper userMapper;
     final SessionMapper sessionMapper;
 
-    public SessionDaoImpl(UserMapper userMapper, SessionMapper sessionMapper) {
-        this.userMapper = userMapper;
+    public SessionDaoImpl(SessionMapper sessionMapper) {
         this.sessionMapper = sessionMapper;
     }
 

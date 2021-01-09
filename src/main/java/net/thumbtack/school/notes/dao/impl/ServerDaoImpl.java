@@ -5,12 +5,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.ServerDao;
+import net.thumbtack.school.notes.dto.response.user.ServerSettingsResponse;
 import net.thumbtack.school.notes.enums.UserStatus;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.mappers.*;
 import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -20,14 +22,35 @@ import java.util.UUID;
  */
 @Slf4j
 @RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Component
 public class ServerDaoImpl implements ServerDao {
-    UserMapper userMapper;
-    NoteMapper noteMapper;
-    SectionMapper sectionMapper;
-    CommentMapper commentMapper;
-    SessionMapper sessionMapper;
+    final UserMapper userMapper;
+    final NoteMapper noteMapper;
+    final SectionMapper sectionMapper;
+    final CommentMapper commentMapper;
+    final SessionMapper sessionMapper;
+
+    /**
+     * Server settings, max user name length
+     * Set in application properties
+     */
+    @Value("${max_name_length}")
+    String maxNameLength;
+
+    /**
+     * Server settings, min user password length
+     * Set in application properties
+     */
+    @Value("${min_password_length}")
+    String minPasswordLength;
+
+    /**
+     * Server settings, time for which user session is alive
+     * Set in application properties
+     */
+    @Value("${user_idle_timeout}")
+    String userIdleTimeout;
 
     /**
      * Method to delete all sections, messages, notes and users from the server
@@ -83,6 +106,7 @@ public class ServerDaoImpl implements ServerDao {
             Session session = new Session();
             String sessionId = UUID.randomUUID().toString();
             session.setSessionId(sessionId);
+            session.setExpiryTime(60);
             sessionMapper.startUserSession(session, userId);
             return sessionId;
         } catch (RuntimeException ex) {
@@ -132,5 +156,18 @@ public class ServerDaoImpl implements ServerDao {
             log.error("Can't get user");
             throw ex;
         }
+    }
+
+    /**
+     * Method to get current server settings
+     *
+     * @return response, which contains current server settings
+     */
+    @Override
+    public ServerSettingsResponse getServerSettings() {
+        return new ServerSettingsResponse(
+                maxNameLength,
+                minPasswordLength,
+                userIdleTimeout);
     }
 }
