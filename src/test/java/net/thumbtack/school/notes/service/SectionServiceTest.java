@@ -85,7 +85,6 @@ public class SectionServiceTest {
             sectionService.deleteSection(secondUserSessionId, section.getId());
         });
 
-        System.out.println(exception.getExceptionErrorInfo().toString());
         assertAll(
                 () -> assertNotNull(exception.getExceptionErrorInfo()),
                 () -> assertTrue(exception.getExceptionErrorInfo().getErrorString()
@@ -98,7 +97,6 @@ public class SectionServiceTest {
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
             sectionService.getSectionInfo(firstUserSessionId, 77);
         });
-        System.out.println(exception.getExceptionErrorInfo().toString());
 
         assertAll(
                 () -> assertNotNull(exception.getExceptionErrorInfo()),
@@ -151,8 +149,6 @@ public class SectionServiceTest {
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
             sectionService.getSectionInfo(secondUserSessionId, section.getId());
         });
-
-        System.out.println(exception.getExceptionErrorInfo().toString());
 
         assertAll(
                 () -> assertNotNull(exception.getExceptionErrorInfo()),

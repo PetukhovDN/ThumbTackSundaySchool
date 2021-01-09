@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * DataAccessObject to work with notes
+ */
 @Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -22,6 +25,15 @@ import java.util.List;
 public class NoteDaoImpl implements NoteDao {
     NoteMapper noteMapper;
 
+    /**
+     * Method to save new note to the database
+     * Note contains such information:
+     * note subject, author identifier, section identifier
+     *
+     * @param note contains new note information
+     * @return note information in success
+     * @throws NoteServerException if note with such identifier already exists in database
+     */
     @Override
     public Note createNote(Note note) throws NoteServerException {
         log.info("DAO insert Note {} to Database", note);
@@ -37,6 +49,12 @@ public class NoteDaoImpl implements NoteDao {
         }
     }
 
+    /**
+     * Method to save new note revision to the database
+     *
+     * @param noteRevision contains note body, revision identifier, note identifier
+     * @return note revision information in success
+     */
     @Override
     public NoteRevision createNoteRevision(NoteRevision noteRevision) {
         log.info("DAO insert NoteRevision {} to Database", noteRevision);
@@ -49,6 +67,13 @@ public class NoteDaoImpl implements NoteDao {
         }
     }
 
+    /**
+     * Method to get note information from database
+     *
+     * @param noteId note identifier
+     * @return note information in success
+     * @throws NoteServerException if there is no note with given identifier in database
+     */
     @Override
     public Note getNoteInfo(int noteId) throws NoteServerException {
         log.info("DAO get information about Note with id {} from Database", noteId);
@@ -65,6 +90,14 @@ public class NoteDaoImpl implements NoteDao {
         }
     }
 
+    /**
+     * Method to get note revision from database
+     *
+     * @param revisionId revision identifier
+     * @param noteId     note identifier
+     * @return note revision information in success
+     * @throws NoteServerException if there is no note revision with given identifier in database
+     */
     @Override
     public NoteRevision getNoteRevisionInfo(String revisionId, int noteId) throws NoteServerException {
         log.info("DAO get Note with id {} body information from Database", noteId);
@@ -81,6 +114,13 @@ public class NoteDaoImpl implements NoteDao {
         }
     }
 
+    /**
+     * Method to add to created note last revision identifier
+     *
+     * @param noteId     note identifier
+     * @param revisionId revision identifier
+     * @return note information in success
+     */
     @Override
     public Note updateNoteLastRevision(int noteId, String revisionId) {
         log.info("DAO save Note with id {} last revision id to Database", noteId);
@@ -93,6 +133,12 @@ public class NoteDaoImpl implements NoteDao {
         }
     }
 
+    /**
+     * Method to change section identifier for the existing note
+     *
+     * @param noteId    note identifier
+     * @param sectionId section identifier
+     */
     @Override
     public void replaceNoteToOtherSection(int noteId, int sectionId) {
         log.info("DAO change section id to the {} for Note with id {} in Database", sectionId, noteId);
@@ -104,6 +150,11 @@ public class NoteDaoImpl implements NoteDao {
         }
     }
 
+    /**
+     * Method to delete note with given identifier from database
+     *
+     * @param noteId identifier of the note to delete
+     */
     @Override
     public void deleteNote(int noteId) {
         log.info("DAO delete Note with id {} from Database", noteId);
@@ -115,6 +166,13 @@ public class NoteDaoImpl implements NoteDao {
         }
     }
 
+    /**
+     * Method to add rating to the existing note
+     *
+     * @param noteId note identifier
+     * @param userId identifier of user that rates note
+     * @param rating new rating for the note
+     */
     @Override
     public void rateNote(int noteId, int userId, int rating) {
         log.info("DAO add rating to Note with id {} to Database", noteId);
@@ -126,6 +184,11 @@ public class NoteDaoImpl implements NoteDao {
         }
     }
 
+    /**
+     * Method to get all notes from the database
+     *
+     * @return list, which contains all notes information
+     */
     public List<Note> getAllNotes() {
         log.info("DAO get all notes from Database");
         try {

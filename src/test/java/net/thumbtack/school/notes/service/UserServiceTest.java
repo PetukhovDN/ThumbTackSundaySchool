@@ -143,13 +143,10 @@ public class UserServiceTest {
         });
         User user = debugService.getUserAccountInfoByLogin(registeredUser.getLogin());
 
-        System.out.println(exception.getExceptionErrorInfo().toString());
         assertAll(
                 () -> assertNotNull(exception.getExceptionErrorInfo()),
                 () -> assertFalse(user.isDeleted()),
                 () -> assertTrue(exception.getExceptionErrorInfo().getErrorString().contains("No such session on the server"))
         );
     }
-
-
 }

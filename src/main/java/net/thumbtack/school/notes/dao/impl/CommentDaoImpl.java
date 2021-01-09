@@ -14,6 +14,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * DataAccessObject to work with comments
+ */
 @Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -21,6 +24,13 @@ import java.util.List;
 public class CommentDaoImpl implements CommentDao {
     CommentMapper commentMapper;
 
+    /**
+     * Method to save new comment to the database
+     *
+     * @param comment contains new comment information
+     * @return saved comment information in success
+     * @throws NoteServerException if comment with such identifier already exists in database
+     */
     @Override
     public Comment createComment(Comment comment) throws NoteServerException {
         log.info("DAO insert Comment {} to Database", comment);
@@ -36,6 +46,12 @@ public class CommentDaoImpl implements CommentDao {
         }
     }
 
+    /**
+     * Method to get all comments, that belongs to the note with given identifier, from database
+     *
+     * @param noteId note identifier
+     * @return list, that contains information about all comments
+     */
     @Override
     public List<Comment> getAllCommentsForNote(int noteId) {
         log.info("DAO get information about all Comments for note with id {} from Database", noteId);
@@ -47,6 +63,13 @@ public class CommentDaoImpl implements CommentDao {
         }
     }
 
+    /**
+     * Method to change comment body in database
+     *
+     * @param commentId      comment identifier
+     * @param newCommentBody new comment information
+     * @return comment information in success
+     */
     @Override
     public Comment changeComment(int commentId, String newCommentBody) {
         log.info("DAO change text for Comment with id {} in Database", commentId);
@@ -59,6 +82,13 @@ public class CommentDaoImpl implements CommentDao {
         }
     }
 
+    /**
+     * Method to get comment information from database
+     *
+     * @param commentId comment identifier
+     * @return comment information in success
+     * @throws NoteServerException if there is no comment with such identifier in database
+     */
     @Override
     public Comment getCommentInfo(int commentId) throws NoteServerException {
         log.info("DAO get information about comment with id {} from Database", commentId);
@@ -75,6 +105,11 @@ public class CommentDaoImpl implements CommentDao {
         }
     }
 
+    /**
+     * Method to delete comment from database
+     *
+     * @param commentId comment identifier
+     */
     @Override
     public void deleteComment(int commentId) {
         log.info("DAO delete Comment with id {} from Database", commentId);
@@ -86,6 +121,11 @@ public class CommentDaoImpl implements CommentDao {
         }
     }
 
+    /**
+     * Method to delete all comments, that belongs to the note with given identifier
+     *
+     * @param noteId note identifier
+     */
     @Override
     public void deleteAllNoteComments(int noteId) {
         log.info("DAO delete all Comments for Note with id {} from Database", noteId);

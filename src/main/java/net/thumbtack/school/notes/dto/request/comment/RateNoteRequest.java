@@ -11,7 +11,7 @@ import net.thumbtack.school.notes.validator.Rating;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RateCommentRequest {
+public class RateNoteRequest {
     @Rating
     int rating;
 }

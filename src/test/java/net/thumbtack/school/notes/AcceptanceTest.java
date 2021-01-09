@@ -110,7 +110,7 @@ public class AcceptanceTest {
         HttpClientErrorException exc = assertThrows(HttpClientErrorException.class, () -> {
             template.exchange(userUrl + "sessions", HttpMethod.POST, entity, Void.class);
         });
-        System.out.println(exc.getResponseBodyAsString());
+
         assertAll(
                 () -> assertEquals(400, exc.getStatusCode().value()),
                 () -> assertTrue(exc.getResponseBodyAsString().contains("No such user on the server"))
@@ -306,7 +306,6 @@ public class AcceptanceTest {
             template.exchange(userUrl + "sections/" + 77,
                     HttpMethod.GET, getSectionEntity, Void.class);
         });
-        System.out.println(exc.getResponseBodyAsString());
 
         assertAll(
                 () -> assertEquals(400, exc.getStatusCode().value()),

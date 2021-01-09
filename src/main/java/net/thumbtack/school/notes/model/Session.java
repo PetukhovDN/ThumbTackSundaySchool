@@ -8,15 +8,37 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 
+/**
+ * Class describing user session model
+ */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Session {
-    int id;
+
+    /**
+     * Session identifier
+     */
     String sessionId;
+
+    /**
+     * Identifier of the user that session belongs to
+     */
     int userId;
+
+    /**
+     * Session time of creation
+     */
     LocalDateTime creationTime;
+
+    /**
+     * Session last access time
+     */
     LocalDateTime lastAccessTime;
+
+    /**
+     * Session life time
+     */
     int expiryTime;
 }

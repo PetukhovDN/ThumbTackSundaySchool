@@ -23,6 +23,7 @@ import java.util.List;
 
 /**
  * Service to work with sections of notes on the server
+ * In every method check`s if session is alive and updates session life time after successful request
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -68,7 +69,7 @@ public class SectionServiceImpl implements SectionService {
         log.info("Trying to rename existed section");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         Section section = sectionDao.getSectionInfo(sectionId);
-        if (section.getAuthor().getId() != userSession.getId()) {
+        if (section.getAuthor().getId() != userSession.getUserId()) {
             throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "You are not creator of this section");
         }
         Section resultSection = sectionDao.renameSection(sectionId, section.getSectionName());
@@ -93,7 +94,7 @@ public class SectionServiceImpl implements SectionService {
         User user = userDao.getUserById(userSession.getUserId());
         if (!user.getUserStatus().equals(UserStatus.ADMIN)) {
             Section section = sectionDao.getSectionInfo(sectionId);
-            if (section.getAuthor().getId() != userSession.getId()) {
+            if (section.getAuthor().getId() != userSession.getUserId()) {
                 throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "You are not creator of this section");
             }
         }

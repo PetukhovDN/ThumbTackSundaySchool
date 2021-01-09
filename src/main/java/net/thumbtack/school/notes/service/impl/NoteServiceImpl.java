@@ -9,7 +9,7 @@ import net.thumbtack.school.notes.dao.impl.NoteDaoImpl;
 import net.thumbtack.school.notes.dao.impl.SessionDaoImpl;
 import net.thumbtack.school.notes.dao.impl.UserDaoImpl;
 import net.thumbtack.school.notes.dto.mappers.NoteMapStruct;
-import net.thumbtack.school.notes.dto.request.comment.RateCommentRequest;
+import net.thumbtack.school.notes.dto.request.comment.RateNoteRequest;
 import net.thumbtack.school.notes.dto.request.note.EditNoteRequest;
 import net.thumbtack.school.notes.dto.request.note.NoteRequest;
 import net.thumbtack.school.notes.dto.response.note.NoteResponse;
@@ -31,6 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Service to work with notes on the server
+ * In every method check`s if session is alive and updates session life time after successful request
+ */
 @Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -41,6 +45,14 @@ public class NoteServiceImpl implements NoteService {
     UserDaoImpl userDao;
     CommentDaoImpl commentDao;
 
+    /**
+     * Method to create note ont the server
+     * Note has it`s own author and is located in the sections, which is specified in creating request
+     *
+     * @param createRequest contains subject of the note, body of the note and section in which this note will be located
+     * @param sessionId     session token of current user
+     * @return information about created note in success
+     */
     @Override
     @Transactional
     public NoteResponse createNote(NoteRequest createRequest, String sessionId) throws NoteServerException {
@@ -62,6 +74,13 @@ public class NoteServiceImpl implements NoteService {
         return response;
     }
 
+    /**
+     * Method to get information about note with given identifier
+     *
+     * @param noteId    identifier of note to get information
+     * @param sessionId session token of current user
+     * @return information about needed note in success
+     */
     @Override
     @Transactional
     public NoteResponse getNoteInfo(int noteId, String sessionId) throws NoteServerException {
@@ -74,6 +93,18 @@ public class NoteServiceImpl implements NoteService {
         return response;
     }
 
+    /**
+     * Method to edit note information or to replace it from one section to another
+     * If contains only note body - creates new note body, old is saved in previous revision
+     * If contains only note section - replaces note to the new section
+     * If both - creates new note body and replaces note to the new section
+     *
+     * @param editNoteRequest contains new note body or new note section identifier, or both
+     * @param noteId          identifier of given note
+     * @param sessionId       session token of current user
+     * @return information about changed note in success
+     * @throws NoteServerException if current user is not the author of note to edit
+     */
     @Override
     @Transactional
     public NoteResponse editNote(EditNoteRequest editNoteRequest, int noteId, String sessionId) throws NoteServerException {
@@ -90,16 +121,17 @@ public class NoteServiceImpl implements NoteService {
         String body = editNoteRequest.getBody();
         String sectionIdString = editNoteRequest.getSectionId();
         int sectionId;
-        String revisionId = UUID.randomUUID().toString();
-        NoteRevision noteRevision = new NoteRevision();
-        noteRevision.setNoteId(noteId);
-        noteRevision.setRevisionId(revisionId);
-        noteRevision.setBody(body);
         try {
             sectionId = Integer.parseInt(sectionIdString);
         } catch (NumberFormatException ex) {
             throw new NoteServerException(ExceptionErrorInfo.INCORRECT_SECTION_IDENTIFIER, "Incorrect section id");
         }
+        String revisionId = UUID.randomUUID().toString();
+        NoteRevision noteRevision = new NoteRevision();
+        noteRevision.setNoteId(noteId);
+        noteRevision.setRevisionId(revisionId);
+        noteRevision.setBody(body);
+
         if (body.isEmpty() && sectionIdString.isBlank()) {
             throw new NoteServerException(ExceptionErrorInfo.EDIT_PARAMETERS_REQUIRED, "At least one parameter is required");
         } else if (body.isBlank()) {
@@ -119,6 +151,14 @@ public class NoteServiceImpl implements NoteService {
         return response;
     }
 
+    /**
+     * Method to delete note with given identifier and all it`s revisions
+     * Only author of the note (or server admin) can delete it
+     *
+     * @param noteId    identifier of note to delete
+     * @param sessionId session token of current user
+     * @throws NoteServerException if current user is not the author if note
+     */
     @Override
     @Transactional
     public void deleteNote(int noteId, String sessionId) throws NoteServerException {
@@ -136,6 +176,14 @@ public class NoteServiceImpl implements NoteService {
         sessionDao.updateSession(userSession);
     }
 
+    /**
+     * Method to delete all note comments
+     * Only author of the note can delete all its comments
+     *
+     * @param noteId    identifier of the note, which comments need to delete
+     * @param sessionId session token of current user
+     * @throws NoteServerException if current user is not the author if note
+     */
     @Override
     @Transactional
     public void deleteAllNoteComments(int noteId, String sessionId) throws NoteServerException {
@@ -150,9 +198,17 @@ public class NoteServiceImpl implements NoteService {
         sessionDao.updateSession(userSession);
     }
 
+    /**
+     * Method to add rating to the note
+     *
+     * @param rateRequest contains new rating (from 1 to 5)
+     * @param noteId      identifier of the note to rate
+     * @param sessionId   session token of the current user
+     * @throws NoteServerException if current user is not the author if note
+     */
     @Override
     @Transactional
-    public void rateNote(RateCommentRequest rateRequest, int noteId, String sessionId) throws NoteServerException {
+    public void rateNote(RateNoteRequest rateRequest, int noteId, String sessionId) throws NoteServerException {
         log.info("Trying to rate note with id {} ", noteId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         int currentUserId = userSession.getUserId();
@@ -164,6 +220,13 @@ public class NoteServiceImpl implements NoteService {
         sessionDao.updateSession(userSession);
     }
 
+    /**
+     * Method to get notes from the server with parameters:
+     *
+     * @param requestParam contains parameters, in which user wants to get user notes from the server
+     * @param sessionId    session token of the current user
+     * @return list of notes, according to the parameters, in success
+     */
     //TODO: logic for parameters
     @Override
     @Transactional

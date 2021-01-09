@@ -21,6 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service to work with comments on the server
+ * In every method check`s if session is alive and updates session life time after successful request
+ */
 @Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -29,6 +33,15 @@ public class CommentServiceImpl implements CommentService {
     CommentDaoImpl commentDao;
     SessionDaoImpl sessionDao;
 
+    /**
+     * Method to add comment to existing note on the server
+     * Response contains comment identifier, comment body, author identifier,
+     * note identifier, note revision and time of creation
+     *
+     * @param addRequest contains comment body and identifier of existing note
+     * @param sessionId  session token of current user
+     * @return information about comment in success
+     */
     @Override
     @Transactional
     public CommentResponse addComment(CommentRequest addRequest, String sessionId) throws NoteServerException {
@@ -40,6 +53,13 @@ public class CommentServiceImpl implements CommentService {
         return response;
     }
 
+    /**
+     * Method to get all comments belonging to the note with given identifier
+     *
+     * @param noteId    note identifier
+     * @param sessionId session token of current user
+     * @return list, which contains comment`s information
+     */
     @Override
     @Transactional
     public List<CommentResponse> getAllNoteComments(int noteId, String sessionId) throws NoteServerException {
@@ -54,6 +74,15 @@ public class CommentServiceImpl implements CommentService {
         return responses;
     }
 
+    /**
+     * Method to edit comment body
+     *
+     * @param editRequest contains new comment body
+     * @param commentId   identifier of the comment to edit
+     * @param sessionId   session token of current user
+     * @return information about comment in success
+     * @throws NoteServerException if current user is not the author of comment to edit
+     */
     @Override
     @Transactional
     public CommentResponse editComment(EditCommentRequest editRequest, int commentId, String sessionId) throws NoteServerException {
@@ -70,6 +99,13 @@ public class CommentServiceImpl implements CommentService {
         return response;
     }
 
+    /**
+     * Method to delete comment with given identifier
+     *
+     * @param commentId comment identifier
+     * @param sessionId session token of current user
+     * @throws NoteServerException if current user is not the author of comment to edit
+     */
     @Override
     @Transactional
     public void deleteComment(int commentId, String sessionId) throws NoteServerException {

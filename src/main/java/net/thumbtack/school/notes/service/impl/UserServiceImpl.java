@@ -28,6 +28,8 @@ import java.util.List;
 
 /**
  * Service to work with user`s accounts and user`s sessions
+ * In every method (except user account registration) check`s if session is alive
+ * and updates session life time (except logging out from the server or leaving server) after successful request
  */
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -207,9 +209,7 @@ public class UserServiceImpl implements UserService {
     /**
      * Method to get users information in dependence of user request parameters
      *
-     * @param requestParam contains four types of parameters:
-     *                     how to sort list of accounts, type of user accounts to be returned,
-     *                     from what position need to take accounts and how many accounts will be returned
+     * @param requestParam contains parameters,  in which user wants to get user accounts from the server
      * @param sessionId    user session token
      * @return list of user accounts, depending on the user request parameters
      */

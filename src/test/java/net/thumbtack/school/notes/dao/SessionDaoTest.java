@@ -72,7 +72,6 @@ public class SessionDaoTest {
         NoteServerException exception = assertThrows(NoteServerException.class, () -> {
             sessionDao.getSessionBySessionId("wrong_session_id");
         });
-        System.out.println(exception.getExceptionErrorInfo().toString());
 
         assertAll(
                 () -> assertNotNull(exception.getExceptionErrorInfo()),

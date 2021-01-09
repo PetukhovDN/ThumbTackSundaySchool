@@ -16,8 +16,24 @@ import net.thumbtack.school.notes.enums.ParamType;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserRequestParam {
+
+    /**
+     * Parameter that selects how to sort user accounts info
+     */
     ParamSort sortByRating;
+
+    /**
+     * Parameter that selects which accounts to display
+     */
     ParamType type;
-    String from;
-    String count;
+
+    /**
+     * Parameter that selects from what position get accounts from server
+     */
+    int from;
+
+    /**
+     * Parameter that selects how many accounts get from server
+     */
+    int count;
 }

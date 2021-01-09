@@ -21,13 +21,11 @@ create TABLE note_user (
     ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 create TABLE session (
-    id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    session_id VARCHAR(36) NOT NULL,
+    session_id VARCHAR(36) NOT NULL PRIMARY KEY,
     note_user_id INT(11) NOT NULL UNIQUE,
     session_start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_access_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expiry_time int(11),
-    UNIQUE KEY session_id (session_id),
     KEY session_start_time (session_start_time),
     KEY last_access_time (last_access_time),
     FOREIGN KEY (note_user_id) REFERENCES note_user (id) ON update CASCADE ON delete CASCADE)

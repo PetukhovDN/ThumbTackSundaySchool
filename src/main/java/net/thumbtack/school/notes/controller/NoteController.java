@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dto.mappers.SectionMupStruct;
 import net.thumbtack.school.notes.dto.request.comment.CommentRequest;
 import net.thumbtack.school.notes.dto.request.comment.EditCommentRequest;
-import net.thumbtack.school.notes.dto.request.comment.RateCommentRequest;
+import net.thumbtack.school.notes.dto.request.comment.RateNoteRequest;
 import net.thumbtack.school.notes.dto.request.note.EditNoteRequest;
 import net.thumbtack.school.notes.dto.request.note.NoteRequest;
 import net.thumbtack.school.notes.dto.request.section.SectionRequest;
@@ -174,7 +174,7 @@ public class NoteController {
 
     @PostMapping(value = "notes/{id}/rating")
     @ResponseStatus(HttpStatus.OK)
-    public void rateComment(@RequestBody @Valid RateCommentRequest rateRequest,
+    public void rateComment(@RequestBody @Valid RateNoteRequest rateRequest,
                             @PathVariable(value = "id") int noteId,
                             @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
         noteService.rateNote(rateRequest, noteId, sessionId);

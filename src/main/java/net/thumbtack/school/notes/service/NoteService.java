@@ -1,6 +1,6 @@
 package net.thumbtack.school.notes.service;
 
-import net.thumbtack.school.notes.dto.request.comment.RateCommentRequest;
+import net.thumbtack.school.notes.dto.request.comment.RateNoteRequest;
 import net.thumbtack.school.notes.dto.request.note.EditNoteRequest;
 import net.thumbtack.school.notes.dto.request.note.NoteRequest;
 import net.thumbtack.school.notes.dto.response.note.NoteResponse;
@@ -29,7 +29,7 @@ public interface NoteService {
     void deleteAllNoteComments(int noteId, String sessionId) throws NoteServerException;
 
     @Transactional
-    void rateNote(RateCommentRequest rateRequest, int noteId, String sessionId) throws NoteServerException;
+    void rateNote(RateNoteRequest rateRequest, int noteId, String sessionId) throws NoteServerException;
 
     @Transactional
     List<NotesInfoResponseWithParams> getNotesInfo(NoteRequestParam requestParam, @NotNull String sessionId) throws NoteServerException;

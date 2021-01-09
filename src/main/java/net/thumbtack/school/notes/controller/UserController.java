@@ -101,8 +101,8 @@ public class UserController {
     public List<UsersInfoResponse> getUsersInfoWithParams(@CookieValue(name = JAVASESSIONID, required = false) String sessionId,
                                                           @RequestParam(value = "sortByRating", required = false) ParamSort paramSort,
                                                           @RequestParam(value = "type ", required = false) ParamType paramType,
-                                                          @RequestParam(value = "from", required = false) String from,
-                                                          @RequestParam(value = "count", required = false) String count) throws NoteServerException {
+                                                          @RequestParam(value = "from", required = false) int from,
+                                                          @RequestParam(value = "count", required = false) int count) throws NoteServerException {
         return userService.getUsersInfo(new UserRequestParam(paramSort, paramType, from, count), sessionId);
     }
 
