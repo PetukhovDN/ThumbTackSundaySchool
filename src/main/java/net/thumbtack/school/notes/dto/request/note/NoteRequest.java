@@ -14,11 +14,9 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NoteRequest {
-    @NotNull
     @NotEmpty
     String subject;
 
-    @NotNull
     @NotEmpty
     String body;
 

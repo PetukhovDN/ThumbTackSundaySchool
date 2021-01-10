@@ -138,9 +138,8 @@ public class NoteControllerTest {
 
         assertAll(
                 () -> assertEquals(400, result.getResponse().getStatus()),
-                () -> assertEquals(4, error.getErrors().size()),
-                () -> assertTrue(error.getErrors().toString().contains("must not be null")),
-                () -> assertTrue(error.getErrors().toString().contains("must not be empty"))
+                () -> assertEquals(2, error.getErrors().size()),
+                () -> assertTrue(error.getErrors().toString().contains("NotEmpty"))
         );
     }
 
@@ -158,7 +157,7 @@ public class NoteControllerTest {
     }
 
     @Test
-    public void testEditNote_wrongSectionId() throws Exception {
+    public void testEditNote_nullSectionId() throws Exception {
         EditNoteRequest editNoteRequest = new EditNoteRequest(
                 "NoteBody",
                 null
@@ -171,9 +170,8 @@ public class NoteControllerTest {
 
         assertAll(
                 () -> assertEquals(400, result.getResponse().getStatus()),
-                () -> assertEquals(2, error.getErrors().size()),
-                () -> assertTrue(error.getErrors().toString().contains("must not be null")),
-                () -> assertTrue(error.getErrors().toString().contains("must not be empty"))
+                () -> assertEquals(1, error.getErrors().size()),
+                () -> assertTrue(error.getErrors().toString().contains("NotNull"))
         );
     }
 

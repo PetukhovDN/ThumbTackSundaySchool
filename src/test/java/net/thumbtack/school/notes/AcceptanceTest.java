@@ -465,7 +465,7 @@ public class AcceptanceTest {
         MultiValueMap<String, String> headers = registerUserReturnHeaderWithSessionId();
         int sectionId = createNewSectionForTests(headers).getBody().getId();
         NoteRequest createRequest = new NoteRequest(
-                null,
+                "",
                 null,
                 sectionId);
         HttpEntity<NoteRequest> createEntity = new HttpEntity<>(createRequest, headers);
@@ -476,9 +476,7 @@ public class AcceptanceTest {
 
         assertAll(
                 () -> assertEquals(400, exc.getStatusCode().value()),
-                () -> assertTrue(exc.getResponseBodyAsString().contains("subject")),
-                () -> assertTrue(exc.getResponseBodyAsString().contains("body")),
-                () -> assertTrue(exc.getResponseBodyAsString().contains("не должно равняться null"))
+                () -> assertTrue(exc.getResponseBodyAsString().contains("NotEmpty"))
         );
     }
 
@@ -684,8 +682,7 @@ public class AcceptanceTest {
 
         assertAll(
                 () -> assertEquals(400, exc.getStatusCode().value()),
-                () -> assertTrue(exc.getResponseBodyAsString().contains("body")),
-                () -> assertTrue(exc.getResponseBodyAsString().contains("не должно быть пустым"))
+                () -> assertTrue(exc.getResponseBodyAsString().contains("NotEmpty"))
         );
     }
 
