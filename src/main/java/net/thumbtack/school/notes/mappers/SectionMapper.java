@@ -17,6 +17,7 @@ public interface SectionMapper {
     @Select("SELECT id, section_name as sectionName, section_creation_time as creationTime, author_id " +
             "FROM section WHERE section_name = #{sectionName} ")
     @Results({
+            @Result(property = "id", column = "id"),
             @Result(property = "author", column = "author_id", javaType = User.class,
                     one = @One(select = "net.thumbtack.school.notes.mappers.UserMapper.getUserById", fetchType = FetchType.LAZY))})
     Section getSectionByName(String sectionName);
@@ -24,6 +25,7 @@ public interface SectionMapper {
     @Select("SELECT id, section_name as sectionName, section_creation_time as creationTime, author_id  " +
             "FROM section WHERE id = #{sectionId} ")
     @Results({
+            @Result(property = "id", column = "id"),
             @Result(property = "author", column = "author_id", javaType = User.class,
                     one = @One(select = "net.thumbtack.school.notes.mappers.UserMapper.getUserById", fetchType = FetchType.LAZY))})
     Section getSectionById(int sectionId);
@@ -36,6 +38,7 @@ public interface SectionMapper {
 
     @Select("SELECT id, section_name as sectionName, section_creation_time as creationTime, author_id FROM section")
     @Results({
+            @Result(property = "id", column = "id"),
             @Result(property = "author", column = "author_id", javaType = User.class,
                     one = @One(select = "net.thumbtack.school.notes.mappers.UserMapper.getUserById", fetchType = FetchType.LAZY))})
     List<Section> getAllSections();

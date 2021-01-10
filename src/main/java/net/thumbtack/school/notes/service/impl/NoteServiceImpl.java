@@ -63,14 +63,14 @@ public class NoteServiceImpl implements NoteService {
         Note note = NoteMapStruct.INSTANCE.requestCreateNote(createRequest);
         note.setAuthor(currentUser);
         int createdNoteId = noteDao.createNote(note);
+        String revisionId = UUID.randomUUID().toString();
         NoteRevision noteRevision = NoteMapStruct.INSTANCE.requestCreateNoteRevision(createRequest);
         noteRevision.setNoteId(createdNoteId);
-        String revisionId = UUID.randomUUID().toString();
         noteRevision.setRevisionId(revisionId);
         String createdNoteRevisionId = noteDao.createNoteRevision(noteRevision);
         NoteRevision createdNoteRevision = noteDao.getNoteRevisionInfo(createdNoteRevisionId, createdNoteId);
-        int updatedNoteId = noteDao.updateNoteLastRevision(createdNoteId, revisionId);
-        Note updatedNote = noteDao.getNoteInfo(updatedNoteId);
+        noteDao.updateNoteLastRevision(createdNoteId, revisionId);
+        Note updatedNote = noteDao.getNoteInfo(createdNoteId);
         NoteResponse response = NoteMapStruct.INSTANCE.responseCreateNote(updatedNote, createdNoteRevision);
         sessionDao.updateSession(userSession);
         return response;
@@ -218,7 +218,7 @@ public class NoteServiceImpl implements NoteService {
         if (currentUserId == authorId) {
             throw new NoteServerException(ExceptionErrorInfo.CANNOT_RATE_YOUR_OWN_NOTE, "You can`t rate note that you are the author of");
         }
-        noteDao.rateNote(noteId, currentUserId, rateRequest.getRating());
+        noteDao.rateNote(noteId, currentUserId, Integer.parseInt(rateRequest.getRating()));
         sessionDao.updateSession(userSession);
     }
 

@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.thumbtack.school.notes.dao.impl.CommentDaoImpl;
+import net.thumbtack.school.notes.dao.impl.NoteDaoImpl;
 import net.thumbtack.school.notes.dao.impl.SessionDaoImpl;
+import net.thumbtack.school.notes.dao.impl.UserDaoImpl;
 import net.thumbtack.school.notes.dto.mappers.CommentMapStruct;
 import net.thumbtack.school.notes.dto.request.comment.CommentRequest;
 import net.thumbtack.school.notes.dto.request.comment.EditCommentRequest;
@@ -13,7 +15,9 @@ import net.thumbtack.school.notes.dto.response.comment.CommentResponse;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.Comment;
+import net.thumbtack.school.notes.model.Note;
 import net.thumbtack.school.notes.model.Session;
+import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.service.CommentService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +36,8 @@ import java.util.List;
 public class CommentServiceImpl implements CommentService {
     CommentDaoImpl commentDao;
     SessionDaoImpl sessionDao;
+    UserDaoImpl userDao;
+    NoteDaoImpl noteDao;
 
     /**
      * Method to add comment to existing note on the server
@@ -47,7 +53,12 @@ public class CommentServiceImpl implements CommentService {
     public CommentResponse addComment(CommentRequest addRequest, String sessionId) throws NoteServerException {
         log.info("Trying to add new comment to note with id {} ", addRequest.getNoteId());
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        int currentUserId = userSession.getUserId();
+        User currentUser = userDao.getUserById(currentUserId);
+        Note existingNote = noteDao.getNoteInfo(addRequest.getNoteId());
         Comment comment = CommentMapStruct.INSTANCE.requestAddComment(addRequest);
+        comment.setAuthor(currentUser);
+        comment.setNote(existingNote);
         commentDao.createComment(comment);
         CommentResponse response = CommentMapStruct.INSTANCE.responseAddComment(comment);
         sessionDao.updateSession(userSession);
@@ -66,6 +77,10 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentResponse> getAllNoteComments(int noteId, String sessionId) throws NoteServerException {
         log.info("Trying to get all comments for note with id {} ", noteId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        if (noteDao.getNoteInfo(noteId) == null) {
+            log.error("No such note on the server");
+            throw new NoteServerException(ExceptionErrorInfo.NOTE_DOES_NOT_EXISTS, String.valueOf(noteId));
+        }
         List<Comment> allNoteComments = commentDao.getAllCommentsForNote(noteId);
         List<CommentResponse> responses = new ArrayList<>();
         for (Comment allNoteComment : allNoteComments) {

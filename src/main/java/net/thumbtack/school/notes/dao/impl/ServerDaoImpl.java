@@ -59,11 +59,11 @@ public class ServerDaoImpl implements ServerDao {
     public void clear() {
         log.info("Trying to clear database");
         try {
-            userMapper.deleteAll();
-            sessionMapper.deleteAll();
-            sectionMapper.deleteAll();
-            noteMapper.deleteAll();
             commentMapper.deleteAll();
+            noteMapper.deleteAll();
+            sectionMapper.deleteAll();
+            sessionMapper.deleteAll();
+            userMapper.deleteAll();
             log.info("Database was cleared");
         } catch (RuntimeException ex) {
             log.error("Can't clear database");

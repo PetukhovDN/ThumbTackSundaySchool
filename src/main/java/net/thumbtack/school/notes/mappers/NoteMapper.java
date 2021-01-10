@@ -18,13 +18,13 @@ public interface NoteMapper {
 
     @Insert("INSERT INTO note_revision (revision_id, note_id, note_body) " +
             "VALUES ( #{noteRevision.revisionId}, #{noteRevision.noteId}, #{noteRevision.body})")
-    @Options(useGeneratedKeys = false, keyProperty = "noteRevision.revisionId", keyColumn = "revision_id")
-    String saveNoteRevision(@Param("noteRevision") NoteRevision noteRevision);
+    Integer saveNoteRevision(@Param("noteRevision") NoteRevision noteRevision);
 
     @Select("SELECT id, note_subject as subject, last_revision_id as lastRevisionId, " +
             "author_id, section_id, note_creation_time as creationTime " +
             "FROM note WHERE id = #{id} ")
     @Results({
+            @Result(property = "id", column = "id"),
             @Result(property = "author", column = "author_id", javaType = User.class,
                     one = @One(select = "net.thumbtack.school.notes.mappers.UserMapper.getUserById", fetchType = FetchType.LAZY)),
             @Result(property = "section", column = "section_id", javaType = Section.class,
@@ -36,6 +36,7 @@ public interface NoteMapper {
     @Select("SELECT id, note_subject as subject, last_revision_id as lastRevisionId, " +
             "author_id, section_id, note_creation_time as creationTime FROM note ")
     @Results({
+            @Result(property = "id", column = "id"),
             @Result(property = "author", column = "author_id", javaType = User.class,
                     one = @One(select = "net.thumbtack.school.notes.mappers.UserMapper.getUserById", fetchType = FetchType.LAZY)),
             @Result(property = "section", column = "section_id", javaType = Section.class,
@@ -68,6 +69,6 @@ public interface NoteMapper {
 
     @Insert("INSERT INTO note_rating (note_id, author_id, rating) " +
             "VALUES ( #{noteId}, #{userId}, #{rating})")
-    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
+    @Options(useGeneratedKeys = true)
     Integer addRatingForNote(int noteId, int userId, int rating);
 }

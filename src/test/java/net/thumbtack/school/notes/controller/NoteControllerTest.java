@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import javax.servlet.http.Cookie;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @ExtendWith(SpringExtension.class)
@@ -134,9 +134,14 @@ public class NoteControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(createNoteRequest)))
                 .andReturn();
-        assertEquals(400, result.getResponse().getStatus());
         GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(), GlobalErrorHandler.MyError.class);
-        assertEquals(2, error.getErrors().size());
+
+        assertAll(
+                () -> assertEquals(400, result.getResponse().getStatus()),
+                () -> assertEquals(4, error.getErrors().size()),
+                () -> assertTrue(error.getErrors().toString().contains("must not be null")),
+                () -> assertTrue(error.getErrors().toString().contains("must not be empty"))
+        );
     }
 
     @Test
@@ -153,7 +158,7 @@ public class NoteControllerTest {
     }
 
     @Test
-    public void testEditNote_noSectionId() throws Exception {
+    public void testEditNote_wrongSectionId() throws Exception {
         EditNoteRequest editNoteRequest = new EditNoteRequest(
                 "NoteBody",
                 null
@@ -162,9 +167,14 @@ public class NoteControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(editNoteRequest)))
                 .andReturn();
-        assertEquals(400, result.getResponse().getStatus());
         GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(), GlobalErrorHandler.MyError.class);
-        assertEquals(1, error.getErrors().size());
+
+        assertAll(
+                () -> assertEquals(400, result.getResponse().getStatus()),
+                () -> assertEquals(2, error.getErrors().size()),
+                () -> assertTrue(error.getErrors().toString().contains("must not be null")),
+                () -> assertTrue(error.getErrors().toString().contains("must not be empty"))
+        );
     }
 
     @Test

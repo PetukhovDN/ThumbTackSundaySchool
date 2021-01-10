@@ -79,11 +79,11 @@ create TABLE note_revision (
 
 create TABLE note_comment (
 	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    comment_text VARCHAR(500) NOT NULL,
+    comment_body VARCHAR(500) NOT NULL,
     comment_creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     author_id INT(11) NOT NULL,
     note_id INT(11) NOT NULL,
-    revision_id INT(11) NOT NULL,
+    revision_id VARCHAR(50) NOT NULL,
 	KEY comment_creation_time (comment_creation_time),
 	KEY revision_id (revision_id),
     FOREIGN KEY (author_id) REFERENCES note_user (id),

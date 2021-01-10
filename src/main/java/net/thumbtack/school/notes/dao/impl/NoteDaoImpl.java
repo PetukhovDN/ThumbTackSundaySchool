@@ -119,14 +119,12 @@ public class NoteDaoImpl implements NoteDao {
      *
      * @param noteId     note identifier
      * @param revisionId revision identifier
-     * @return note identifier in success
      */
     @Override
-    public Integer updateNoteLastRevision(int noteId, String revisionId) {
+    public void updateNoteLastRevision(int noteId, String revisionId) {
         log.info("DAO save Note with id {} last revision id to Database", noteId);
         try {
             noteMapper.updateNoteLastRevisionId(noteId, revisionId);
-            return noteId;
         } catch (RuntimeException ex) {
             log.error("Can't save last revision id of the Note with id {} to Database, {}", noteId, ex);
             throw ex;

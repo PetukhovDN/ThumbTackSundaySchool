@@ -13,7 +13,7 @@ public interface NoteDao {
 
     NoteRevision getNoteRevisionInfo(String revisionId, int noteId) throws NoteServerException;
 
-    Integer updateNoteLastRevision(int noteId, String revisionId);
+    void updateNoteLastRevision(int noteId, String revisionId);
 
     void replaceNoteToOtherSection(int noteId, int sectionId);
 

@@ -62,6 +62,7 @@ public interface UserMapper {
     @Select("SELECT id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
             "user_creation_time as creationTime, user_status as userStatus, deleted_status as deleted FROM note_user")
     @Results({
+            @Result(property = "id", column = "id"),
             @Result(property = "following", column = "id", javaType = List.class,
                     many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getFollowingTo", fetchType = FetchType.LAZY)),
             @Result(property = "followers", column = "id", javaType = List.class,

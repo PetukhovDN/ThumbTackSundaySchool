@@ -32,7 +32,8 @@ public enum ExceptionErrorInfo {
     CANNOT_RATE_YOUR_OWN_NOTE("You can`t rate note that you are the author of"),
     NOT_AUTHOR_OF_COMMENT("You are not creator of this comment"),
     COMMENT_ALREADY_EXISTS("Comment with this id already exist"),
-    COMMENT_DOES_NOT_EXISTS("No such comment on the server");
+    COMMENT_DOES_NOT_EXISTS("No such comment on the server"),
+    INCORRECT_RATING_FORMAT("Rating must be a number between 1 and 5");
 
     @Getter
     String errorString;

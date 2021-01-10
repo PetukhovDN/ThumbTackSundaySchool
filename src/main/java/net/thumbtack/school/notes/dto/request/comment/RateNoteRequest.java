@@ -13,5 +13,5 @@ import net.thumbtack.school.notes.validator.Rating;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RateNoteRequest {
     @Rating
-    int rating;
+    String rating;
 }
