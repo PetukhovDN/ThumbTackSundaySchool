@@ -72,7 +72,6 @@ public class UserServiceTest {
         String testSessionIdSecond = UUID.randomUUID().toString();
         User user = userService.registerUser(newRequest, testSessionIdSecond);
         userService.makeAdmin(user.getId(), adminSession);
-
         User resultUser = userService.getUserInfo(testSessionIdSecond);
 
         assertAll(

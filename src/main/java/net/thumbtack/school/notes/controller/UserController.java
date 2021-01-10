@@ -86,7 +86,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public UpdateUserInfoResponse updateUserInfo(@RequestBody UpdateUserInfoRequest updateRequest,
                                                  @CookieValue(name = JAVASESSIONID, required = false) String sessionId) throws NoteServerException {
-        return UserMapStruct.INSTANCE.responseUpdateUserInfo(userService.updateUserInfo(updateRequest, sessionId));
+        return userService.updateUserInfo(updateRequest, sessionId);
     }
 
     @PutMapping(value = "accounts/{id}/super")

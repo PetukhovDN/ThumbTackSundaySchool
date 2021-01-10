@@ -10,6 +10,7 @@ import net.thumbtack.school.notes.dto.request.user.LeaveServerRequest;
 import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
+import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
 import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
 import net.thumbtack.school.notes.enums.UserStatus;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
@@ -174,7 +175,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional
-    public User updateUserInfo(UpdateUserInfoRequest updateRequest, @NotNull String sessionId) throws NoteServerException {
+    public UpdateUserInfoResponse updateUserInfo(UpdateUserInfoRequest updateRequest, @NotNull String sessionId) throws NoteServerException {
         log.info("Trying to update user account");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         String oldPassword = updateRequest.getOldPassword();
@@ -183,8 +184,9 @@ public class UserServiceImpl implements UserService {
         userToUpdate.setId(userSession.getUserId());
         int updatedUserId = userDao.editUserInfo(userToUpdate);
         User updatedUser = userDao.getUserById(updatedUserId);
+        UpdateUserInfoResponse response = UserMapStruct.INSTANCE.responseUpdateUserInfo(updatedUser);
         sessionDao.updateSession(userSession);
-        return updatedUser;
+        return response;
     }
 
     /**
