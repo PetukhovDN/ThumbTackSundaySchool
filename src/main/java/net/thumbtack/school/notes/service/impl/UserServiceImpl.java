@@ -11,13 +11,13 @@ import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
 import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
-import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
+import net.thumbtack.school.notes.enums.ParamSort;
+import net.thumbtack.school.notes.enums.ParamType;
 import net.thumbtack.school.notes.enums.UserStatus;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.Session;
 import net.thumbtack.school.notes.model.User;
-import net.thumbtack.school.notes.params.UserRequestParam;
 import net.thumbtack.school.notes.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -26,6 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.reverseOrder;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Service to work with user`s accounts and user`s sessions
@@ -132,7 +136,7 @@ public class UserServiceImpl implements UserService {
             return user;
         } catch (NullPointerException ex) {
             log.error("No such session on the server");
-            throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, "No such session on the server");
+            throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, sessionId);
         }
     }
 
@@ -213,27 +217,78 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Method to get users information in dependence of user request parameters
+     * Method to get all users information
      *
-     * @param requestParam contains parameters,  in which user wants to get user accounts from the server
-     * @param sessionId    user session token
-     * @return list of user accounts, depending on the user request parameters
+     * @param sessionId user session token
+     * @return list of all user accounts
      */
 
-    //TODO: logic for parameters
     @Override
     @Transactional
-    public List<UsersInfoResponse> getUsersInfo(UserRequestParam requestParam, @NotNull String sessionId) throws NoteServerException {
+    public List<User> getAllUsers(@NotNull String sessionId) throws NoteServerException {
         log.info("Trying to get all users info");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         List<User> users = userDao.getAllUsers();
-        ArrayList<UsersInfoResponse> usersResponse = new ArrayList<>();
-        for (User user : users) {
-            UsersInfoResponse response = UserMapStruct.INSTANCE.responseGetAllUsers(user);
-            usersResponse.add(response);
-        }
         sessionDao.updateSession(userSession);
-        return usersResponse;
+        return users;
+    }
+
+    /**
+     * Method to get list of user account according to the current user request parameter
+     *
+     * @param paramType user request parameter
+     * @param sessionId user session token
+     * @return list of user accounts according to the parameters
+     * @throws NoteServerException if not admin user wants to get list of server administrators
+     */
+    @Override
+    @Transactional
+    public List<User> getAllUsersByType(ParamType paramType, @NotNull String sessionId) throws NoteServerException {
+        log.info("Trying to get all users info with params");
+        Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        User currentUser = userDao.getUserById(userSession.getUserId());
+        List<User> users = new ArrayList<>();
+        switch (paramType) {
+            case HIGH_RATING:
+                log.info("Getting all users with high rating");
+                users = userDao.getAllUsers();
+                // todo
+                break;
+            case LOW_RATING:
+                log.info("Getting all users with low rating");
+                users = userDao.getAllUsers();
+                sortByRating(ParamSort.DESC, users);
+                // todo
+                break;
+            case FOLLOWING:
+                log.info("Getting all users which current user follower");
+                users = userDao.getUsersFollowedBy(currentUser.getId());
+                break;
+            case FOLLOWERS:
+                log.info("Getting all users which are following current user");
+                users = userDao.getUsersFollowingTo(currentUser.getId());
+                break;
+            case IGNORE:
+                log.info("Getting all users which current user ignore");
+                users = userDao.getUsersIgnoredBy(currentUser.getId());
+                break;
+            case IGNORED_BY:
+                log.info("Getting all users which are ignoring current user");
+                users = userDao.getUsersIgnoringTo(currentUser.getId());
+                break;
+            case DELETED:
+                log.info("Getting all users which leave server");
+                users = userDao.getUsersLeftServer();
+                break;
+            case ADMIN:
+                log.info("Getting all users which have admin status");
+                if (!currentUser.getUserStatus().equals(UserStatus.ADMIN)) {
+                    throw new NoteServerException(ExceptionErrorInfo.NOT_ENOUGH_RIGHTS, currentUser.getUserStatus().toString());
+                }
+                users = userDao.getAdministrators();
+                break;
+        }
+        return users;
     }
 
     /**
@@ -308,6 +363,38 @@ public class UserServiceImpl implements UserService {
         sessionDao.updateSession(userSession);
     }
 
+
+    /**
+     * Method to sort user accounts information by users ratings
+     *
+     * @param paramSort specifies type of sorting
+     * @param usersInfo list of user account
+     * @return sorted list of user accounts
+     */
+    public List<User> sortByRating(ParamSort paramSort, List<User> usersInfo) {
+        log.info("Trying to sort list of user accounts in order, set in paramSort: {} ", paramSort);
+        List<User> sortedList = new ArrayList<>();
+        if (paramSort.equals(ParamSort.ASC)) {
+            sortedList = usersInfo.stream()
+                    .sorted(comparing(user -> user
+                            .getRatings()
+                            .stream()
+                            .mapToInt(e -> e)
+                            .average()
+                            .getAsDouble()))
+                    .collect(toList());
+        } else if (paramSort.equals(ParamSort.DESC)) {
+            sortedList = usersInfo.stream()
+                    .sorted(comparing(user -> user
+                            .getRatings()
+                            .stream()
+                            .mapToInt(e -> e)
+                            .average()
+                            .getAsDouble(), reverseOrder()))
+                    .collect(toList());
+        }
+        return sortedList;
+    }
 
     /**
      * Method to check that given password is correct for account with this user id

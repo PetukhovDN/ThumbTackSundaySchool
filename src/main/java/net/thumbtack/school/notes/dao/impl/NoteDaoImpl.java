@@ -81,7 +81,7 @@ public class NoteDaoImpl implements NoteDao {
             Note note = noteMapper.getNoteById(noteId);
             if (note == null) {
                 log.error("No such note on the server");
-                throw new NoteServerException(ExceptionErrorInfo.NOTE_DOES_NOT_EXISTS, "No such note on the server");
+                throw new NoteServerException(ExceptionErrorInfo.NOTE_DOES_NOT_EXISTS, String.valueOf(noteId));
             }
             return note;
         } catch (RuntimeException ex) {
@@ -105,7 +105,7 @@ public class NoteDaoImpl implements NoteDao {
             NoteRevision noteRevision = noteMapper.getNoteRevision(revisionId);
             if (noteRevision == null) {
                 log.error("No such note on the server");
-                throw new NoteServerException(ExceptionErrorInfo.NOTE_DOES_NOT_EXISTS, "No such note on the server");
+                throw new NoteServerException(ExceptionErrorInfo.NOTE_DOES_NOT_EXISTS, String.valueOf(noteId));
             }
             return noteRevision;
         } catch (RuntimeException ex) {

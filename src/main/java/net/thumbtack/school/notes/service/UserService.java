@@ -5,12 +5,12 @@ import net.thumbtack.school.notes.dto.request.user.LoginRequest;
 import net.thumbtack.school.notes.dto.request.user.RegisterRequest;
 import net.thumbtack.school.notes.dto.request.user.UpdateUserInfoRequest;
 import net.thumbtack.school.notes.dto.response.user.UpdateUserInfoResponse;
-import net.thumbtack.school.notes.dto.response.user.UsersInfoResponse;
+import net.thumbtack.school.notes.enums.ParamType;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
 import net.thumbtack.school.notes.model.User;
-import net.thumbtack.school.notes.params.UserRequestParam;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public interface UserService {
@@ -37,7 +37,10 @@ public interface UserService {
     void makeAdmin(int userId, String sessionId) throws NoteServerException;
 
     @Transactional
-    List<UsersInfoResponse> getUsersInfo(UserRequestParam userRequestParam, String sessionId) throws NoteServerException;
+    List<User> getAllUsers(String sessionId) throws NoteServerException;
+
+    @Transactional
+    List<User> getAllUsersByType(ParamType paramType, @NotNull String sessionId) throws NoteServerException;
 
     @Transactional
     void followUser(String login, String sessionId) throws NoteServerException;

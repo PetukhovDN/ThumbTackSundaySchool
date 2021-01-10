@@ -95,7 +95,7 @@ public class SectionDaoImpl implements SectionDao {
             Section section = sectionMapper.getSectionById(sectionId);
             if (section == null) {
                 log.error("No such section on the server");
-                throw new NoteServerException(ExceptionErrorInfo.SECTION_DOES_NOT_EXISTS, "No such section on the server");
+                throw new NoteServerException(ExceptionErrorInfo.SECTION_DOES_NOT_EXISTS, String.valueOf(sectionId));
             }
             return section;
         } catch (RuntimeException ex) {

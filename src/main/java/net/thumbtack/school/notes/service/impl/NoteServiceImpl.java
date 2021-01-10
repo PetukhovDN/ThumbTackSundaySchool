@@ -115,9 +115,10 @@ public class NoteServiceImpl implements NoteService {
         int currentUserId = userSession.getUserId();
         User user = userDao.getUserById(currentUserId);
         if (!user.getUserStatus().equals(UserStatus.ADMIN)) {
-            int authorId = noteDao.getNoteInfo(noteId).getAuthor().getId();
+            User author = noteDao.getNoteInfo(noteId).getAuthor();
+            int authorId = author.getId();
             if (currentUserId != authorId) {
-                throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_NOTE, "You are not creator of this note");
+                throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_NOTE, "Author is " + author.getLogin());
             }
         }
         String body = editNoteRequest.getBody();
@@ -126,7 +127,7 @@ public class NoteServiceImpl implements NoteService {
         try {
             sectionId = Integer.parseInt(sectionIdString);
         } catch (NumberFormatException ex) {
-            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_SECTION_IDENTIFIER, "Incorrect section id");
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_SECTION_IDENTIFIER, sectionIdString);
         }
         String revisionId = UUID.randomUUID().toString();
         NoteRevision noteRevision = new NoteRevision();
@@ -135,7 +136,7 @@ public class NoteServiceImpl implements NoteService {
         noteRevision.setBody(body);
 
         if (body.isEmpty() && sectionIdString.isBlank()) {
-            throw new NoteServerException(ExceptionErrorInfo.EDIT_PARAMETERS_REQUIRED, "At least one parameter is required");
+            throw new NoteServerException(ExceptionErrorInfo.EDIT_PARAMETERS_REQUIRED, body + " | " + sectionIdString);
         } else if (body.isBlank()) {
             noteDao.replaceNoteToOtherSection(noteId, sectionId);
         } else if (sectionIdString.isBlank()) {
@@ -169,9 +170,10 @@ public class NoteServiceImpl implements NoteService {
         int currentUserId = userSession.getUserId();
         User user = userDao.getUserById(currentUserId);
         if (!user.getUserStatus().equals(UserStatus.ADMIN)) {
-            int authorId = noteDao.getNoteInfo(noteId).getAuthor().getId();
+            User author = noteDao.getNoteInfo(noteId).getAuthor();
+            int authorId = author.getId();
             if (currentUserId != authorId) {
-                throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_NOTE, "You are not creator of this note");
+                throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_NOTE, "Author is " + author.getLogin());
             }
         }
         noteDao.deleteNote(noteId);
@@ -192,9 +194,10 @@ public class NoteServiceImpl implements NoteService {
         log.info("Trying to delete all comments for note with id {} ", noteId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         int currentUserId = userSession.getUserId();
-        int authorId = noteDao.getNoteInfo(noteId).getAuthor().getId();
+        User author = noteDao.getNoteInfo(noteId).getAuthor();
+        int authorId = author.getId();
         if (currentUserId != authorId) {
-            throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_NOTE, "You are not creator of this note");
+            throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_NOTE, "Author is " + author.getLogin());
         }
         commentDao.deleteAllNoteComments(noteId);
         sessionDao.updateSession(userSession);
@@ -214,9 +217,10 @@ public class NoteServiceImpl implements NoteService {
         log.info("Trying to rate note with id {} ", noteId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         int currentUserId = userSession.getUserId();
-        int authorId = noteDao.getNoteInfo(noteId).getAuthor().getId();
+        User author = noteDao.getNoteInfo(noteId).getAuthor();
+        int authorId = author.getId();
         if (currentUserId == authorId) {
-            throw new NoteServerException(ExceptionErrorInfo.CANNOT_RATE_YOUR_OWN_NOTE, "You can`t rate note that you are the author of");
+            throw new NoteServerException(ExceptionErrorInfo.CANNOT_RATE_YOUR_OWN_NOTE, "Author: " + author.getLogin());
         }
         noteDao.rateNote(noteId, currentUserId, Integer.parseInt(rateRequest.getRating()));
         sessionDao.updateSession(userSession);

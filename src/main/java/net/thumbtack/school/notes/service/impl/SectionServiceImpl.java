@@ -73,8 +73,10 @@ public class SectionServiceImpl implements SectionService {
         log.info("Trying to rename existed section");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         Section section = sectionDao.getSectionInfo(sectionId);
-        if (section.getAuthor().getId() != userSession.getUserId()) {
-            throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "You are not creator of this section");
+        int authorId = userSession.getUserId();
+        if (section.getAuthor().getId() != authorId) {
+            User author = userDao.getUserById(authorId);
+            throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "Author is: " + author.getId());
         }
         int resultSectionId = sectionDao.renameSection(sectionId, section.getSectionName());
         Section resultSection = sectionDao.getSectionInfo(resultSectionId);
@@ -97,11 +99,12 @@ public class SectionServiceImpl implements SectionService {
     public void deleteSection(String sessionId, int sectionId) throws NoteServerException {
         log.info("Trying to delete section");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
-        User user = userDao.getUserById(userSession.getUserId());
-        if (!user.getUserStatus().equals(UserStatus.ADMIN)) {
+        User currentUser = userDao.getUserById(userSession.getUserId());
+        if (!currentUser.getUserStatus().equals(UserStatus.ADMIN)) {
             Section section = sectionDao.getSectionInfo(sectionId);
-            if (section.getAuthor().getId() != userSession.getUserId()) {
-                throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "You are not creator of this section");
+            User author = section.getAuthor();
+            if (userSession.getUserId() != author.getId()) {
+                throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "Author is: " + author.getLogin());
             }
         }
         sectionDao.deleteSection(sectionId);

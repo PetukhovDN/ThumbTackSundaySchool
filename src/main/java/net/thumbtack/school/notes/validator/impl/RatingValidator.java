@@ -22,7 +22,7 @@ public class RatingValidator implements ConstraintValidator<Rating, String> {
             int rating = Integer.parseInt(ratingString);
             return rating >= 1 && rating <= 5;
         } catch (NumberFormatException exc) {
-            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_RATING_FORMAT, exc.getLocalizedMessage());
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_RATING_FORMAT, exc.getMessage());
         }
     }
 }

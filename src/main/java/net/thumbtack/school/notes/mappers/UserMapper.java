@@ -97,4 +97,38 @@ public interface UserMapper {
 
     @Delete("DELETE FROM note_user")
     void deleteAll();
+
+    @Select("SELECT id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
+            "user_creation_time as creationTime, user_status as userStatus, deleted_status as deleted " +
+            "FROM note_user WHERE user_status = 'ADMIN'")
+    @Results({
+            @Result(property = "id", column = "id"),
+            @Result(property = "following", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getFollowingTo", fetchType = FetchType.LAZY)),
+            @Result(property = "followers", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getFollowedBy", fetchType = FetchType.LAZY)),
+            @Result(property = "ignoring", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getIgnoringTo", fetchType = FetchType.LAZY)),
+            @Result(property = "ignoredBy", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getIgnoredBy", fetchType = FetchType.LAZY)),
+            @Result(property = "ratings", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getRatings", fetchType = FetchType.LAZY))})
+    List<User> getAdmins();
+
+    @Select("SELECT id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
+            "user_creation_time as creationTime, user_status as userStatus, deleted_status as deleted " +
+            "FROM note_user WHERE deleted_status = '1'")
+    @Results({
+            @Result(property = "id", column = "id"),
+            @Result(property = "following", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getFollowingTo", fetchType = FetchType.LAZY)),
+            @Result(property = "followers", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getFollowedBy", fetchType = FetchType.LAZY)),
+            @Result(property = "ignoring", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getIgnoringTo", fetchType = FetchType.LAZY)),
+            @Result(property = "ignoredBy", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getIgnoredBy", fetchType = FetchType.LAZY)),
+            @Result(property = "ratings", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.notes.mappers.UserMapper.getRatings", fetchType = FetchType.LAZY))})
+    List<User> getDeleted();
 }

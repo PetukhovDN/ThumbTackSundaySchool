@@ -12,7 +12,7 @@ import net.thumbtack.school.notes.enums.ParamSort;
 import net.thumbtack.school.notes.enums.ParamType;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
-import net.thumbtack.school.notes.params.UserRequestParam;
+import net.thumbtack.school.notes.model.User;
 import net.thumbtack.school.notes.service.impl.UserServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -107,9 +108,39 @@ public class UserController {
     public List<UsersInfoResponse> getUsersInfoWithParams(@CookieValue(name = JAVASESSIONID, required = false) String sessionId,
                                                           @RequestParam(value = "sortByRating", required = false) ParamSort paramSort,
                                                           @RequestParam(value = "type ", required = false) ParamType paramType,
-                                                          @RequestParam(value = "from", required = false) int from,
-                                                          @RequestParam(value = "count", required = false) int count) throws NoteServerException {
-        return userService.getUsersInfo(new UserRequestParam(paramSort, paramType, from, count), sessionId);
+                                                          @RequestParam(value = "from", required = false) String from,
+                                                          @RequestParam(value = "count", required = false) String count) throws NoteServerException {
+        List<User> userAccountsInfo;
+        if (paramType == null) {
+            userAccountsInfo = userService.getAllUsers(sessionId);
+        } else {
+            userAccountsInfo = userService.getAllUsersByType(paramType, sessionId);
+        }
+        if (paramSort != null) {
+            userAccountsInfo = userService.sortByRating(paramSort, userAccountsInfo);
+        }
+        try {
+            if (from != null && !from.isEmpty()) {
+                userAccountsInfo.removeAll(userAccountsInfo.subList(0, Integer.parseInt(from)));
+            }
+        } catch (NumberFormatException exception) {
+            log.error("From must be a number");
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_FROM_FORMAT, from);
+        }
+        try {
+            if (count != null && !count.isEmpty()) {
+                userAccountsInfo.removeAll(userAccountsInfo.subList(Integer.parseInt(count) + 1, userAccountsInfo.size() - 1));
+            }
+        } catch (NumberFormatException exc) {
+            log.error("Count must be a number");
+            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_COUNT_FORMAT, count);
+        }
+        ArrayList<UsersInfoResponse> usersResponse = new ArrayList<>();
+        for (User user : userAccountsInfo) {
+            UsersInfoResponse response = UserMapStruct.INSTANCE.responseGetAllUsers(user);
+            usersResponse.add(response);
+        }
+        return usersResponse;
     }
 
     @PostMapping(value = "followings",

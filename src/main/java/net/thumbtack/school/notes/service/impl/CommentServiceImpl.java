@@ -105,9 +105,10 @@ public class CommentServiceImpl implements CommentService {
         log.info("Trying to edit comment with id {} ", commentId);
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         int currentUserId = userSession.getUserId();
-        int authorId = commentDao.getCommentInfo(commentId).getAuthor().getId();
+        User author = commentDao.getCommentInfo(commentId).getAuthor();
+        int authorId = author.getId();
         if (authorId != currentUserId) {
-            throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_COMMENT, "You are not creator of this comment");
+            throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_COMMENT, "Author is " + author.getLogin());
         }
         int editedCommentId = commentDao.changeComment(commentId, editRequest.getBody());
         Comment editedComment = commentDao.getCommentInfo(editedCommentId);
@@ -130,11 +131,12 @@ public class CommentServiceImpl implements CommentService {
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         int currentUserId = userSession.getUserId();
         Comment comment = commentDao.getCommentInfo(commentId);
-        int noteAuthor = comment.getNote().getAuthor().getId();
-        if (currentUserId != noteAuthor) {
+        User author = commentDao.getCommentInfo(commentId).getAuthor();
+        int authorId = author.getId();
+        if (currentUserId != authorId) {
             int commentAuthor = comment.getAuthor().getId();
             if (commentAuthor != currentUserId) {
-                throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_COMMENT, "You are not creator of this comment");
+                throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_COMMENT, "Author is " + author.getLogin());
             }
         }
         commentDao.deleteComment(commentId);

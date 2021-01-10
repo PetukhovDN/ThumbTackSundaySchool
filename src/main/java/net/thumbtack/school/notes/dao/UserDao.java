@@ -35,4 +35,8 @@ public interface UserDao {
     List<User> getUsersIgnoringTo(int userId);
 
     List<User> getUsersIgnoredBy(int userId);
+
+    List<User> getUsersLeftServer();
+
+    List<User> getAdministrators();
 }

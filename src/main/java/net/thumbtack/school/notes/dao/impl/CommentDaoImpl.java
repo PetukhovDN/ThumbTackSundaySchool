@@ -39,7 +39,7 @@ public class CommentDaoImpl implements CommentDao {
             return comment.getId();
         } catch (DuplicateKeyException ex) {
             log.error("Comment {} already exists", comment, ex);
-            throw new NoteServerException(ExceptionErrorInfo.COMMENT_ALREADY_EXISTS, "Comment with this id already exist");
+            throw new NoteServerException(ExceptionErrorInfo.COMMENT_ALREADY_EXISTS, comment.getCommentBody());
         } catch (RuntimeException ex) {
             log.error("Can't insert Comment {} to Database, {}", comment, ex);
             throw ex;
@@ -96,7 +96,7 @@ public class CommentDaoImpl implements CommentDao {
             Comment comment = commentMapper.getCommentById(commentId);
             if (comment == null) {
                 log.error("No such note on the server");
-                throw new NoteServerException(ExceptionErrorInfo.COMMENT_DOES_NOT_EXISTS, "No such comment on the server");
+                throw new NoteServerException(ExceptionErrorInfo.COMMENT_DOES_NOT_EXISTS, String.valueOf(commentId));
             }
             return comment;
         } catch (RuntimeException ex) {

@@ -33,7 +33,9 @@ public enum ExceptionErrorInfo {
     NOT_AUTHOR_OF_COMMENT("You are not creator of this comment"),
     COMMENT_ALREADY_EXISTS("Comment with this id already exist"),
     COMMENT_DOES_NOT_EXISTS("No such comment on the server"),
-    INCORRECT_RATING_FORMAT("Rating must be a number between 1 and 5");
+    INCORRECT_RATING_FORMAT("Rating must be a number between 1 and 5"),
+    INCORRECT_COUNT_FORMAT("Count must be a number"),
+    INCORRECT_FROM_FORMAT("From must be a number");
 
     @Getter
     String errorString;

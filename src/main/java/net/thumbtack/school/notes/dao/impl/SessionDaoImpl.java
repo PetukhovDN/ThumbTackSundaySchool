@@ -58,7 +58,7 @@ public class SessionDaoImpl implements SessionDao {
             sessionMapper.stopUserSession(sessionId);
         } catch (NullPointerException ex) {
             log.error("No session with id {} running on server", sessionId);
-            throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, "No such session on the server");
+            throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, sessionId);
         } catch (RuntimeException ex) {
             log.error("User can't logout from server, ", ex);
             throw ex;
@@ -77,7 +77,7 @@ public class SessionDaoImpl implements SessionDao {
         try {
             Session userSession = sessionMapper.getSessionBySessionId(sessionId);
             if (sessionExpired(userSession)) {
-                throw new NoteServerException(ExceptionErrorInfo.SESSION_EXPIRED, "Session with id " + sessionId + " expired");
+                throw new NoteServerException(ExceptionErrorInfo.SESSION_EXPIRED, sessionId);
             }
             return userSession;
         } catch (RuntimeException ex) {

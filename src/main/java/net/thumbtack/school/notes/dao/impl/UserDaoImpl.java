@@ -83,7 +83,7 @@ public class UserDaoImpl implements UserDao {
             return user.getId();
         } catch (NullPointerException ex) {
             log.error("No user with id {} in database", user.getId());
-            throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, "No such user on the server");
+            throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, user.getLogin());
         } catch (RuntimeException ex) {
             log.error("Can't get user info from Database, ", ex);
             throw ex;
@@ -298,6 +298,38 @@ public class UserDaoImpl implements UserDao {
             return userMapper.getIgnoredBy(userId);
         } catch (RuntimeException ex) {
             log.error("Can't get users, which are ignoring user with id {}", userId);
+            throw ex;
+        }
+    }
+
+    /**
+     * Method to get information about user accounts which have left the server
+     *
+     * @return list of user accounts information in success
+     */
+    @Override
+    public List<User> getUsersLeftServer() {
+        log.info("Trying to get user accounts which have left the server");
+        try {
+            return userMapper.getDeleted();
+        } catch (RuntimeException ex) {
+            log.error("Can't get user accounts which have left the server");
+            throw ex;
+        }
+    }
+
+    /**
+     * Method to get information about administrator accounts on the server
+     *
+     * @return list of user accounts information in success
+     */
+    @Override
+    public List<User> getAdministrators() {
+        log.info("Trying to get server administrators");
+        try {
+            return userMapper.getAdmins();
+        } catch (RuntimeException ex) {
+            log.error("Can't get server administrators");
             throw ex;
         }
     }
