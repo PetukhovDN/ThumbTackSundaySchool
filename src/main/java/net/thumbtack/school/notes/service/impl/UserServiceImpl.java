@@ -251,14 +251,11 @@ public class UserServiceImpl implements UserService {
         switch (paramType) {
             case HIGH_RATING:
                 log.info("Getting all users with high rating");
-                users = userDao.getAllUsers();
-                // todo
+                users = sortByRating(ParamSort.DESC, userDao.getAllUsers());
                 break;
             case LOW_RATING:
                 log.info("Getting all users with low rating");
-                users = userDao.getAllUsers();
-                sortByRating(ParamSort.DESC, users);
-                // todo
+                users = sortByRating(ParamSort.ASC, userDao.getAllUsers());
                 break;
             case FOLLOWING:
                 log.info("Getting all users which current user follower");

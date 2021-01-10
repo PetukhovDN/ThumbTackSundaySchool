@@ -233,7 +233,7 @@ public class NoteServiceImpl implements NoteService {
      * @param sessionId    session token of the current user
      * @return list of notes, according to the parameters, in success
      */
-    //TODO: logic for parameters
+    //TODO: logic for parameters, now returns all notes from the server
     @Override
     @Transactional
     public List<NotesInfoResponseWithParams> getNotesInfo(NoteRequestParam requestParam, @NotNull String sessionId) throws NoteServerException {
