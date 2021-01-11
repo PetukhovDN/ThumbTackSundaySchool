@@ -76,6 +76,11 @@ public class User {
     List<Integer> ratings;
 
     /**
+     * Average rating of the user
+     */
+    double rating;
+
+    /**
      * List of all users that current user follow
      */
     List<User> following;

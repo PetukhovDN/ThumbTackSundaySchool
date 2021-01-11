@@ -76,7 +76,8 @@ public interface UserMapStruct {
             @Mapping(target = "creationTime", source = "user.creationTime"),
             @Mapping(target = "online", source = "user.online"),
             @Mapping(target = "deleted", source = "user.deleted"),
-            @Mapping(target = "userStatus", source = "user.userStatus")
+            @Mapping(target = "userStatus", source = "user.userStatus"),
+            @Mapping(target = "rating", source = "user.rating")
     })
     UsersInfoResponse responseGetAllUsers(User user);
 }

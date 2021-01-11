@@ -229,6 +229,7 @@ public class UserServiceImpl implements UserService {
         log.info("Trying to get all users info");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
         List<User> users = userDao.getAllUsers();
+        calculateAverageRating(users);
         sessionDao.updateSession(userSession);
         return users;
     }
@@ -251,31 +252,40 @@ public class UserServiceImpl implements UserService {
         switch (paramType) {
             case HIGH_RATING:
                 log.info("Getting all users with high rating");
-                users = sortByRating(ParamSort.DESC, userDao.getAllUsers());
+                users = userDao.getAllUsers();
+                calculateAverageRating(users);
+                users = sortByRating(ParamSort.DESC, users);
                 break;
             case LOW_RATING:
                 log.info("Getting all users with low rating");
-                users = sortByRating(ParamSort.ASC, userDao.getAllUsers());
+                users = userDao.getAllUsers();
+                calculateAverageRating(users);
+                users = sortByRating(ParamSort.ASC, users);
                 break;
             case FOLLOWING:
                 log.info("Getting all users which current user follower");
                 users = userDao.getUsersFollowedBy(currentUser.getId());
+                calculateAverageRating(users);
                 break;
             case FOLLOWERS:
                 log.info("Getting all users which are following current user");
                 users = userDao.getUsersFollowingTo(currentUser.getId());
+                calculateAverageRating(users);
                 break;
             case IGNORE:
                 log.info("Getting all users which current user ignore");
                 users = userDao.getUsersIgnoredBy(currentUser.getId());
+                calculateAverageRating(users);
                 break;
             case IGNORED_BY:
                 log.info("Getting all users which are ignoring current user");
                 users = userDao.getUsersIgnoringTo(currentUser.getId());
+                calculateAverageRating(users);
                 break;
             case DELETED:
                 log.info("Getting all users which leave server");
                 users = userDao.getUsersLeftServer();
+                calculateAverageRating(users);
                 break;
             case ADMIN:
                 log.info("Getting all users which have admin status");
@@ -283,6 +293,7 @@ public class UserServiceImpl implements UserService {
                     throw new NoteServerException(ExceptionErrorInfo.NOT_ENOUGH_RIGHTS, currentUser.getUserStatus().toString());
                 }
                 users = userDao.getAdministrators();
+                calculateAverageRating(users);
                 break;
         }
         return users;
@@ -373,21 +384,11 @@ public class UserServiceImpl implements UserService {
         List<User> sortedList = new ArrayList<>();
         if (paramSort.equals(ParamSort.ASC)) {
             sortedList = usersInfo.stream()
-                    .sorted(comparing(user -> user
-                            .getRatings()
-                            .stream()
-                            .mapToInt(e -> e)
-                            .average()
-                            .getAsDouble()))
+                    .sorted(comparing(User::getRating))
                     .collect(toList());
         } else if (paramSort.equals(ParamSort.DESC)) {
             sortedList = usersInfo.stream()
-                    .sorted(comparing(user -> user
-                            .getRatings()
-                            .stream()
-                            .mapToInt(e -> e)
-                            .average()
-                            .getAsDouble(), reverseOrder()))
+                    .sorted(comparing(User::getRating, reverseOrder()))
                     .collect(toList());
         }
         return sortedList;
@@ -406,5 +407,20 @@ public class UserServiceImpl implements UserService {
             log.error("Wrong password {}", password);
             throw new NoteServerException(ExceptionErrorInfo.WRONG_PASSWORD, password);
         }
+    }
+
+    /**
+     * Method to calculate average users rating from list of all there ratings
+     *
+     * @param users list of user accounts which every contains list of user ratings
+     */
+    public void calculateAverageRating(List<User> users) {
+        log.info("Calculating average rating for every user");
+        users.forEach(user -> user.setRating(user
+                .getRatings()
+                .stream()
+                .mapToInt(e -> e)
+                .average()
+                .getAsDouble()));
     }
 }

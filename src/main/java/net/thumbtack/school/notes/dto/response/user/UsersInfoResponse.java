@@ -23,5 +23,5 @@ public class UsersInfoResponse {
     boolean online;
     boolean deleted;
     UserStatus userStatus;
-    int rating;
+    double rating;
 }
