@@ -8,8 +8,8 @@ public interface SessionMapper {
     @Insert("INSERT INTO session (session_id, note_user_id, expiry_time) VALUES ( #{session.sessionId}, #{userId}, #{session.expiryTime} )")
     Integer startUserSession(@Param("session") Session session, int userId);
 
-    @Delete("DELETE FROM session WHERE session_id = #{sessionId}")
-    void stopUserSession(String sessionId);
+    @Delete("DELETE FROM session WHERE note_user_id = #{userId}")
+    void stopUserSession(int userId);
 
     @Select("SELECT session_id as sessionId, note_user_id as userId, session_start_time as creationTime, " +
             "last_access_time as lastAccessTime, expiry_time as expiryTime " +

@@ -18,9 +18,9 @@ public interface UserDao {
 
     List<User> getAllUsers();
 
-    void followUser(int currentUserId, int userIdToFollow);
+    void followUser(int currentUserId, int userIdToFollow) throws NoteServerException;
 
-    void ignoreUser(int currentUserId, int userIdToFollow);
+    void ignoreUser(int currentUserId, int userIdToFollow) throws NoteServerException;
 
     void stopFollowUser(int currentUserId, int userIdToFollow);
 

@@ -4,10 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import net.thumbtack.school.notes.dao.impl.CommentDaoImpl;
-import net.thumbtack.school.notes.dao.impl.NoteDaoImpl;
-import net.thumbtack.school.notes.dao.impl.SessionDaoImpl;
-import net.thumbtack.school.notes.dao.impl.UserDaoImpl;
+import net.thumbtack.school.notes.dao.impl.*;
 import net.thumbtack.school.notes.dto.mappers.NoteMapStruct;
 import net.thumbtack.school.notes.dto.request.comment.RateNoteRequest;
 import net.thumbtack.school.notes.dto.request.note.EditNoteRequest;
@@ -17,10 +14,7 @@ import net.thumbtack.school.notes.dto.response.note.NotesInfoResponseWithParams;
 import net.thumbtack.school.notes.enums.UserStatus;
 import net.thumbtack.school.notes.exceptions.ExceptionErrorInfo;
 import net.thumbtack.school.notes.exceptions.NoteServerException;
-import net.thumbtack.school.notes.model.Note;
-import net.thumbtack.school.notes.model.NoteRevision;
-import net.thumbtack.school.notes.model.Session;
-import net.thumbtack.school.notes.model.User;
+import net.thumbtack.school.notes.model.*;
 import net.thumbtack.school.notes.params.NoteRequestParam;
 import net.thumbtack.school.notes.service.NoteService;
 import org.springframework.stereotype.Service;
@@ -44,6 +38,7 @@ public class NoteServiceImpl implements NoteService {
     SessionDaoImpl sessionDao;
     UserDaoImpl userDao;
     CommentDaoImpl commentDao;
+    SectionDaoImpl sectionDao;
 
     /**
      * Method to create note ont the server
@@ -58,10 +53,17 @@ public class NoteServiceImpl implements NoteService {
     public NoteResponse createNote(NoteRequest createRequest, String sessionId) throws NoteServerException {
         log.info("Trying to create new note");
         Session userSession = sessionDao.getSessionBySessionId(sessionId);
+        Note note = NoteMapStruct.INSTANCE.requestCreateNote(createRequest);
         int currentUserId = userSession.getUserId();
         User currentUser = userDao.getUserById(currentUserId);
-        Note note = NoteMapStruct.INSTANCE.requestCreateNote(createRequest);
         note.setAuthor(currentUser);
+        int sectionId = createRequest.getSectionId();
+        try {
+            Section section = sectionDao.getSectionInfo(sectionId);
+            note.setSection(section);
+        } catch (NullPointerException exception) {
+            throw new NoteServerException(ExceptionErrorInfo.SECTION_DOES_NOT_EXISTS, String.valueOf(sectionId));
+        }
         int createdNoteId = noteDao.createNote(note);
         String revisionId = UUID.randomUUID().toString();
         NoteRevision noteRevision = NoteMapStruct.INSTANCE.requestCreateNoteRevision(createRequest);
@@ -123,26 +125,33 @@ public class NoteServiceImpl implements NoteService {
         }
         String body = editNoteRequest.getBody();
         String sectionIdString = editNoteRequest.getSectionId();
-        int sectionId;
-        try {
-            sectionId = Integer.parseInt(sectionIdString);
-        } catch (NumberFormatException ex) {
-            throw new NoteServerException(ExceptionErrorInfo.INCORRECT_SECTION_IDENTIFIER, sectionIdString);
-        }
         String revisionId = UUID.randomUUID().toString();
         NoteRevision noteRevision = new NoteRevision();
         noteRevision.setNoteId(noteId);
         noteRevision.setRevisionId(revisionId);
         noteRevision.setBody(body);
+        int sectionId;
 
-        if (body.isEmpty() && sectionIdString.isBlank()) {
+        if (body == null && sectionIdString == null) {
             throw new NoteServerException(ExceptionErrorInfo.EDIT_PARAMETERS_REQUIRED, body + " | " + sectionIdString);
-        } else if (body.isBlank()) {
-            noteDao.replaceNoteToOtherSection(noteId, sectionId);
-        } else if (sectionIdString.isBlank()) {
+        } else if (sectionIdString == null) {
             noteDao.createNoteRevision(noteRevision);
             noteDao.updateNoteLastRevision(noteId, revisionId);
+        } else if (body == null) {
+            try {
+                sectionId = Integer.parseInt(sectionIdString);
+            } catch (NumberFormatException ex) {
+                throw new NoteServerException(ExceptionErrorInfo.INCORRECT_SECTION_IDENTIFIER, sectionIdString);
+            }
+            sectionDao.getSectionInfo(sectionId);
+            noteDao.replaceNoteToOtherSection(noteId, sectionId);
         } else {
+            try {
+                sectionId = Integer.parseInt(sectionIdString);
+            } catch (NumberFormatException ex) {
+                throw new NoteServerException(ExceptionErrorInfo.INCORRECT_SECTION_IDENTIFIER, sectionIdString);
+            }
+            sectionDao.getSectionInfo(sectionId);
             noteDao.createNoteRevision(noteRevision);
             noteDao.updateNoteLastRevision(noteId, revisionId);
             noteDao.replaceNoteToOtherSection(noteId, sectionId);

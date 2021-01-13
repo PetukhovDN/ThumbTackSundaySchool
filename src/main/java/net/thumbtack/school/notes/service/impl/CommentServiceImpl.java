@@ -59,8 +59,9 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = CommentMapStruct.INSTANCE.requestAddComment(addRequest);
         comment.setAuthor(currentUser);
         comment.setNote(existingNote);
-        commentDao.createComment(comment);
-        CommentResponse response = CommentMapStruct.INSTANCE.responseAddComment(comment);
+        int commentId = commentDao.createComment(comment);
+        Comment createdComment = commentDao.getCommentInfo(commentId);
+        CommentResponse response = CommentMapStruct.INSTANCE.responseAddComment(createdComment);
         sessionDao.updateSession(userSession);
         return response;
     }

@@ -48,17 +48,17 @@ public class SessionDaoImpl implements SessionDao {
     /**
      * Method to stop user session
      *
-     * @param sessionId user session token
+     * @param userId user identifier
      * @throws NoteServerException if there is no saved in database session with this session token
      */
     @Override
-    public void stopUserSession(String sessionId) throws NoteServerException {
+    public void stopUserSession(int userId) throws NoteServerException {
         log.info("DAO User logout from server");
         try {
-            sessionMapper.stopUserSession(sessionId);
+            sessionMapper.stopUserSession(userId);
         } catch (NullPointerException ex) {
-            log.error("No session with id {} running on server", sessionId);
-            throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, sessionId);
+            log.error("No session for user with id {} running on server", userId);
+            throw new NoteServerException(ExceptionErrorInfo.USER_IS_NOT_LOGGED_IN, String.valueOf(userId));
         } catch (RuntimeException ex) {
             log.error("User can't logout from server, ", ex);
             throw ex;
@@ -137,7 +137,7 @@ public class SessionDaoImpl implements SessionDao {
             return currentTimeInSec > sessionStartTimeInSec + session.getExpiryTime();
         } catch (NullPointerException ex) {
             log.error("No such session on the server");
-            throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, "No such session on the server");
+            throw new NoteServerException(ExceptionErrorInfo.SESSION_DOES_NOT_EXISTS, "You are not logged in");
         }
     }
 }

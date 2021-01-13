@@ -78,9 +78,8 @@ public class SectionServiceImpl implements SectionService {
             User author = userDao.getUserById(authorId);
             throw new NoteServerException(ExceptionErrorInfo.NOT_AUTHOR_OF_SECTION, "Author is: " + author.getId());
         }
-        int resultSectionId = sectionDao.renameSection(sectionId, section.getSectionName());
-        Section resultSection = sectionDao.getSectionInfo(resultSectionId);
-        SectionResponse response = SectionMupStruct.INSTANCE.responseCreateSection(resultSection);
+        sectionDao.renameSection(sectionId, renameRequest.getSectionName());
+        SectionResponse response = SectionMupStruct.INSTANCE.responseCreateSection(sectionDao.getSectionInfo(sectionId));
         sessionDao.updateSession(userSession);
         return response;
     }

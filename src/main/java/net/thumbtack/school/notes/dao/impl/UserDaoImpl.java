@@ -149,10 +149,13 @@ public class UserDaoImpl implements UserDao {
      * @param userIdToFollow identifier of user to start following
      */
     @Override
-    public void followUser(int currentUserId, int userIdToFollow) {
+    public void followUser(int currentUserId, int userIdToFollow) throws NoteServerException {
         log.info("DAO adding user with id {} to following list", userIdToFollow);
         try {
             userMapper.followUser(currentUserId, userIdToFollow);
+        } catch (DuplicateKeyException exc) {
+            throw new NoteServerException(ExceptionErrorInfo.ALREADY_FOLLOW_USER,
+                    "User with id = " + currentUserId + " already follow user with id = " + userIdToFollow);
         } catch (RuntimeException ex) {
             log.error("Can't add user with id {} to following list", userIdToFollow, ex);
             throw ex;
@@ -166,10 +169,13 @@ public class UserDaoImpl implements UserDao {
      * @param userIdToIgnore identifier of user to start ignoring
      */
     @Override
-    public void ignoreUser(int currentUserId, int userIdToIgnore) {
+    public void ignoreUser(int currentUserId, int userIdToIgnore) throws NoteServerException {
         log.info("DAO adding user with id {} to ignoring list", userIdToIgnore);
         try {
             userMapper.ignoreUser(currentUserId, userIdToIgnore);
+        } catch (DuplicateKeyException exc) {
+            throw new NoteServerException(ExceptionErrorInfo.ALREADY_IGNORE_USER,
+                    "User with id = " + currentUserId + " already ignore user with id = " + userIdToIgnore);
         } catch (RuntimeException ex) {
             log.error("Can't add user with id {} to ignoring list", userIdToIgnore, ex);
             throw ex;

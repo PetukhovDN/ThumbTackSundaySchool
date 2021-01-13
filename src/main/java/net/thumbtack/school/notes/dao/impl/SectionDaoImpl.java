@@ -54,11 +54,13 @@ public class SectionDaoImpl implements SectionDao {
      * @return section identifier in success
      */
     @Override
-    public Integer renameSection(int sectionId, String newSectionName) {
+    public Integer renameSection(int sectionId, String newSectionName) throws NoteServerException {
         log.info("DAO change Section name {} in Database", newSectionName);
         try {
             sectionMapper.updateSection(sectionId, newSectionName);
             return sectionId;
+        } catch (DuplicateKeyException exc) {
+            throw new NoteServerException(ExceptionErrorInfo.SECTION_ALREADY_EXISTS, newSectionName);
         } catch (RuntimeException ex) {
             log.error("Can't rename Section with name {} in Database, {}", newSectionName, ex);
             throw ex;

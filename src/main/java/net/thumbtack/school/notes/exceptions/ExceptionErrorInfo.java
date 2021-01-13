@@ -35,7 +35,9 @@ public enum ExceptionErrorInfo {
     COMMENT_DOES_NOT_EXISTS("No such comment on the server"),
     INCORRECT_RATING_FORMAT("Rating must be a number between 1 and 5"),
     INCORRECT_COUNT_FORMAT("Count must be a number"),
-    INCORRECT_FROM_FORMAT("From must be a number");
+    INCORRECT_FROM_FORMAT("From must be a number"),
+    ALREADY_FOLLOW_USER("You are already following this user"),
+    ALREADY_IGNORE_USER("You are already ignoring this user");
 
     @Getter
     String errorString;

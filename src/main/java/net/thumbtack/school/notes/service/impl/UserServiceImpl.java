@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
         int userId = userDao.getUserByLogin(loginRequest.getLogin()).getId();
         checkIsPasswordCorrect(userId, loginRequest.getPassword());
         if (sessionDao.getSessionByUserId(userId) != null) {
-            sessionDao.stopUserSession(sessionId);
+            sessionDao.stopUserSession(userId);
         }
         Session userSession = new Session();
         userSession.setSessionId(newSessionID);
@@ -114,7 +114,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void logoutUser(@NotNull String sessionId) throws NoteServerException {
         log.info("Trying to logout user");
-        sessionDao.stopUserSession(sessionId);
+        int userId = sessionDao.getSessionBySessionId(sessionId).getUserId();
+        sessionDao.stopUserSession(userId);
     }
 
     /**
@@ -159,7 +160,7 @@ public class UserServiceImpl implements UserService {
             int userId = session.getUserId();
             String password = leaveRequest.getPassword();
             checkIsPasswordCorrect(userId, password);
-            sessionDao.stopUserSession(sessionId);
+            sessionDao.stopUserSession(userId);
             User userById = userDao.getUserById(userId);
             userById.setDeleted(true);
             userDao.changeUserDeletedStatusToDeleted(userById);
@@ -421,6 +422,6 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .mapToInt(e -> e)
                 .average()
-                .getAsDouble()));
+                .orElse(0.0)));
     }
 }

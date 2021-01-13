@@ -6,7 +6,7 @@ import net.thumbtack.school.notes.model.Session;
 public interface SessionDao {
     Session logInUser(int userId, Session session) throws NoteServerException;
 
-    void stopUserSession(String sessionToken) throws NoteServerException;
+    void stopUserSession(int userId) throws NoteServerException;
 
     Session getSessionBySessionId(String sessionId) throws NoteServerException;
 

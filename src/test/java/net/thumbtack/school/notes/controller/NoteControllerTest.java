@@ -157,25 +157,6 @@ public class NoteControllerTest {
     }
 
     @Test
-    public void testEditNote_nullSectionId() throws Exception {
-        EditNoteRequest editNoteRequest = new EditNoteRequest(
-                "NoteBody",
-                null
-        );
-        MvcResult result = mvc.perform(put("/api/notes/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(editNoteRequest)))
-                .andReturn();
-        GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(), GlobalErrorHandler.MyError.class);
-
-        assertAll(
-                () -> assertEquals(400, result.getResponse().getStatus()),
-                () -> assertEquals(1, error.getErrors().size()),
-                () -> assertTrue(error.getErrors().toString().contains("NotNull"))
-        );
-    }
-
-    @Test
     public void testAddComment_rightParameters() throws Exception {
         CommentRequest addCommentRequest = new CommentRequest(
                 "CommentText",

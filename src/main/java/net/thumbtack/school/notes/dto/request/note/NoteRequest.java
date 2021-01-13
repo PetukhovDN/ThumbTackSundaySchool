@@ -21,5 +21,6 @@ public class NoteRequest {
     String body;
 
     @NotNull
+    //@Digits(integer = 0, fraction = 0)
     int sectionId;
 }

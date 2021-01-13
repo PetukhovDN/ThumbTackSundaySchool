@@ -8,7 +8,7 @@ import java.util.List;
 public interface SectionDao {
     Integer createSection(Section section, int userId) throws NoteServerException;
 
-    Integer renameSection(int sectionId, String newSectionName);
+    Integer renameSection(int sectionId, String newSectionName) throws NoteServerException;
 
     void deleteSection(int sectionId);
 

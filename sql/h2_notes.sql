@@ -31,6 +31,7 @@ create TABLE ignore_user (
 	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	ignoring_user_id INT(11),
 	ignored_by_user_id INT(11),
+    UNIQUE KEY ignore_user (ignoring_user_id,ignored_by_user_id),
     FOREIGN KEY (ignoring_user_id) REFERENCES note_user (id) ON update CASCADE ON delete CASCADE,
     FOREIGN KEY (ignored_by_user_id) REFERENCES note_user (id) ON update CASCADE ON delete CASCADE)
 	ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -39,6 +40,7 @@ create TABLE following_user (
 	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	following_user_id INT(11),
     follower_user_id INT(11),
+	UNIQUE KEY following_user (following_user_id,follower_user_id),
 	FOREIGN KEY (following_user_id) REFERENCES note_user (id) ON update CASCADE ON delete CASCADE,
 	FOREIGN KEY (follower_user_id) REFERENCES note_user (id) ON update CASCADE ON delete CASCADE)
 	ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -48,7 +50,7 @@ create TABLE section (
     section_name VARCHAR(50) NOT NULL,
     section_creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     author_id INT(11),
-    KEY section_name (section_name),
+    UNIQUE KEY section_name (section_name),
     KEY section_creation_time (section_creation_time),
     FOREIGN KEY (author_id) REFERENCES note_user (id) ON update set null ON delete set null)
 	ENGINE=INNODB DEFAULT CHARSET=utf8;
