@@ -14,6 +14,7 @@ public enum ExceptionErrorInfo {
     USER_ALREADY_LOGGED_IN("You are already logged in"),
     USER_DOES_NOT_EXISTS("No such user on the server"),
     USER_IS_NOT_LOGGED_IN("You are not logged in"),
+    USER_ACCOUNT_IS_DELETED("You have left the server"),
     SESSION_DOES_NOT_EXISTS("No such session on the server"),
     WRONG_PASSWORD("Wrong password"),
     SESSION_EXPIRED("Session expired, please log in"),

@@ -81,6 +81,7 @@ public class UserServiceImpl implements UserService {
     /**
      * Method for the registered user to log in to the server
      * If user is already logged in, it will be new user session created
+     * If user have left server, he cant log in to the server
      *
      * @param loginRequest contains information about user to log in: user login and password
      * @param sessionId    user session token (to check if user is already online)
@@ -91,15 +92,18 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public String loginUser(LoginRequest loginRequest, String sessionId, String newSessionID) throws NoteServerException {
         log.info("Trying to login user");
-        int userId = userDao.getUserByLogin(loginRequest.getLogin()).getId();
-        checkIsPasswordCorrect(userId, loginRequest.getPassword());
-        if (sessionDao.getSessionByUserId(userId) != null) {
-            sessionDao.stopUserSession(userId);
+        User user = userDao.getUserByLogin(loginRequest.getLogin());
+        if (user.isDeleted()) {
+            throw new NoteServerException(ExceptionErrorInfo.USER_ACCOUNT_IS_DELETED, loginRequest.getLogin());
+        }
+        checkIsPasswordCorrect(user.getId(), loginRequest.getPassword());
+        if (sessionDao.getSessionByUserId(user.getId()) != null) {
+            sessionDao.stopUserSession(user.getId());
         }
         Session userSession = new Session();
         userSession.setSessionId(newSessionID);
         userSession.setExpiryTime(sessionLifeTime);
-        Session resultSession = sessionDao.logInUser(userId, userSession);
+        Session resultSession = sessionDao.logInUser(user.getId(), userSession);
         sessionDao.updateSession(userSession);
         return resultSession.getSessionId();
     }
