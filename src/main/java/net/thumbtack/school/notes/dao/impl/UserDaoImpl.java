@@ -61,9 +61,6 @@ public class UserDaoImpl implements UserDao {
                     new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, String.valueOf(userId)));
             log.info("User with login {} was got from database", userById.getLogin());
             return userById;
-//        } catch (NullPointerException ex) {
-//            log.error("No user with id = {} in database", userId);
-//            throw new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, String.valueOf(userId));
         } catch (RuntimeException ex) {
             log.error("Can't get user info from Database, ", ex);
             throw ex;
