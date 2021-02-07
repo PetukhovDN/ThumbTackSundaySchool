@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.mapping.FetchType;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mapper
 public interface UserMapper {
@@ -27,7 +28,7 @@ public interface UserMapper {
     @Select("SELECT id, first_name as firstName, last_name as lastName, patronymic, login, password, " +
             "user_creation_time as creationTime, user_status as userStatus, deleted_status as deleted " +
             "FROM note_user WHERE id = #{id}")
-    User getUserById(int id);
+    Optional<User> getUserById(int id);
 
     @Update("UPDATE note_user SET first_name = #{user.firstName}, last_name = #{user.lastName}, " +
             "patronymic = #{user.patronymic}, password = #{user.password}  WHERE id = #{user.id} ")

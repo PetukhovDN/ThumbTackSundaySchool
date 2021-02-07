@@ -37,7 +37,7 @@ public class DebugService {
      * @return user account information
      */
     @Transactional
-    public User registerUser() {
+    public User registerUser() throws NoteServerException {
         return serverDao.registerUser();
     }
 

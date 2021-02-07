@@ -77,7 +77,7 @@ public class ServerDaoImpl implements ServerDao {
      * @return user in success
      */
     @Override
-    public User registerUser() {
+    public User registerUser() throws NoteServerException {
         log.info("Trying to save user account to database");
         try {
             User user = new User();
@@ -86,7 +86,8 @@ public class ServerDaoImpl implements ServerDao {
             user.setLogin("userLogin" + (int) (Math.random() * 10000 + 1));
             user.setPassword("user_password");
             userMapper.registerUser(user);
-            return userMapper.getUserById(user.getId());
+            return userMapper.getUserById(user.getId()).orElseThrow(() ->
+                    new NoteServerException(ExceptionErrorInfo.USER_DOES_NOT_EXISTS, "exception"));
         } catch (RuntimeException ex) {
             log.error("Can't save user to database");
             throw ex;

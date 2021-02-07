@@ -9,7 +9,7 @@ import javax.validation.ConstraintValidatorContext;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-//TODO: start to use instead of method int session dao impl
+//TODO: start to use instead of method in session dao impl
 
 /**
  * Session life time validation
@@ -35,6 +35,6 @@ public class SessionLifeTimeValidator implements ConstraintValidator<SessionLife
                 .toInstant()
                 .toEpochMilli() / 1000;
         long currentTimeInSec = LocalDateTime.now().atZone(ZoneId.of("Asia/Omsk")).toInstant().toEpochMilli() / 1000;
-        return currentTimeInSec < sessionStartTimeInSec + sessionLifeTime;
+        return currentTimeInSec > sessionStartTimeInSec + sessionLifeTime;
     }
 }

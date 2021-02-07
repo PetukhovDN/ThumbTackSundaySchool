@@ -33,7 +33,7 @@ public class UserServiceTest {
     UserService userService;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws NoteServerException {
         debugService.clearDatabase();
         registeredUser = debugService.registerUser();
         testSessionId = debugService.loginUser(registeredUser.getId());

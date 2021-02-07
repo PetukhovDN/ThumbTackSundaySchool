@@ -109,4 +109,4 @@ create TABLE note_rating (
     FOREIGN KEY (author_id) REFERENCES note_user (id))
     ENGINE=INNODB DEFAULT CHARSET=utf8;
 
-insert into note_user (id, first_name, last_name, login, password, user_status) values (null, 'admin', 'admin', 'admin', 'password', 'ADMIN');
+insert into forum_user (id, first_name, last_name, login, password, user_status) values (null, 'admin', 'admin', 'admin', 'password', 'ADMIN');

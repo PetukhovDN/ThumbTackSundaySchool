@@ -7,7 +7,7 @@ import net.thumbtack.school.notes.model.User;
 public interface ServerDao {
     void clear();
 
-    User registerUser();
+    User registerUser() throws NoteServerException;
 
     String logInUser(int userId);
 

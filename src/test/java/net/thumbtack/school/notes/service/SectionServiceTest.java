@@ -34,7 +34,7 @@ public class SectionServiceTest {
     SectionService sectionService;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws NoteServerException {
         debugService.clearDatabase();
         firstRegisteredUser = debugService.registerUser();
         secondRegisteredUser = debugService.registerUser();

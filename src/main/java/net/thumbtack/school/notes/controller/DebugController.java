@@ -37,7 +37,7 @@ public class DebugController {
 
     @PostMapping(value = "super")
     @ResponseStatus(HttpStatus.OK)
-    public void makeSuper(HttpServletResponse response) {
+    public void makeSuper(HttpServletResponse response) throws NoteServerException {
         User user = debugService.registerUser();
         User admin = debugService.makeAdmin(user);
         String sessionId = debugService.loginUser(admin.getId());
